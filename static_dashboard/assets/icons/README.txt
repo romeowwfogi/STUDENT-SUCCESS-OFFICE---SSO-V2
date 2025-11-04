@@ -1,0 +1,1 @@
+Place icon assets (SVG/PNG) here for the static dashboard.

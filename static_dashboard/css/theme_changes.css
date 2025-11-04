@@ -1,0 +1,164 @@
+SSO Theme Update — Dark Mode (Slate) + Soft Green Buttons
+Date: 2025-11-02
+
+Summary
+- Updated dark mode to a deep slate/indigo palette for better readability.
+- Set button and accent colors to soft green to match branding.
+- Kept light mode as-is; only dark theme variables were changed.
+
+Modified Files
+1) c:\xampp\htdocs\sso\dashboard.css
+   - Block: [data-theme="dark"]
+2) c:\xampp\htdocs\sso\admin_style.css
+   - Block: [data-theme="dark"]
+
+Exact Changes (Old → New)
+
+dashboard.css — [data-theme="dark"]
+- --color-background: #0f3011 → #0f172a
+- --color-card:       #142015  → #111827
+- --color-border:     #223a25  → #1f2937
+- --color-hover:      #1a2a1c  → #182236
+- --color-text:       #f9fafb  → #e5e7eb
+- --color-text-light: #d1d5db  → #94a3b8
+- --color-primary:    (inherits) → #22c55e   // soft green base
+- --color-accent:     (inherits) → #34d399   // soft green accent
+- --color-darkergreen-base: #0f4f12 → #16a34a // hover on buttons
+- Other utility colors kept the same (yellow/white/gray).
+
+admin_style.css — [data-theme="dark"]
+- --color-background: #0f1412 → #0f172a
+- --color-card:       #121b14 → #111827
+- --color-border:     #1f2a22 → #1f2937
+- --color-hover:      #152219 → #182236
+- --color-text:       #f9fafb → #e5e7eb
+- --color-text-light: #d1d5db → #94a3b8
+- Added (overrides within dark mode):
+  --color-primary: #22c55e
+  --color-accent:  #34d399
+
+How To Customize (Dark Mode)
+- Open the files above and edit variables inside the [data-theme="dark"] block.
+- Buttons and highlights:
+  - Change --color-primary (base) and --color-accent (secondary).
+  - Hover shade is --color-darkergreen-base.
+- Backgrounds and surfaces:
+  - --color-background (page), --color-card (panels/cards), --color-border.
+- Text:
+  - --color-text (main) and --color-text-light (muted).
+
+Preview / Toggle
+- The theme toggle is implemented in `dahsboard.js` via the `data-theme` attribute on `<html>`.
+- Visit: http://127.0.0.1:8000/ and use the theme toggle.
+- To reset saved choice: in browser console run `localStorage.removeItem('theme')` and refresh.
+
+Notes
+- Light mode is unchanged. These variables only affect `[data-theme="dark"]`.
+- Changes are global because CSS variables cascade; components consume `var(--color-...)` values.
+
+Rollback
+- Restore the old values listed above in the same [data-theme="dark"] blocks, or remove the overrides to inherit from `:root`.
+
+------------------------------------------------------------------------
+New File — Responsive Login Page
+File: c:\xampp\htdocs\sso\login_new.html
+
+Overview
+- Two-column split layout inspired by the provided screenshot.
+- Left side: login form (always visible). Right side: decorative illustration.
+- Mobile behavior: only the left side is rendered; right side is hidden via CSS @media query.
+
+Structure
+- <div class="split"> → wrapper with two children: .left and .right
+- .left → contains .content block with brand, headings, form, and actions
+- .right → gradient background + inline SVG illustration (decorative)
+
+Palette & Tokens (at top of <style>)
+- --purple-500: #8b5cf6   // primary button color
+- --purple-600: #7c3aed   // hover on primary
+- --purple-50:  #f5f3ff   // very light purple
+- --bg:         #ffffff   // page background
+- --text:       #1f2937   // primary text
+- --muted:      #6b7280   // secondary text
+- --border:     #e5e7eb   // input and divider borders
+
+Key CSS Blocks
+- .split { display:flex; min-height:100vh; }
+- .left { center content; padding:40px; }
+- .right { gradient background; centers illustration; }
+- .input:focus { border-color: var(--purple-500); box-shadow: 0 0 0 3px rgba(139,92,246,0.15); }
+- .btn { background: var(--purple-500); hover: var(--purple-600); }
+- .btn-google { outlined button with Google SVG icon }
+- Mobile-only-left:
+  @media (max-width: 768px) { .split { flex-direction: column; } .right { display:none; } .left { padding:24px; } }
+
+Form Semantics
+- Email and password inputs are `required` and include labels for accessibility.
+- "Remember for 30 days" checkbox uses `accent-color` for visual consistency.
+- "Forgot password" and "Sign up" are placeholder links.
+
+How To Modify — login_new.html
+1) Colors
+   - Change the palette in `:root` at the top of the file.
+   - Primary button: `--purple-500`; Hover: `--purple-600`.
+   - Text/borders: update `--text`, `--muted`, `--border`.
+2) Branding
+   - Edit the brand name text in `.brand .name` (default: "TheCubeFactory").
+   - Replace the `.logo` block with your logo image: e.g.
+     <img src="uploads/banners/68ffc7bdbb34a_PLP-LOGO.png" alt="PLP" class="logo" style="width:24px;height:24px;border-radius:6px;" />
+3) Illustration
+   - Replace the inline SVG inside `.right` with your own graphic or remove it.
+   - To keep the layout but change colors, adjust SVG fill/stroke values.
+4) Responsive breakpoint
+   - Only-left-on-mobile is controlled by the media query: `@media (max-width: 768px)`.
+   - To hide the right side at a different breakpoint, change `768px` to your desired width.
+5) Form action / backend integration
+   - Set the form action to your PHP endpoint, e.g.: `<form action="login.php" method="post">`.
+   - Map input names (`email`, `password`) to what `login.php` expects.
+   - On success, redirect to your dashboard; on failure, show an error message block.
+6) Accessibility & UX
+   - Inputs already have labels; add `aria-live` regions for form errors if needed.
+   - Add `autocomplete="email"` and `autocomplete="current-password"` for better UX.
+7) Google sign-in button
+   - The button is static. Wire it up to your OAuth flow or remove it.
+
+How To Link This Page
+- Navigate directly: http://127.0.0.1:8000/login_new.html
+- Or set your entry route to point here while testing.
+
+Server / Preview Details
+- Started local server using XAMPP PHP: `C:\xampp\php\php.exe -S 127.0.0.1:8000 -t C:\xampp\htdocs\sso`.
+- Preview URLs: dashboard → `/`, new login → `/login_new.html`.
+
+Theme Integration Notes
+- `login_new.html` uses its own minimal palette. It does not read `dashboard.css` variables.
+- If you want the login page to follow the app’s theme tokens:
+  1) Import `dashboard.css` at the top.
+  2) Replace local `:root` tokens with `var(--color-...)` and tune styles accordingly.
+- Dark mode support can be added by mirroring styles under `[data-theme="dark"]` in this file or by inheriting the app-wide variables.
+
+Full Change Log (Directory-Level)
+- Modified: `dashboard.css` — updated `[data-theme="dark"]` palette and accent greens.
+- Modified: `admin_style.css` — matched dark theme variables and accent greens.
+- Added:    `theme_changes.txt` — documentation of changes and customization guide.
+- Added:    `login_new.html` — new responsive login page (two-column; mobile left-only).
+- Operational: Launched local PHP dev server and previewed pages.
+
+Global Dark Mode Setup (New)
+- Added: `theme-init.js` — lightweight, reusable theme initializer.
+  - Responsibilities: reads preferred theme from `localStorage` or `prefers-color-scheme`, sets `data-theme` on `<html>`, persists changes, listens to system changes, and binds to `#mobileThemeToggle` when present.
+  - How to use: add `<script src="theme-init.js"></script>` after your CSS link (if the page doesn’t include the shared navbar/sidebar).
+- Updated: `includes/mobile_navbar.php` — injected inline theme init + toggle hookup.
+- Updated: `includes/sidebar.php` — injected inline theme init fallback.
+- Updated heads to load `theme-init.js` on admin pages using `admin_style.css`:
+  - `manage_form.php`, `manage_options.php`, `archived_types.php`, `applicants.php`, `applicant_types.php`, `edit_type.php`, `schedule_room_view.php`, `schedule_management.php`.
+
+How to modify or extend
+- To change default theme: set `localStorage.setItem('theme','dark'|'light')` or edit logic in `theme-init.js:getPreferredTheme()`.
+- To add a desktop toggle: add a button anywhere with `id="mobileThemeToggle"` or bind your own element and call a copy of `toggleTheme()` in `theme-init.js`.
+- To override colors: adjust variables in `dashboard.css` and `admin_style.css` under `:root` and `[data-theme="dark"]`.
+- To opt-out on a specific page: remove the `<script src="theme-init.js"></script>` line and ensure no includes inject the inline script.
+
+Rollback for login_new.html
+- Simply delete `login_new.html` if not needed.
+- Or revert palette by restoring original `:root` tokens.

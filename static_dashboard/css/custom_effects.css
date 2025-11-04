@@ -1,0 +1,482 @@
+/* Extracted inline visual CSS — preserved exactly */
+
+/* Source: application_management.php */
+.floating-archive-icon {
+    position: fixed;
+    bottom: 30px;
+    right: 30px;
+    width: 60px;
+    height: 60px;
+    background: #dc3545;
+    border-radius: 50%;
+    display: none;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    box-shadow: 0 4px 12px rgba(220, 53, 69, 0.3);
+    transition: all 0.3s ease;
+    z-index: 1000;
+    border: none;
+}
+
+.floating-archive-icon:hover {
+    background: #c82333;
+    transform: scale(1.1);
+    box-shadow: 0 6px 16px rgba(220, 53, 69, 0.4);
+}
+
+.floating-archive-icon svg {
+    width: 24px;
+    height: 24px;
+    color: white;
+}
+
+.floating-archive-icon.show {
+    display: flex;
+    animation: fadeInUp 0.3s ease;
+}
+
+@keyframes fadeInUp {
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* Selection counter badge */
+.selection-counter {
+    position: absolute;
+    top: -8px;
+    right: -8px;
+    background: #136515;
+    color: white;
+    border-radius: 50%;
+    width: 24px;
+    height: 24px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 12px;
+    font-weight: bold;
+}
+
+/* New Cycle Modal Styles */
+.modal-overlay {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.4);
+    z-index: 1001;
+    align-items: center;
+    justify-content: center;
+    backdrop-filter: blur(4px);
+}
+
+.modal-overlay.show {
+    display: flex;
+    animation: fadeIn 0.3s ease;
+}
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+    }
+
+    to {
+        opacity: 1;
+    }
+}
+
+@keyframes slideUp {
+    from {
+        opacity: 0;
+        transform: translateY(30px) scale(0.95);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+    }
+}
+
+/* Modal Button Hover Effects */
+#modalCancelBtn:hover {
+    background: #f7fafc !important;
+    border-color: #cbd5e0 !important;
+    transform: translateY(-1px);
+}
+
+#modalConfirmBtn:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 6px 20px rgba(24, 165, 88, 0.5) !important;
+}
+
+#modalCancelBtn:active,
+#modalConfirmBtn:active {
+    transform: translateY(0);
+}
+
+/* New Cycle Modal Button Hover Effects */
+#closeNewCycleModal:hover {
+    background: rgba(0, 0, 0, 0.1) !important;
+    transform: scale(1.05);
+}
+
+#cancelNewCycleModal:hover {
+    background: #f7fafc !important;
+    border-color: #cbd5e0 !important;
+    transform: translateY(-1px);
+}
+
+#confirmNewCycleModal:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 6px 20px rgba(24, 165, 88, 0.5) !important;
+}
+
+#cancelNewCycleModal:active,
+#confirmNewCycleModal:active {
+    transform: translateY(0);
+}
+
+/* Input Focus States */
+#modal_cycle_name:focus {
+    outline: none !important;
+    border-color: #18a558 !important;
+    box-shadow: 0 0 0 3px rgba(24, 165, 88, 0.15) !important;
+    background: var(--color-card) !important;
+    color: var(--color-text) !important;
+}
+
+/* Pagination Styles */
+.pagination {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 20px 24px;
+    background: var(--color-card);
+    border-top: 1px solid var(--color-border);
+    border-radius: 0 0 12px 12px;
+    margin-top: 0;
+}
+
+.pagination__left {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.pagination__label {
+    font-size: 0.9rem;
+    color: #4a5568;
+    font-weight: 500;
+}
+
+.pagination__select {
+    padding: 8px 12px;
+    border: 2px solid var(--color-border);
+    border-radius: 8px;
+    background: var(--color-card);
+    color: var(--color-text);
+    font-size: 0.9rem;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    outline: none;
+}
+
+.pagination__select:hover {
+    border-color: #cbd5e0;
+}
+
+.pagination__select:focus {
+    border-color: #18a558;
+    box-shadow: 0 0 0 3px rgba(24, 165, 88, 0.15);
+}
+
+.pagination__center {
+    flex: 1;
+    text-align: center;
+}
+
+.pagination__info {
+    font-size: 0.9rem;
+    color: #4a5568;
+    font-weight: 500;
+}
+
+.pagination__right {
+    display: flex;
+    gap: 8px;
+}
+
+.pagination__bttns {
+    padding: 10px 16px;
+    border: 2px solid var(--color-border);
+    background: var(--color-card);
+    color: var(--color-text);
+    border-radius: 8px;
+    font-weight: 600;
+    font-size: 0.9rem;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    outline: none;
+    min-width: 80px;
+}
+
+.pagination__bttns:hover:not(.pagination__button--disabled) {
+    background: #f7fafc;
+    border-color: #cbd5e0;
+    transform: translateY(-1px);
+}
+
+.pagination__bttns:active:not(.pagination__button--disabled) {
+    transform: translateY(0);
+}
+
+.pagination__button--disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+    background: var(--color-hover) !important;
+    border-color: var(--color-border) !important;
+    transform: none !important;
+}
+
+@media (max-width: 768px) {
+    .pagination {
+        flex-direction: column;
+        gap: 16px;
+        padding: 16px;
+    }
+
+    .pagination__center {
+        order: -1;
+    }
+
+    .pagination__left,
+    .pagination__right {
+        justify-content: center;
+    }
+}
+
+/* Table Sorting Styles */
+.sortable {
+    position: relative;
+    cursor: pointer !important;
+    user-select: none;
+    transition: all 0.2s ease;
+    padding-right: 30px !important;
+}
+
+.sortable:hover {
+    background-color: #f8fafc;
+    color: #2d3748;
+}
+
+.sortable .sort-icon {
+    position: absolute;
+    right: 8px;
+    top: 50%;
+    transform: translateY(-50%);
+    opacity: 0.5;
+    transition: all 0.3s ease;
+    width: 16px;
+    height: 16px;
+}
+
+.sortable:hover .sort-icon {
+    opacity: 0.8;
+}
+
+.sortable.sort-asc .sort-icon,
+.sortable.sort-desc .sort-icon {
+    opacity: 1;
+    color: #4299e1;
+}
+
+.sortable.sort-asc .sort-icon {
+    transform: translateY(-50%) rotate(0deg);
+}
+
+.sortable.sort-desc .sort-icon {
+    transform: translateY(-50%) rotate(180deg);
+}
+
+/* Enhanced table header styling */
+.table th.sortable {
+    background: linear-gradient(135deg, #f7fafc 0%, #edf2f7 100%);
+    border-bottom: 2px solid #e2e8f0;
+}
+
+.table th.sortable:hover {
+    background: linear-gradient(135deg, #edf2f7 0%, #e2e8f0 100%);
+    transform: translateY(-1px);
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.table th.sortable.sort-asc,
+.table th.sortable.sort-desc {
+    background: linear-gradient(135deg, #ebf8ff 0%, #bee3f8 100%);
+    border-bottom-color: #4299e1;
+}
+
+/* Sort indicator animations */
+@keyframes sortIndicator {
+    0% {
+        transform: translateY(-50%) scale(0.8);
+    }
+
+    50% {
+        transform: translateY(-50%) scale(1.1);
+    }
+
+    100% {
+        transform: translateY(-50%) scale(1);
+    }
+}
+
+.sortable.sort-asc .sort-icon,
+.sortable.sort-desc .sort-icon {
+    animation: sortIndicator 0.3s ease;
+}
+
+
+/* Source: applicant_types.php */
+/* Modal Animations */
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+    }
+
+    to {
+        opacity: 1;
+    }
+}
+
+@keyframes slideUp {
+    from {
+        opacity: 0;
+        transform: translateY(30px) scale(0.95);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+    }
+}
+
+/* Modal Overlay Animation */
+#editModal.show {
+    display: block !important;
+    animation: fadeIn 0.3s ease;
+}
+
+#editModal.show>div {
+    animation: slideUp 0.3s ease;
+}
+
+/* Modal Button Hover Effects */
+#editModal button[onclick="closeEditModal()"]:hover {
+    background: #f7fafc !important;
+    border-color: #cbd5e0 !important;
+    transform: translateY(-1px);
+}
+
+#editModal button[type="submit"]:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 6px 20px rgba(24, 165, 88, 0.5) !important;
+}
+
+#editModal button:active {
+    transform: translateY(0);
+}
+
+/* Close Button Hover Effect */
+#editModal button[onclick="closeEditModal()"]:first-of-type:hover {
+    background: rgba(0, 0, 0, 0.1) !important;
+    transform: scale(1.05);
+}
+
+/* Input Focus Effects */
+#editModal input:focus {
+    border-color: var(--color-primary) !important;
+    box-shadow: 0 0 0 3px rgba(24, 165, 88, 0.15) !important;
+    outline: none;
+}
+
+/* File Input Styling */
+#editModal input[type="file"] {
+    cursor: pointer;
+}
+
+#editModal input[type="file"]:hover {
+    border-color: #cbd5e0 !important;
+}
+
+/* Loading Overlay Styles */
+.loading-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.7);
+    display: none;
+    justify-content: center;
+    align-items: center;
+    z-index: 9999;
+    backdrop-filter: blur(4px);
+}
+
+.loading-spinner {
+    text-align: center;
+    color: white;
+}
+
+.spinner {
+    width: 50px;
+    height: 50px;
+    border: 4px solid rgba(255, 255, 255, 0.3);
+    border-top: 4px solid #ffffff;
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+    margin: 0 auto 20px auto;
+}
+
+.loading-text {
+    font-size: 18px;
+    font-weight: 500;
+    color: white;
+    margin-top: 10px;
+}
+
+@keyframes spin {
+    0% {
+        transform: rotate(0deg);
+    }
+
+    100% {
+        transform: rotate(360deg);
+    }
+}
+
+button:hover{
+    transform: translateY(-1px);
+    filter: drop-shadow(-2px 9px 5px #000000);
+}
+
+button:active{
+    box-shadow: inset 2px 2px 5px rgba(0,0,0,0.5);
+    transform: translateY(1px);
+}
+
+button:focus-visible{
+    outline: 3px solid var(--ring-color);
+    outline-offset: 2px;
+}

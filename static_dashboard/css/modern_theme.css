@@ -1,0 +1,179 @@
+/* Modern Theme: clean, professional aesthetics without changing layout/structure */
+
+/* Palette and base variables override */
+:root {
+  --color-primary: #136515;
+  --color-accent: #18a558;
+  --color-background: #f5f7f6; /* soft neutral light */
+  --color-card: #ffffff;
+  --color-border: #e9edf0; /* subtle separators */
+  --color-hover: #eff5f0; /* gentle hover tone */
+  --color-text: #111827; /* near-black */
+  --color-text-light: #6b7280; /* slate gray */
+
+  --radius-sm: 8px;
+  --radius-md: 12px;
+  --radius-lg: 16px;
+
+  --shadow-sm: 0 2px 8px rgba(16, 24, 40, 0.06);
+  --shadow-md: 0 6px 18px rgba(16, 24, 40, 0.10);
+  --shadow-lg: 0 12px 32px rgba(16, 24, 40, 0.12);
+
+  --transition-fast: 150ms ease;
+  --transition-base: 250ms ease;
+  --transition-slow: 450ms ease;
+}
+
+/* Typography & smoothing */
+html, body {
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+body {
+  background: var(--color-background);
+}
+
+/* Layout spacing remains consistent but feels airier */
+.main-content {
+  padding: 1.25rem; /* slightly increased spacing */
+}
+
+/* Sidebar visual refresh */
+.sidebar {
+  background: var(--color-card);
+  border-right: 1px solid var(--color-border);
+  box-shadow: var(--shadow-sm);
+}
+
+.nav-menu__link {
+  border-radius: var(--radius-md);
+  transition: transform var(--transition-fast), background var(--transition-fast), box-shadow var(--transition-fast);
+}
+.nav-menu__link:hover {
+  background: var(--color-hover);
+  transform: translateY(-1px);
+  box-shadow: var(--shadow-sm);
+}
+.nav-menu__link.active {
+  background: linear-gradient(135deg, var(--color-primary), var(--color-accent));
+  color: #fff;
+  box-shadow: var(--shadow-md);
+}
+
+/* Navbar/header separation */
+.navbar {
+  background: var(--color-card);
+  border-bottom: 1px solid var(--color-border);
+  box-shadow: var(--shadow-sm);
+}
+
+.header {
+  background: var(--color-card);
+  border-bottom: 1px solid var(--color-border);
+  box-shadow: var(--shadow-sm);
+  border-radius: var(--radius-md);
+  padding: 0.75rem 1rem;
+}
+
+/* Cards: rounded, soft shadow */
+.card {
+  background: var(--color-card);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-md);
+  transition: transform var(--transition-base), box-shadow var(--transition-base);
+}
+.card:hover {
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-lg);
+}
+
+/* KPI cards consistency */
+.kpi-card {
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-sm);
+}
+.kpi-card__icon {
+  background: var(--color-hover);
+  border-radius: var(--radius-sm);
+}
+
+/* Buttons: modern, tactile feedback */
+.btn {
+  border-radius: 12px;
+  transition: transform var(--transition-fast), box-shadow var(--transition-fast), background var(--transition-fast), color var(--transition-fast);
+  box-shadow: var(--shadow-sm);
+}
+.btn:hover {
+  transform: translateY(-1px);
+  box-shadow: var(--shadow-md);
+}
+.btn:active {
+  transform: translateY(0);
+  box-shadow: var(--shadow-sm);
+}
+.btn--primary {
+  background: var(--color-primary);
+  color: #fff;
+}
+.btn--primary:hover {
+  background: var(--color-accent);
+}
+
+/* Tables: crisp headers and row hover */
+.table {
+  background: var(--color-card);
+  border-radius: var(--radius-md);
+  box-shadow: var(--shadow-sm);
+  border: 1px solid var(--color-border);
+  overflow: hidden;
+}
+.table th {
+  background: linear-gradient(135deg, #f7fafc, #edf2f7);
+}
+.table tbody tr:hover {
+  background: var(--color-hover);
+}
+
+/* Modals: soft edges and subtle motion */
+.modal {
+  background: var(--color-card);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-lg);
+}
+.modal-overlay.show .modal {
+  animation: slideInUp var(--transition-slow);
+}
+
+@keyframes slideInUp {
+  from { opacity: 0; transform: translateY(12px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+/* Inputs and selects */
+input, select, textarea {
+  border-radius: 10px;
+  border: 1.5px solid var(--color-border);
+  transition: box-shadow var(--transition-fast), border-color var(--transition-fast);
+}
+input:focus, select:focus, textarea:focus {
+  border-color: var(--color-accent);
+  box-shadow: 0 0 0 4px rgba(24, 165, 88, 0.15);
+  outline: none;
+}
+
+/* Sortable headers: subtle accent */
+.sortable {
+  border-radius: 8px;
+}
+.sortable:hover {
+  box-shadow: var(--shadow-sm);
+}
+
+/* Reduce motion if requested */
+@media (prefers-reduced-motion: reduce) {
+  * { transition: none !important; animation: none !important; }
+}

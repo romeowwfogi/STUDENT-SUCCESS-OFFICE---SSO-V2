@@ -1,0 +1,1 @@
+Place image assets here (logos, banners) for the static dashboard.

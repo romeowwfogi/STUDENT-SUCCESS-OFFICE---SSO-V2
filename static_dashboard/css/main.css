@@ -1,0 +1,43 @@
+/* Base resets and utilities extracted for static dashboard */
+* { margin: 0; padding: 0; box-sizing: border-box; }
+html, body { height: 100%; }
+body { font-family: 'Poppins', sans-serif; line-height: 1.6; }
+
+/* Layout helpers */
+.layout { display: flex; min-height: 100vh; }
+.main-content { flex: 1; padding: 1rem; }
+.section { display: none; }
+.section.active { display: block; }
+
+/* Navbar base */
+.navbar { display: flex; justify-content: space-between; align-items: center; padding: 0.5rem 1rem; border-bottom: 1px solid var(--color-border); background-color: var(--color-card); position: sticky; top: 0; z-index: 100; }
+.navbar__left { display: flex; align-items: center; gap: 0.75rem; }
+.navbar__logo { width: 28px; height: 28px; border-radius: 6px; display: flex; align-items: center; justify-content: center; font-weight: 600; background: linear-gradient(135deg, var(--color-primary), var(--color-accent)); color: #fff; }
+.navbar__title { font-size: 1rem; font-weight: 600; }
+
+/* Buttons base (works with dashboard.css variants) */
+.btn { padding: 0.5rem 0.75rem; border: none; border-radius: 8px; font-size: 0.95rem; font-weight: 500; cursor: pointer; transition: all 0.15s ease; display: inline-flex; align-items: center; gap: 0.5rem; }
+.btn--icon { width: 40px; height: 40px; padding: 0; display: flex; align-items: center; justify-content: center; }
+
+/* Header */
+.header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem; }
+.header__left h1 { font-size: 1.5rem; font-weight: 600; }
+.header__actions { display: flex; gap: 0.5rem; align-items: center; }
+
+/* Simple card */
+.card { border-radius: 12px; border: 1px solid var(--color-border); background: var(--color-card); }
+.chart-container__title { font-size: 1rem; font-weight: 600; }
+.chart-container__subtitle { color: var(--color-text-light); font-size: 0.9rem; }
+
+/* Sidebar shell (details in dashboard.css) */
+.sidebar { position: fixed; left: 0; top: 0; height: 100vh; width: 250px; background-color: var(--color-card); border-right: 1px solid var(--color-border); padding: 1rem; overflow-y: auto; }
+.sidebar.collapsed { width: 80px; }
+.nav-menu { list-style: none; }
+.nav-menu__item { margin-bottom: 0.5rem; }
+.nav-menu__link { display: flex; align-items: center; gap: 0.5rem; padding: 0.5rem; text-decoration: none; border-radius: 8px; color: var(--color-text-light); }
+.nav-menu__link.active { background-color: var(--color-primary); color: #fff; }
+.nav-menu__logout { margin-top: auto; border-top: 1px solid var(--color-border); padding-top: 0.5rem; }
+
+/* Content offset for fixed sidebar */
+.main-content { margin-left: 250px; }
+.sidebar.collapsed ~ .main-content { margin-left: 80px; }

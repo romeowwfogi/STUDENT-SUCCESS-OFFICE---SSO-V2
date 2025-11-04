@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Dashboard</title>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/admin_style.css" />
+  <link rel="stylesheet" href="css/theme_changes.css" />
+  <link rel="stylesheet" href="css/custom_effects.css" />
+  <link rel="stylesheet" href="css/dashboard.css" />
+  <link rel="stylesheet" href="css/modern_theme.css" />
+  <script src="js/theme-init.js" defer></script>
+  <script src="js/ui.js" defer></script>
+  <script src="js/dropdown.js" defer></script>
+  <script src="js/modal.js" defer></script>
+</head>
+<body>
+  <!-- Mobile Navbar (flattened) -->
+  <nav class="navbar">
+    <div class="navbar__left">
+      <button id="mobileMenuToggle" class="btn btn--icon" aria-label="Toggle menu">☰</button>
+      <div class="navbar__logo">SSO</div>
+      <div class="navbar__title">Dashboard</div>
+    </div>
+    <div class="navbar__right">
+      <button id="themeToggle" class="btn btn--icon" aria-label="Toggle theme">🌗</button>
+    </div>
+  </nav>
+
+  <!-- Sidebar (flattened) -->
+  <aside id="sidebar" class="sidebar">
+    <div class="sidebar__profile" style="margin-bottom: 1rem;">
+      <div style="font-weight:600;">Guest User</div>
+      <div style="color: var(--color-text-light); font-size: 0.9rem;">Admissions Officer</div>
+    </div>
+    <ul class="nav-menu">
+      <li class="nav-menu__item"><a class="nav-menu__link active" href="dashboard_main.html"><span class="nav-menu__icon">🏠</span><span class="nav-menu__text">Dashboard</span></a></li>
+      <li class="nav-menu__item"><a class="nav-menu__link" href="pages/application_management.html"><span class="nav-menu__icon">📄</span><span class="nav-menu__text">Application Management</span></a></li>
+      <li class="nav-menu__item"><a class="nav-menu__link" href="pages/applicant_management.html"><span class="nav-menu__icon">🧑</span><span class="nav-menu__text">Applicant Management</span></a></li>
+      <li class="nav-menu__item"><a class="nav-menu__link" href="pages/exam_permit_management.html"><span class="nav-menu__icon">🎫</span><span class="nav-menu__text">Exam Permit Management</span></a></li>
+      <li class="nav-menu__item"><a class="nav-menu__link" href="pages/archived_cycles.html"><span class="nav-menu__icon">🗂️</span><span class="nav-menu__text">Archived Cycles</span></a></li>
+      <li class="nav-menu__item nav-menu__logout"><a class="nav-menu__link" href="login_new.html"><span class="nav-menu__icon">⎋</span><span class="nav-menu__text">Logout</span></a></li>
+    </ul>
+  </aside>
+
+  <!-- Main content -->
+  <main class="main-content">
+    <header class="header">
+      <div class="header__left">
+        <h1>Dashboard Overview</h1>
+      </div>
+      <div class="header__actions">
+        <button class="btn btn--primary">New Cycle</button>
+        <button class="btn">Export</button>
+      </div>
+    </header>
+
+    <!-- Filters (from inline styles migrated to CSS) -->
+    <section class="filters-container">
+      <div class="filter-group">
+        <label for="cycleSelect">Admission Cycle</label>
+        <select id="cycleSelect">
+          <option>2025 - First Semester</option>
+          <option>2024 - Second Semester</option>
+          <option>2024 - First Semester</option>
+        </select>
+      </div>
+      <div class="filter-group">
+        <label for="statusSelect">Application Status</label>
+        <select id="statusSelect">
+          <option>All</option>
+          <option>Pending</option>
+          <option>Verified</option>
+          <option>Reviewed</option>
+          <option>Accepted</option>
+          <option>Rejected</option>
+        </select>
+      </div>
+      <button class="apply-filters-btn">Apply Filters</button>
+    </section>
+
+    <section class="stats-header">
+      <h2>Application Statistics</h2>
+      <p>Snapshot of current admissions cycle performance</p>
+    </section>
+
+    <!-- KPI Cards -->
+    <section class="kpi-grid">
+      <div class="kpi-card">
+        <div class="kpi-card__header">
+          <span class="kpi-card__label">Total Applications</span>
+          <div class="kpi-card__icon kpi-card__icon--blue">📊</div>
+        </div>
+        <div class="kpi-card__value">1,245</div>
+        <div class="kpi-card__trend kpi-card__trend--neutral">+3% week over week</div>
+      </div>
+      <div class="kpi-card">
+        <div class="kpi-card__header">
+          <span class="kpi-card__label">Verified</span>
+          <div class="kpi-card__icon kpi-card__icon--blue">✅</div>
+        </div>
+        <div class="kpi-card__value">980</div>
+        <div class="kpi-card__trend kpi-card__trend--neutral">+1.2% week over week</div>
+      </div>
+      <div class="kpi-card">
+        <div class="kpi-card__header">
+          <span class="kpi-card__label">Reviewed</span>
+          <div class="kpi-card__icon kpi-card__icon--blue">🕵️</div>
+        </div>
+        <div class="kpi-card__value">650</div>
+        <div class="kpi-card__trend kpi-card__trend--neutral">-0.6% week over week</div>
+      </div>
+      <div class="kpi-card">
+        <div class="kpi-card__header">
+          <span class="kpi-card__label">Accepted</span>
+          <div class="kpi-card__icon kpi-card__icon--blue">🎓</div>
+        </div>
+        <div class="kpi-card__value">310</div>
+        <div class="kpi-card__trend kpi-card__trend--neutral">+5.5% week over week</div>
+      </div>
+    </section>
+
+    <!-- Chart placeholder (keeps layout) -->
+    <section class="chart-container">
+      <div class="chart-container__header">
+        <div>
+          <div class="chart-container__title">Application Trends</div>
+          <div class="chart-container__subtitle">Monthly application volume</div>
+        </div>
+        <button class="btn">Download</button>
+      </div>
+      <div class="chart-container__canvas card">
+        <!-- Canvas placeholder to preserve spacing; Chart.js can be added later -->
+        <div style="height:300px; display:flex; align-items:center; justify-content:center; color: var(--color-text-light);">
+          Chart preview area
+        </div>
+      </div>
+    </section>
+  </main>
+</body>
+</html>
