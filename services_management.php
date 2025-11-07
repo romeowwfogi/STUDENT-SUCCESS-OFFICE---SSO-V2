@@ -749,7 +749,7 @@ $conn->close();
                                         <td class='table_actions actions'>
                                             <div class='table-controls'>
                                                 <a href="#" class="table__btn table__btn--view" data-action="view-applicants" data-service-id="<?php echo $service['service_id']; ?>" data-tooltip="View requestors" aria-label="View requestors" title="View requestors">View</a>
-                                                <a href="#" class="table__btn table__btn--view" data-action="manage-service" data-service-id="<?php echo $service['service_id']; ?>" data-tooltip="Manage service" aria-label="Manage service" title="Manage service">Manage</a>
+                                                <a href="manage_services.php?service_id=<?php echo $service['service_id']; ?>" class="table__btn table__btn--view" data-service-id="<?php echo $service['service_id']; ?>" data-tooltip="Manage service" aria-label="Manage service" title="Manage service">Manage</a>
                                                 <a href="#" class="table__btn table__btn--view" data-action="edit-service"
                                                     data-service-id="<?php echo $service['service_id']; ?>"
                                                     data-service-name="<?php echo htmlspecialchars($service['name']); ?>"
