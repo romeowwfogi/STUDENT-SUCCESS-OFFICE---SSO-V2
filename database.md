@@ -1727,6 +1727,11 @@ ALTER TABLE `tokenization`
   ADD CONSTRAINT `tokenization_ibfk_1` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`);
 COMMIT;
 
+ALTER TABLE services_fields ADD COLUMN visible_when_option_id INT NULL;
+ALTER TABLE services_fields ADD COLUMN visible_when_value VARCHAR(255) NULL AFTER allowed_file_types;
+ALTER TABLE services_fields ADD CONSTRAINT fk_visible_option FOREIGN KEY (visible_when_option_id) REFERENCES services_field_options(option_id) ON DELETE SET NULL;
+ALTER TABLE services_fields ADD COLUMN max_file_size_mb INT NULL
+
 /*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;
 /*!40101 SET CHARACTER_SET_RESULTS=@OLD_CHARACTER_SET_RESULTS */;
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;

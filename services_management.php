@@ -682,9 +682,9 @@ $conn->close();
                         </div>
 
 
-                        <div class="search_button_container">
+                        <!-- <div class="search_button_container">
                             <button class="button export" onclick="window.location.href = 'archived_cycles.php';">View Archived Services</button>
-                        </div>
+                        </div> -->
                     </div>
                     <table class="table" id="cyclesTable">
                         <thead>
@@ -748,7 +748,7 @@ $conn->close();
                                         <td data-cell='Description'><?php echo htmlspecialchars($service["description"] ?? ''); ?></td>
                                         <td class='table_actions actions'>
                                             <div class='table-controls'>
-                                                <a href="#" class="table__btn table__btn--view" data-action="view-applicants" data-service-id="<?php echo $service['service_id']; ?>" data-tooltip="View requestors" aria-label="View requestors" title="View requestors">View</a>
+                                                <a href="view_requestors.php?service_id=<?php echo $service['service_id']; ?>" class="table__btn table__btn--view" data-action="view-applicants" data-service-id="<?php echo $service['service_id']; ?>" data-tooltip="View requestors" aria-label="View requestors" title="View requestors">View</a>
                                                 <a href="manage_services.php?service_id=<?php echo $service['service_id']; ?>" class="table__btn table__btn--view" data-service-id="<?php echo $service['service_id']; ?>" data-tooltip="Manage service" aria-label="Manage service" title="Manage service">Manage</a>
                                                 <a href="#" class="table__btn table__btn--view" data-action="edit-service"
                                                     data-service-id="<?php echo $service['service_id']; ?>"

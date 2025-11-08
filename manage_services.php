@@ -16,7 +16,30 @@ while ($row = $result->fetch_assoc()) {
 // --- DATA FETCHING: Get service fields if a service is selected ---
 $serviceFields = [];
 if ($serviceId) {
-    $stmt = $conn->prepare("SELECT field_id, label, field_type, is_required, display_order, allowed_file_types FROM services_fields WHERE service_id = ? ORDER BY display_order ASC, field_id ASC");
+    // Check which conditional visibility columns exist to avoid SELECT errors
+    $condMode = 'none'; // 'value' or 'option_id'
+    $colChkFieldId = $conn->query("SHOW COLUMNS FROM services_fields LIKE 'visible_when_field_id'");
+    $colChkValue   = $conn->query("SHOW COLUMNS FROM services_fields LIKE 'visible_when_value'");
+    $colChkOptId   = $conn->query("SHOW COLUMNS FROM services_fields LIKE 'visible_when_option_id'");
+    if ($colChkOptId && $colChkOptId->num_rows > 0) {
+        $condMode = 'option_id';
+    } elseif ($colChkFieldId && $colChkFieldId->num_rows > 0 && $colChkValue && $colChkValue->num_rows > 0) {
+        $condMode = 'value';
+    }
+    if ($colChkFieldId) { $colChkFieldId->close(); }
+    if ($colChkValue) { $colChkValue->close(); }
+    if ($colChkOptId) { $colChkOptId->close(); }
+
+    // Detect optional max_file_size_mb column
+    $colChkMax = $conn->query("SHOW COLUMNS FROM services_fields LIKE 'max_file_size_mb'");
+    $hasMaxCol = ($colChkMax && $colChkMax->num_rows > 0);
+    if ($colChkMax) { $colChkMax->close(); }
+
+    $sql = "SELECT field_id, label, field_type, is_required, display_order, allowed_file_types" .
+           ($hasMaxCol ? ", max_file_size_mb" : "") .
+           ($condMode === 'value' ? ", visible_when_field_id, visible_when_value" : ($condMode === 'option_id' ? ", visible_when_option_id" : "")) .
+           " FROM services_fields WHERE service_id = ? ORDER BY display_order ASC, field_id ASC";
+    $stmt = $conn->prepare($sql);
     $stmt->bind_param('i', $serviceId);
     if ($stmt->execute()) {
         $res = $stmt->get_result();
@@ -28,7 +51,6 @@ if ($serviceId) {
     $stmt->close();
 }
 
-$conn->close();
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -91,6 +113,31 @@ $conn->close();
                         <tbody>
                             <?php if (!empty($serviceFields)): ?>
                                 <?php foreach ($serviceFields as $field): ?>
+                                    <?php
+                                        // Compute conditional values for UI regardless of schema
+                                        $visibleWhenFieldIdUi = '';
+                                        $visibleWhenValueUi = '';
+                                        if (array_key_exists('visible_when_field_id', $field) || array_key_exists('visible_when_value', $field)) {
+                                            $visibleWhenFieldIdUi = (string)($field['visible_when_field_id'] ?? '');
+                                            $visibleWhenValueUi = (string)($field['visible_when_value'] ?? '');
+                                        } elseif (array_key_exists('visible_when_option_id', $field)) {
+                                            $optId = $field['visible_when_option_id'] ?? null;
+                                            if ($optId !== null) {
+                                                $stmtOpt = $conn->prepare('SELECT field_id, option_value FROM services_field_options WHERE option_id = ?');
+                                                $stmtOpt->bind_param('i', $optId);
+                                                if ($stmtOpt->execute()) {
+                                                    $resOpt = $stmtOpt->get_result();
+                                                    if ($resOpt && $resOpt->num_rows > 0) {
+                                                        $rowOpt = $resOpt->fetch_assoc();
+                                                        $visibleWhenFieldIdUi = (string)($rowOpt['field_id'] ?? '');
+                                                        $visibleWhenValueUi = (string)($rowOpt['option_value'] ?? '');
+                                                    }
+                                                    $resOpt->close();
+                                                }
+                                                $stmtOpt->close();
+                                            }
+                                        }
+                                    ?>
                                     <tr data-field-id="<?php echo (int)$field['field_id']; ?>">
                                         <td><?php echo (int)$field['display_order']; ?></td>
                                         <td><?php echo htmlspecialchars($field['label']); ?></td>
@@ -98,7 +145,8 @@ $conn->close();
                                         <td><?php echo ((int)$field['is_required'] === 1) ? 'Yes' : 'No'; ?></td>
                                         <td data-cell="Actions">
                                             <div class="table__actions">
-                                                <button type="button" class="table__btn table__btn--edit" title="Edit Field" onclick="openEditFieldModal(<?php echo (int)$field['field_id']; ?>, '<?php echo htmlspecialchars($field['label'], ENT_QUOTES); ?>', '<?php echo htmlspecialchars(strtolower($field['field_type']), ENT_QUOTES); ?>', <?php echo (int)$field['is_required']; ?>, <?php echo (int)$field['display_order']; ?>, '<?php echo htmlspecialchars($field['allowed_file_types'] ?? '', ENT_QUOTES); ?>')">Edit</button>
+                                                <?php $maxFileSizeMbUi = (string)($field['max_file_size_mb'] ?? ''); ?>
+                                                <button type="button" class="table__btn table__btn--edit" title="Edit Field" onclick="openEditFieldModal(<?php echo (int)$field['field_id']; ?>, '<?php echo htmlspecialchars($field['label'], ENT_QUOTES); ?>', '<?php echo htmlspecialchars(strtolower($field['field_type']), ENT_QUOTES); ?>', <?php echo (int)$field['is_required']; ?>, <?php echo (int)$field['display_order']; ?>, '<?php echo htmlspecialchars($field['allowed_file_types'] ?? '', ENT_QUOTES); ?>', '<?php echo htmlspecialchars($maxFileSizeMbUi, ENT_QUOTES); ?>', '<?php echo htmlspecialchars($visibleWhenFieldIdUi, ENT_QUOTES); ?>', '<?php echo htmlspecialchars($visibleWhenValueUi, ENT_QUOTES); ?>')">Edit</button>
                                                 <?php
                                                 $optionTypes = ['select', 'checkbox', 'radio'];
                                                 if (in_array(strtolower($field['field_type']), $optionTypes, true)):
@@ -189,6 +237,12 @@ $conn->close();
                         <small style="color:#718096; display:block; margin-top:6px;">Example: .pdf,.jpg,.png (no spaces). Leave blank to allow any type.</small>
                     </div>
 
+                    <div class="form-group" id="maxFileSizeMbGroup" style="margin-top:12px; display:none;">
+                        <label for="maxFileSizeMb" style="display:block; margin-bottom:8px; font-weight:600; color:#2d3748; font-size:0.9rem;">Max file size (MB)</label>
+                        <input type="number" id="maxFileSizeMb" name="max_file_size_mb" placeholder="e.g., 10" min="1" max="2048" style="width: 100%; padding: 12px 14px; border: 2px solid #e2e8f0; border-radius: 12px; font-size: 0.95rem; transition: all 0.2s ease; box-sizing: border-box; background: #f7fafc; color: #2d3748;">
+                        <small style="color:#718096; display:block; margin-top:6px;">Optional. Limit upload size for this field. Range: 1–2048.</small>
+                    </div>
+
                     <div class="form-group" style="margin-top:12px; gap:12px; align-items:center;">
                         <div style="flex:1;">
                             <label for="displayOrder" style="display:block; margin-bottom:8px; font-weight:600; color:#2d3748; font-size:0.9rem;">Display Order</label>
@@ -200,6 +254,28 @@ $conn->close();
                             <input type="checkbox" id="isRequired" name="is_required" checked>
                             <label for="isRequired" style="font-weight:600; color:#2d3748; font-size:0.9rem;">Required</label>
                         </div>
+                    </div>
+
+                    <!-- Conditional Visibility -->
+                    <div class="form-group" style="margin-top:12px;">
+                        <label for="visibleWhenFieldId" style="display:block; margin-bottom:8px; font-weight:600; color:#2d3748; font-size:0.9rem;">Show this field when another field equals</label>
+                        <select id="visibleWhenFieldId" name="visible_when_field_id" style="width: 100%; padding: 12px 14px; border: 2px solid #e2e8f0; border-radius: 12px; font-size: 0.95rem; transition: all 0.2s ease; box-sizing: border-box; background: #f7fafc; color: #2d3748;">
+                            <option value="">None</option>
+                            <?php if (!empty($serviceFields)): ?>
+                                <?php foreach ($serviceFields as $f): ?>
+                                    <?php $ft = strtolower($f['field_type']); if (in_array($ft, ['select','checkbox','radio'], true)): ?>
+                                        <option value="<?php echo (int)$f['field_id']; ?>"><?php echo htmlspecialchars($f['label']); ?></option>
+                                    <?php endif; ?>
+                                <?php endforeach; ?>
+                            <?php endif; ?>
+                        </select>
+                        <small style="color:#718096; display:block; margin-top:6px;">Only select, checkbox, and radio fields can be controllers.</small>
+                    </div>
+
+                    <div class="form-group" id="visibleWhenValueGroup" style="margin-top:12px; display:none;">
+                        <label for="visibleWhenValue" style="display:block; margin-bottom:8px; font-weight:600; color:#2d3748; font-size:0.9rem;">Trigger value</label>
+                        <input type="text" id="visibleWhenValue" name="visible_when_value" placeholder="e.g., yes" style="width: 100%; padding: 12px 14px; border: 2px solid #e2e8f0; border-radius: 12px; font-size: 0.95rem; transition: all 0.2s ease; box-sizing: border-box; background: #f7fafc; color: #2d3748;">
+                        <small style="color:#718096; display:block; margin-top:6px;">Enter the option value in the controller that should show this field.</small>
                     </div>
                 </form>
             </div>
@@ -260,6 +336,12 @@ $conn->close();
                         <small style="color:#718096; display:block; margin-top:6px;">Example: .pdf,.jpg,.png (no spaces). Leave blank to allow any type.</small>
                     </div>
 
+                    <div class="form-group" id="editMaxFileSizeMbGroup" style="margin-top:12px; display:none;">
+                        <label for="editMaxFileSizeMb" style="display:block; margin-bottom:8px; font-weight:600; color:#2d3748; font-size:0.9rem;">Max file size (MB)</label>
+                        <input type="number" id="editMaxFileSizeMb" name="max_file_size_mb" placeholder="e.g., 10" min="1" max="2048" style="width: 100%; padding: 12px 14px; border: 2px solid #e2e8f0; border-radius: 12px; font-size: 0.95rem; transition: all 0.2s ease; box-sizing: border-box; background: #f7fafc; color: #2d3748;">
+                        <small style="color:#718096; display:block; margin-top:6px;">Optional. Limit upload size for this field. Range: 1–2048.</small>
+                    </div>
+
                     <div class="form-group" style="margin-top:12px; gap:12px; align-items:center;">
                         <div style="flex:1;">
                             <label for="editDisplayOrder" style="display:block; margin-bottom:8px; font-weight:600; color:#2d3748; font-size:0.9rem;">Display Order</label>
@@ -270,6 +352,28 @@ $conn->close();
                             <input type="checkbox" id="editIsRequired" name="is_required">
                             <label for="editIsRequired" style="font-weight:600; color:#2d3748; font-size:0.9rem;">Required</label>
                         </div>
+                    </div>
+
+                    <!-- Conditional Visibility (Edit) -->
+                    <div class="form-group" style="margin-top:12px;">
+                        <label for="editVisibleWhenFieldId" style="display:block; margin-bottom:8px; font-weight:600; color:#2d3748; font-size:0.9rem;">Show this field when another field equals</label>
+                        <select id="editVisibleWhenFieldId" name="visible_when_field_id" style="width: 100%; padding: 12px 14px; border: 2px solid #e2e8f0; border-radius: 12px; font-size: 0.95rem; transition: all 0.2s ease; box-sizing: border-box; background: #f7fafc; color: #2d3748;">
+                            <option value="">None</option>
+                            <?php if (!empty($serviceFields)): ?>
+                                <?php foreach ($serviceFields as $f): ?>
+                                    <?php $ft = strtolower($f['field_type']); if (in_array($ft, ['select','checkbox','radio'], true)): ?>
+                                        <option value="<?php echo (int)$f['field_id']; ?>"><?php echo htmlspecialchars($f['label']); ?></option>
+                                    <?php endif; ?>
+                                <?php endforeach; ?>
+                            <?php endif; ?>
+                        </select>
+                        <small style="color:#718096; display:block; margin-top:6px;">Only select, checkbox, and radio fields can be controllers.</small>
+                    </div>
+
+                    <div class="form-group" id="editVisibleWhenValueGroup" style="margin-top:12px; display:none;">
+                        <label for="editVisibleWhenValue" style="display:block; margin-bottom:8px; font-weight:600; color:#2d3748; font-size:0.9rem;">Trigger value</label>
+                        <input type="text" id="editVisibleWhenValue" name="visible_when_value" placeholder="e.g., yes" style="width: 100%; padding: 12px 14px; border: 2px solid #e2e8f0; border-radius: 12px; font-size: 0.95rem; transition: all 0.2s ease; box-sizing: border-box; background: #f7fafc; color: #2d3748;">
+                        <small style="color:#718096; display:block; margin-top:6px;">Enter the option value in the controller that should show this field.</small>
                     </div>
                 </form>
             </div>
@@ -386,6 +490,12 @@ $conn->close();
         const fieldTypeSelect = document.getElementById('fieldType');
         const allowedFileTypesGroup = document.getElementById('allowedFileTypesGroup');
         const allowedFileTypesInput = document.getElementById('allowedFileTypes');
+        const maxFileSizeMbGroup = document.getElementById('maxFileSizeMbGroup');
+        const maxFileSizeMbInput = document.getElementById('maxFileSizeMb');
+        // Conditional visibility (Add)
+        const visibleWhenFieldIdSelect = document.getElementById('visibleWhenFieldId');
+        const visibleWhenValueGroup = document.getElementById('visibleWhenValueGroup');
+        const visibleWhenValueInput = document.getElementById('visibleWhenValue');
         const currentServiceId = <?php echo (int)($serviceId ?? 0); ?>;
 
         // Edit modal elements
@@ -400,10 +510,16 @@ $conn->close();
         const editFieldTypeSelect = document.getElementById('editFieldType');
         const editAllowedFileTypesGroup = document.getElementById('editAllowedFileTypesGroup');
         const editAllowedFileTypesInput = document.getElementById('editAllowedFileTypes');
+        const editMaxFileSizeMbGroup = document.getElementById('editMaxFileSizeMbGroup');
+        const editMaxFileSizeMbInput = document.getElementById('editMaxFileSizeMb');
         const editDisplayOrderInput = document.getElementById('editDisplayOrder');
         const editIsRequiredInput = document.getElementById('editIsRequired');
+        // Conditional visibility (Edit)
+        const editVisibleWhenFieldIdSelect = document.getElementById('editVisibleWhenFieldId');
+        const editVisibleWhenValueGroup = document.getElementById('editVisibleWhenValueGroup');
+        const editVisibleWhenValueInput = document.getElementById('editVisibleWhenValue');
 
-        function appendServiceFieldRow(fieldId, label, fieldType, isRequired, displayOrder) {
+        function appendServiceFieldRow(fieldId, label, fieldType, isRequired, displayOrder, allowedFileTypes, maxFileSizeMb, visibleWhenFieldId, visibleWhenValue) {
             const tbody = document.querySelector('#serviceFieldsTable tbody');
             if (!tbody) return;
             const optionTypes = ['select', 'checkbox', 'radio'];
@@ -417,7 +533,7 @@ $conn->close();
                 <td>${isRequired === 1 ? 'Yes' : 'No'}</td>
                 <td data-cell="Actions">
                     <div class="table__actions">
-                        <button type="button" class="table__btn table__btn--edit" title="Edit Field" onclick="openEditFieldModal(${fieldId}, '${escapeHtml(label)}', '${fieldType}', ${isRequired}, ${Number(displayOrder) || 0}, '')">Edit</button>
+                        <button type="button" class="table__btn table__btn--edit" title="Edit Field" onclick="openEditFieldModal(${fieldId}, '${escapeHtml(label)}', '${fieldType}', ${isRequired}, ${Number(displayOrder) || 0}, '${escapeHtml(allowedFileTypes || '')}', '${escapeHtml(String(maxFileSizeMb || ''))}', '${escapeHtml(String(visibleWhenFieldId || ''))}', '${escapeHtml(visibleWhenValue || '')}')">Edit</button>
                         ${optionTypes.includes(fieldType) ? `<button type=\"button\" class=\"table__btn table__btn--view\" title=\"Manage Options\" onclick=\"openOptionsModal(${fieldId}, ${currentServiceId}, '${escapeHtml(label)}')\">Manage Options</button>` : ''}
                     </div>
                 </td>
@@ -425,7 +541,7 @@ $conn->close();
             tbody.appendChild(tr);
         }
 
-        function updateServiceFieldRow(fieldId, label, fieldType, isRequired, displayOrder) {
+        function updateServiceFieldRow(fieldId, label, fieldType, isRequired, displayOrder, allowedFileTypes, maxFileSizeMb, visibleWhenFieldId, visibleWhenValue) {
             const row = document.querySelector(`#serviceFieldsTable tbody tr[data-field-id='${CSS.escape(String(fieldId))}']`);
             if (!row) return;
             const optionTypes = ['select', 'checkbox', 'radio'];
@@ -439,7 +555,7 @@ $conn->close();
             if (actionsCell) {
                 actionsCell.innerHTML = `
                     <div class="table__actions">
-                        <button type="button" class="table__btn table__btn--edit" title="Edit Field" onclick="openEditFieldModal(${fieldId}, '${escapeHtml(label)}', '${fieldType}', ${isRequired}, ${Number(displayOrder) || 0}, '')">Edit</button>
+                        <button type="button" class="table__btn table__btn--edit" title="Edit Field" onclick="openEditFieldModal(${fieldId}, '${escapeHtml(label)}', '${fieldType}', ${isRequired}, ${Number(displayOrder) || 0}, '${escapeHtml(allowedFileTypes || '')}', '${escapeHtml(String(maxFileSizeMb || ''))}', '${escapeHtml(String(visibleWhenFieldId || ''))}', '${escapeHtml(visibleWhenValue || '')}')">Edit</button>
                         ${optionTypes.includes(fieldType) ? `<button type=\"button\" class=\"table__btn table__btn--view\" title=\"Manage Options\" onclick=\"openOptionsModal(${fieldId}, ${currentServiceId}, '${escapeHtml(label)}')\">Manage Options</button>` : ''}
                     </div>
                 `;
@@ -450,7 +566,17 @@ $conn->close();
         editFieldTypeSelect.addEventListener('change', function() {
             const isFile = String(this.value).toLowerCase() === 'file';
             editAllowedFileTypesGroup.style.display = isFile ? 'block' : 'none';
+            editMaxFileSizeMbGroup.style.display = isFile ? 'block' : 'none';
         });
+
+        // Toggle trigger value input visibility (Edit)
+        if (editVisibleWhenFieldIdSelect) {
+            editVisibleWhenFieldIdSelect.addEventListener('change', function() {
+                const hasController = String(this.value).trim() !== '';
+                if (editVisibleWhenValueGroup) editVisibleWhenValueGroup.style.display = hasController ? 'block' : 'none';
+                if (!hasController && editVisibleWhenValueInput) editVisibleWhenValueInput.value = '';
+            });
+        }
 
         function openAddFieldModal() {
             if (!currentServiceId) {
@@ -460,6 +586,10 @@ $conn->close();
             addFieldInlineMessage.style.display = 'none';
             addFieldInlineMessage.textContent = '';
             addFieldForm.reset();
+            // Reset conditional visibility controls
+            if (visibleWhenFieldIdSelect) visibleWhenFieldIdSelect.value = '';
+            if (visibleWhenValueInput) visibleWhenValueInput.value = '';
+            if (visibleWhenValueGroup) visibleWhenValueGroup.style.display = 'none';
             addFieldModal.classList.add('show');
             addFieldModal.style.display = 'flex';
             addFieldModal.style.visibility = 'visible';
@@ -483,7 +613,17 @@ $conn->close();
         fieldTypeSelect.addEventListener('change', function() {
             const isFile = String(this.value).toLowerCase() === 'file';
             allowedFileTypesGroup.style.display = isFile ? 'block' : 'none';
+            maxFileSizeMbGroup.style.display = isFile ? 'block' : 'none';
         });
+
+        // Toggle trigger value input visibility (Add)
+        if (visibleWhenFieldIdSelect) {
+            visibleWhenFieldIdSelect.addEventListener('change', function() {
+                const hasController = String(this.value).trim() !== '';
+                if (visibleWhenValueGroup) visibleWhenValueGroup.style.display = hasController ? 'block' : 'none';
+                if (!hasController && visibleWhenValueInput) visibleWhenValueInput.value = '';
+            });
+        }
 
         // Wire buttons
         openAddFieldModalBtn?.addEventListener('click', openAddFieldModal);
@@ -499,6 +639,11 @@ $conn->close();
             const isRequired = document.getElementById('isRequired').checked ? 1 : 0;
             const displayOrderVal = parseInt(document.getElementById('displayOrder').value || '0', 10) || 0;
             let allowedTypes = allowedFileTypesInput.value.trim();
+            let maxSizeMb = String(maxFileSizeMbInput?.value || '').trim();
+            // Conditional visibility
+            const visibleControllerIdRaw = visibleWhenFieldIdSelect?.value || '';
+            const visibleControllerId = visibleControllerIdRaw !== '' ? parseInt(visibleControllerIdRaw, 10) || 0 : 0;
+            const visibleTriggerValue = visibleWhenValueInput?.value?.trim() || '';
 
             if (!label) {
                 showAddFieldMessage('error', 'Label is required');
@@ -517,6 +662,24 @@ $conn->close();
                 }
             } else if (fieldType !== 'file') {
                 allowedTypes = '';
+                maxSizeMb = '';
+            }
+            // Require max size when field type is file
+            if (fieldType === 'file' && !maxSizeMb) {
+                showAddFieldMessage('error', 'Max file size (MB) is required');
+                return;
+            }
+            if (fieldType === 'file' && maxSizeMb) {
+                const asInt = parseInt(maxSizeMb, 10);
+                if (!/^[0-9]+$/.test(maxSizeMb) || asInt <= 0 || asInt > 2048) {
+                    showAddFieldMessage('error', 'Max file size (MB) must be between 1 and 2048');
+                    return;
+                }
+            }
+            // If controller selected, require a trigger value
+            if (visibleControllerId && !visibleTriggerValue) {
+                showAddFieldMessage('error', 'Enter a trigger value for the selected controller field');
+                return;
             }
 
             const doSubmit = async () => {
@@ -531,6 +694,9 @@ $conn->close();
                     fd.append('is_required', String(isRequired));
                     fd.append('display_order', String(displayOrderVal));
                     if (allowedTypes) fd.append('allowed_file_types', allowedTypes);
+                    if (maxSizeMb) fd.append('max_file_size_mb', maxSizeMb);
+                    if (visibleControllerId) fd.append('visible_when_field_id', String(visibleControllerId));
+                    if (visibleControllerId) fd.append('visible_when_value', visibleTriggerValue);
 
                     const res = await fetch('manage_service_fields.php', {
                         method: 'POST',
@@ -538,7 +704,9 @@ $conn->close();
                     });
                     if (!res.ok) {
                         const txt = await res.text();
-                        showAddFieldMessage('error', `Server responded ${res.status}. ${txt.slice(0, 180)}`);
+                        const friendly = toHumanHttpStatus(res.status);
+                        showAddFieldMessage('error', friendly);
+                        try { showErrorModal('Couldn’t Add Field', friendly, txt); } catch (e) {}
                         return;
                     }
                     let data;
@@ -546,7 +714,9 @@ $conn->close();
                         data = await res.json();
                     } catch (jsonErr) {
                         const txt = await res.text().catch(() => '');
-                        showAddFieldMessage('error', `Unexpected response while adding field. ${txt ? txt.slice(0, 180) : ''}`);
+                        const friendly = 'We couldn’t read the server response. Please try again.';
+                        showAddFieldMessage('error', friendly);
+                        try { showErrorModal('Couldn’t Add Field', friendly, txt || ''); } catch (e) {}
                         return;
                     }
                     if (data.ok) {
@@ -555,7 +725,8 @@ $conn->close();
                             setConfirmLoading(false);
                             modalTitle.textContent = 'Successfully Added!';
                             const typeLabel = fieldType.charAt(0).toUpperCase() + fieldType.slice(1);
-                            modalMessage.innerHTML = `<div style="margin-top:6px;"><div>Label: <strong>${escapeHtml(label)}</strong></div><div>Type: <strong>${escapeHtml(typeLabel)}</strong></div></div>`;
+                            const maxInfo = (fieldType === 'file' && maxSizeMb) ? `<div>Max size: <strong>${escapeHtml(String(maxSizeMb))} MB</strong></div>` : '';
+                            modalMessage.innerHTML = `<div style="margin-top:6px;"><div>Label: <strong>${escapeHtml(label)}</strong></div><div>Type: <strong>${escapeHtml(typeLabel)}</strong></div>${maxInfo}</div>`;
                             modalLocked = true;
                             modalConfirmBtn.textContent = 'Okay';
                             modalCancelBtn.style.display = 'none';
@@ -565,31 +736,38 @@ $conn->close();
                                 closeAddFieldModal();
                             };
                             confirmationModal.style.display = 'flex';
-                            appendServiceFieldRow(data.field_id, label, fieldType, isRequired, data.display_order);
+                            appendServiceFieldRow(data.field_id, label, fieldType, isRequired, data.display_order, allowedTypes, maxSizeMb, visibleControllerId, visibleTriggerValue);
                         } else {
                             showAddFieldMessage('success', 'Field added');
-                            appendServiceFieldRow(data.field_id, label, fieldType, isRequired, data.display_order);
+                            appendServiceFieldRow(data.field_id, label, fieldType, isRequired, data.display_order, allowedTypes, maxSizeMb, visibleControllerId, visibleTriggerValue);
                         }
                     } else {
                         closeConfirmationModal();
-                        showAddFieldMessage('error', data.error || 'Error adding field');
+                        const friendly = toHumanMessage(data.error || '');
+                        showAddFieldMessage('error', friendly);
+                        try { showErrorModal('Couldn’t Add Field', friendly, data.error || ''); } catch (e) {}
                     }
                 } catch (e) {
                     closeConfirmationModal();
-                    showAddFieldMessage('error', `Network or server error adding field: ${e?.message || e}`);
+                    const friendly = 'We couldn’t connect to the server. Please check your network and try again.';
+                    showAddFieldMessage('error', friendly);
+                    try { showErrorModal('Couldn’t Add Field', friendly, String(e?.message || e)); } catch (err) {}
                 } finally {
                     hideLoader();
                 }
             };
 
             const summary = [`Label: ${label}`, `Type: ${fieldType}`];
-            if (fieldType === 'file') summary.push(`Allowed: ${allowedTypes || '(any)'}`);
+            if (fieldType === 'file') {
+                summary.push(`Allowed: ${allowedTypes || '(any)'}`);
+                if (maxSizeMb) summary.push(`Max size: ${maxSizeMb} MB`);
+            }
             showConfirm('Confirm Add Field', `Are you sure you want to add this field?\n${summary.join('\n')}`, doSubmit);
         }
 
         confirmAddFieldBtn?.addEventListener('click', doAddField);
 
-        function openEditFieldModal(fieldId, label, fieldType, isRequired, displayOrder, allowedFileTypes) {
+        function openEditFieldModal(fieldId, label, fieldType, isRequired, displayOrder, allowedFileTypes, maxFileSizeMb, visibleWhenFieldId, visibleWhenValue) {
             editFieldInlineMessage.style.display = 'none';
             editFieldInlineMessage.textContent = '';
             editFieldForm.reset();
@@ -599,8 +777,16 @@ $conn->close();
             editIsRequiredInput.checked = (parseInt(isRequired, 10) === 1);
             editDisplayOrderInput.value = String(parseInt(displayOrder, 10) || 0);
             editAllowedFileTypesInput.value = allowedFileTypes || '';
+            editMaxFileSizeMbInput.value = maxFileSizeMb || '';
             // Toggle file types group based on type
-            editAllowedFileTypesGroup.style.display = (String(editFieldTypeSelect.value).toLowerCase() === 'file') ? 'block' : 'none';
+            const isEditFile = (String(editFieldTypeSelect.value).toLowerCase() === 'file');
+            editAllowedFileTypesGroup.style.display = isEditFile ? 'block' : 'none';
+            editMaxFileSizeMbGroup.style.display = isEditFile ? 'block' : 'none';
+
+            // Set conditional visibility controls
+            if (editVisibleWhenFieldIdSelect) editVisibleWhenFieldIdSelect.value = String(visibleWhenFieldId || '');
+            if (editVisibleWhenValueInput) editVisibleWhenValueInput.value = String(visibleWhenValue || '');
+            if (editVisibleWhenValueGroup) editVisibleWhenValueGroup.style.display = (String(visibleWhenFieldId || '') !== '' ? 'block' : 'none');
 
             editFieldModal.classList.add('show');
             editFieldModal.style.display = 'flex';
@@ -634,6 +820,7 @@ $conn->close();
             const isRequired = editIsRequiredInput.checked ? 1 : 0;
             const displayOrderVal = parseInt(editDisplayOrderInput.value || '0', 10) || 0;
             let allowedTypes = editAllowedFileTypesInput.value.trim();
+            let maxSizeMb = String(editMaxFileSizeMbInput?.value || '').trim();
 
             if (!fieldId) {
                 showEditFieldMessage('error', 'Invalid field id');
@@ -656,6 +843,19 @@ $conn->close();
                 }
             } else if (fieldType !== 'file') {
                 allowedTypes = '';
+                maxSizeMb = '';
+            }
+            // Require max size when field type is file
+            if (fieldType === 'file' && !maxSizeMb) {
+                showEditFieldMessage('error', 'Max file size (MB) is required');
+                return;
+            }
+            if (fieldType === 'file' && maxSizeMb) {
+                const asInt = parseInt(maxSizeMb, 10);
+                if (!/^[0-9]+$/.test(maxSizeMb) || asInt <= 0 || asInt > 2048) {
+                    showEditFieldMessage('error', 'Max file size (MB) must be between 1 and 2048');
+                    return;
+                }
             }
 
             const doSubmit = async () => {
@@ -671,6 +871,18 @@ $conn->close();
                     fd.append('is_required', String(isRequired));
                     fd.append('display_order', String(displayOrderVal));
                     if (allowedTypes) fd.append('allowed_file_types', allowedTypes);
+                    if (maxSizeMb) fd.append('max_file_size_mb', maxSizeMb);
+                    // Conditional visibility
+                    const editControllerIdRaw = editVisibleWhenFieldIdSelect?.value || '';
+                    const editControllerId = editControllerIdRaw !== '' ? parseInt(editControllerIdRaw, 10) || 0 : 0;
+                    const editTriggerValue = editVisibleWhenValueInput?.value?.trim() || '';
+                    if (editControllerId && !editTriggerValue) {
+                        showEditFieldMessage('error', 'Enter a trigger value for the selected controller field');
+                        return;
+                    }
+                    // Always send both keys; backend will handle NULL clearing when empty
+                    fd.append('visible_when_field_id', editControllerId ? String(editControllerId) : '');
+                    fd.append('visible_when_value', editControllerId ? editTriggerValue : '');
 
                     const res = await fetch('manage_service_fields.php', {
                         method: 'POST',
@@ -678,7 +890,9 @@ $conn->close();
                     });
                     if (!res.ok) {
                         const txt = await res.text();
-                        showEditFieldMessage('error', `Server responded ${res.status}. ${txt.slice(0, 180)}`);
+                        const friendly = toHumanHttpStatus(res.status);
+                        showEditFieldMessage('error', friendly);
+                        try { showErrorModal('Couldn’t Update Field', friendly, txt); } catch (e) {}
                         return;
                     }
                     let data;
@@ -686,7 +900,9 @@ $conn->close();
                         data = await res.json();
                     } catch (jsonErr) {
                         const txt = await res.text().catch(() => '');
-                        showEditFieldMessage('error', `Unexpected response while updating field. ${txt ? txt.slice(0, 180) : ''}`);
+                        const friendly = 'We couldn’t read the server response. Please try again.';
+                        showEditFieldMessage('error', friendly);
+                        try { showErrorModal('Couldn’t Update Field', friendly, txt || ''); } catch (e) {}
                         return;
                     }
                     if (data.ok) {
@@ -694,7 +910,8 @@ $conn->close();
                             setConfirmLoading(false);
                             modalTitle.textContent = 'Successfully Updated!';
                             const typeLabel = fieldType.charAt(0).toUpperCase() + fieldType.slice(1);
-                            modalMessage.innerHTML = `<div style=\"margin-top:6px;\"><div>Label: <strong>${escapeHtml(label)}</strong></div><div>Type: <strong>${escapeHtml(typeLabel)}</strong></div></div>`;
+                            const maxInfo = (fieldType === 'file' && maxSizeMb) ? `<div>Max size: <strong>${escapeHtml(String(maxSizeMb))} MB</strong></div>` : '';
+                            modalMessage.innerHTML = `<div style=\"margin-top:6px;\"><div>Label: <strong>${escapeHtml(label)}</strong></div><div>Type: <strong>${escapeHtml(typeLabel)}</strong></div>${maxInfo}</div>`;
                             modalLocked = true;
                             modalConfirmBtn.textContent = 'Okay';
                             modalCancelBtn.style.display = 'none';
@@ -703,25 +920,32 @@ $conn->close();
                                 closeEditFieldModal();
                             };
                             confirmationModal.style.display = 'flex';
-                            updateServiceFieldRow(fieldId, label, fieldType, isRequired, displayOrderVal);
+                            updateServiceFieldRow(fieldId, label, fieldType, isRequired, displayOrderVal, allowedTypes, maxSizeMb, editControllerId, editTriggerValue);
                         } else {
                             showEditFieldMessage('success', 'Field updated');
-                            updateServiceFieldRow(fieldId, label, fieldType, isRequired, displayOrderVal);
+                            updateServiceFieldRow(fieldId, label, fieldType, isRequired, displayOrderVal, allowedTypes, maxSizeMb, editControllerId, editTriggerValue);
                         }
                     } else {
                         closeConfirmationModal();
-                        showEditFieldMessage('error', data.error || 'Error updating field');
+                        const friendly = toHumanMessage(data.error || '');
+                        showEditFieldMessage('error', friendly);
+                        try { showErrorModal('Couldn’t Update Field', friendly, data.error || ''); } catch (e) {}
                     }
                 } catch (e) {
                     closeConfirmationModal();
-                    showEditFieldMessage('error', `Network or server error updating field: ${e?.message || e}`);
+                    const friendly = 'We couldn’t connect to the server. Please check your network and try again.';
+                    showEditFieldMessage('error', friendly);
+                    try { showErrorModal('Couldn’t Update Field', friendly, String(e?.message || e)); } catch (err) {}
                 } finally {
                     hideLoader();
                 }
             };
 
             const summary = [`Label: ${label}`, `Type: ${fieldType}`];
-            if (fieldType === 'file') summary.push(`Allowed: ${allowedTypes || '(any)'}`);
+            if (fieldType === 'file') {
+                summary.push(`Allowed: ${allowedTypes || '(any)'}`);
+                if (maxSizeMb) summary.push(`Max size: ${maxSizeMb} MB`);
+            }
             showConfirm('Confirm Update', `Are you sure you want to update this field?\n${summary.join('\n')}`, doSubmit);
         }
 
@@ -865,11 +1089,86 @@ $conn->close();
                 } catch (err) {
                     // Ensure modal closes and we show inline error
                     closeConfirmationModal();
-                    showMessage('error', `Action failed: ${err?.message || err}`);
+                    showErrorModal('Action failed', toHumanMessage(err?.message || err), err?.stack || err?.message || String(err));
                 }
                 // Do not reset loading state here: success path updates modal to "Okay"; failure closes the modal.
             };
             confirmationModal.style.display = 'flex';
+        }
+
+        // Show an error modal (Okay only). Useful when backend returns ok=false
+        function showErrorModal(title, message, details) {
+            if (!confirmationModal || !modalTitle || !modalMessage || !modalConfirmBtn || !modalCancelBtn) {
+                return; // If modal not present, silently skip
+            }
+            setConfirmLoading(false);
+            modalLocked = true; // prevent outside click closing
+            modalTitle.textContent = title || 'Error';
+            if (details) {
+                const safeMsg = escapeHtml(message || 'An error occurred.');
+                const safeDet = escapeHtml(details);
+                modalMessage.innerHTML = `${safeMsg}\n\n<div style="margin-top:10px; font-size: 0.9rem; color: #4a5568;">
+                    <details>
+                        <summary style="cursor:pointer; color:#1a202c;">Show details</summary>
+                        <pre style="white-space:pre-wrap; margin-top:8px; background:#f7fafc; border:1px solid #e2e8f0; border-radius:8px; padding:10px;">${safeDet}</pre>
+                    </details>
+                </div>`;
+            } else {
+                modalMessage.textContent = message || 'An error occurred.';
+            }
+            modalConfirmBtn.textContent = 'Okay';
+            modalCancelBtn.style.display = 'none';
+            modalConfirmBtn.onclick = () => {
+                closeConfirmationModal(true);
+            };
+            confirmationModal.style.display = 'flex';
+        }
+
+        // Translate technical errors into human-friendly messages
+        function toHumanMessage(raw) {
+            const msg = String(raw || '').trim();
+            const lower = msg.toLowerCase();
+            // Known backend validations
+            if (lower.includes('controller field must be select or radio') || lower.includes('controller field must be select, radio, or checkbox')) {
+                return 'To reveal this field based on another, choose a controller with selectable choices (Select, Radio, or Checkbox with defined options), then use one of its exact option values.';
+            }
+            if (lower.includes('controller field not found')) {
+                return 'The “Show this field when” controller was not found. Please choose a different controller field.';
+            }
+            if (lower.includes('trigger value required')) {
+                return 'Please enter the option/value that should reveal this field.';
+            }
+            if (lower.includes('trigger value does not match any option') || lower.includes('no matching option')) {
+                return 'The value you entered doesn’t match any choice of the selected controller. Open “Manage Options” for that field and use one of its option values.';
+            }
+            if (lower.includes('unknown field type') || lower.includes('invalid field type')) {
+                return 'Please choose a valid field type such as Text, Date, Number, Email, Select, Checkbox, Radio, or File.';
+            }
+            if (lower.includes('invalid field id')) {
+                return 'We couldn’t find that field. Try reloading the page and try again.';
+            }
+            if (lower.includes('database') || lower.includes('sql') || lower.includes('server error')) {
+                return 'Something went wrong while saving. Please try again. If it persists, reload the page.';
+            }
+            // Fallback to the original if it looks user-readable, else generic
+            if (msg && msg.length <= 160 && !/exception|trace|stack|sql|mysqli|undefined index|notice/i.test(msg)) {
+                return msg;
+            }
+            return 'We couldn’t save your changes. Please try again.';
+        }
+
+        function toHumanHttpStatus(status) {
+            switch (Number(status) || 0) {
+                case 400: return 'The request wasn’t valid. Please double-check the form and try again.';
+                case 401: return 'You’re not signed in. Please log in and try again.';
+                case 403: return 'You don’t have permission to do this.';
+                case 404: return 'We couldn’t reach the service. Try reloading the page.';
+                case 409: return 'There’s a conflict with existing data. Try changing the inputs.';
+                case 422: return 'Some inputs are invalid. Please review the form and try again.';
+                case 500: return 'The server had a problem. Please try again.';
+                case 503: return 'The service is temporarily unavailable. Please try again shortly.';
+                default: return 'We couldn’t complete the request. Please try again.';
+            }
         }
 
         async function loadOptions() {
@@ -880,7 +1179,7 @@ $conn->close();
                 const res = await fetch(`manage_service_options.php?field_id=${fieldId}&service_id=${serviceId}&ajax=1&action=get`);
                 const data = await res.json();
                 if (!data.ok) {
-                    showMessage('error', data.error || 'Failed to load options');
+                    showErrorModal('Couldn’t load options', toHumanMessage(data.error || 'Failed to load options'), JSON.stringify(data, null, 2));
                     return;
                 }
                 const opts = data.options || [];
@@ -903,7 +1202,7 @@ $conn->close();
                     }
                 }
             } catch (e) {
-                showMessage('error', 'Error loading options');
+                showErrorModal('Couldn’t load options', 'Network or server error while loading options.', e?.message || String(e));
             } finally {
                 hideLoader();
             }
@@ -935,7 +1234,7 @@ $conn->close();
                 // If server returned non-2xx, surface status and short text
                 if (!res.ok) {
                     const txt = await res.text();
-                    showMessage('error', `Server responded ${res.status}. ${txt.slice(0, 180)}`);
+                    showErrorModal('Couldn’t update options', toHumanHttpStatus(res.status), txt);
                     return;
                 }
                 let data;
@@ -943,7 +1242,7 @@ $conn->close();
                     data = await res.json();
                 } catch (jsonErr) {
                     const txt = await res.text().catch(() => '');
-                    showMessage('error', `Unexpected response while updating. ${txt ? txt.slice(0, 180) : ''}`);
+                    showErrorModal('Couldn’t update options', 'Unexpected response format while updating options.', txt);
                     return;
                 }
                 if (data.ok) {
@@ -960,16 +1259,16 @@ $conn->close();
                 } else if (typeof data.errors !== 'undefined') {
                     // Failure: dismiss confirmation modal if visible
                     closeConfirmationModal();
-                    showMessage('warning', `Some options failed to update (${data.errors}).`);
+                    showErrorModal('Some updates failed', 'One or more options did not update successfully. Please review and try again.', JSON.stringify(data, null, 2));
                 } else {
                     // Failure: dismiss confirmation modal if visible
                     closeConfirmationModal();
-                    showMessage('error', data.error || 'Failed to update options');
+                    showErrorModal('Couldn’t update options', toHumanMessage(data.error || 'Failed to update options'), JSON.stringify(data, null, 2));
                 }
             } catch (e) {
                 // Failure: dismiss confirmation modal if visible
                 closeConfirmationModal();
-                showMessage('error', `Network or server error updating options: ${e?.message || e}`);
+                showErrorModal('Couldn’t update options', 'Network or server error while updating options.', e?.message || String(e));
             } finally {
                 hideLoader();
             }
@@ -980,7 +1279,7 @@ $conn->close();
             const val = document.getElementById('newOptionValue').value.trim();
             const ord = document.getElementById('newOptionOrder').value.trim();
             if (!lbl || !val) {
-                showMessage('error', 'Label and Value are required');
+                showErrorModal('Missing fields', 'Label and Value are required to add an option.');
                 return;
             }
             const fieldId = optionsModal.dataset.fieldId;
@@ -1000,7 +1299,7 @@ $conn->close();
                     });
                     if (!res.ok) {
                         const txt = await res.text();
-                        showMessage('error', `Server responded ${res.status}. ${txt.slice(0, 180)}`);
+                        showErrorModal('Couldn’t add option', toHumanHttpStatus(res.status), txt);
                         return;
                     }
                     let data;
@@ -1008,7 +1307,7 @@ $conn->close();
                         data = await res.json();
                     } catch (jsonErr) {
                         const txt = await res.text();
-                        showMessage('error', `Unexpected response while adding option. ${txt ? txt.slice(0, 180) : ''}`);
+                        showErrorModal('Couldn’t add option', 'Unexpected response format while adding option.', txt);
                         return;
                     }
                     if (data.ok) {
@@ -1042,12 +1341,12 @@ $conn->close();
                     } else {
                         // Failure: dismiss confirmation modal if visible
                         closeConfirmationModal();
-                        showMessage('error', data.error || 'Error adding option');
+                        showErrorModal('Couldn’t add option', toHumanMessage(data.error || 'Error adding option'), JSON.stringify(data, null, 2));
                     }
                 } catch (e) {
                     // Failure: dismiss confirmation modal if visible
                     closeConfirmationModal();
-                    showMessage('error', `Network or server error adding option: ${e?.message || e}`);
+                    showErrorModal('Couldn’t add option', 'Network or server error while adding option.', e?.message || String(e));
                 }
             };
 
@@ -1065,7 +1364,7 @@ $conn->close();
                     const res = await fetch(`manage_service_options.php?field_id=${fieldId}&service_id=${serviceId}&ajax=1&action=delete_option&id=${optionId}`);
                     if (!res.ok) {
                         const txt = await res.text();
-                        showMessage('error', `Server responded ${res.status}. ${txt.slice(0, 180)}`);
+                        showErrorModal('Couldn’t delete option', toHumanHttpStatus(res.status), txt);
                         return;
                     }
                     let data;
@@ -1073,7 +1372,7 @@ $conn->close();
                         data = await res.json();
                     } catch (jsonErr) {
                         const txt = await res.text();
-                        showMessage('error', `Unexpected response while deleting option. ${txt ? txt.slice(0, 180) : ''}`);
+                        showErrorModal('Couldn’t delete option', 'Unexpected response format while deleting option.', txt);
                         return;
                     }
                     if (data.ok) {
@@ -1115,12 +1414,12 @@ $conn->close();
                     } else {
                         // Failure: dismiss confirmation modal if visible
                         closeConfirmationModal();
-                        showMessage('error', data.error || 'Error deleting option');
+                        showErrorModal('Couldn’t delete option', toHumanMessage(data.error || 'Error deleting option'), JSON.stringify(data, null, 2));
                     }
                 } catch (e) {
                     // Failure: dismiss confirmation modal if visible
                     closeConfirmationModal();
-                    showMessage('error', `Network or server error deleting option: ${e?.message || e}`);
+                    showErrorModal('Couldn’t delete option', 'Network or server error while deleting option.', e?.message || String(e));
                 }
             };
 
