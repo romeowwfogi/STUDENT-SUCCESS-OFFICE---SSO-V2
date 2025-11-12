@@ -28,6 +28,32 @@ if ($user_id <= 0 || $applicant_number === '') {
     exit;
 }
 
+// If a permit for this user already exists, perform a resend instead of creating a new one
+try {
+    if ($user_id > 0) {
+        if ($chkStmt = $conn->prepare("SELECT id FROM application_permit WHERE user_id = ? ORDER BY id DESC LIMIT 1")) {
+            $chkStmt->bind_param('i', $user_id);
+            $chkStmt->execute();
+            $resChk = $chkStmt->get_result();
+            if ($resChk && $resChk->fetch_assoc()) {
+                // Forward current inputs to the resend script
+                $_POST['user_id'] = $user_id;
+                $_POST['accent_color'] = $accent_color;
+                $_POST['admission_officer'] = $admission_officer;
+                $_POST['applicant_name'] = $applicant_name;
+                $_POST['date_of_exam'] = $date_of_exam;
+                $_POST['exam_time'] = $exam_time_input;
+                $_POST['application_period_start'] = $period_start_raw;
+                $_POST['application_period_end'] = $period_end_raw;
+                require __DIR__ . '/resend_application_permit.php';
+                exit;
+            }
+            $chkStmt->close();
+        }
+    }
+} catch (Throwable $e) { /* ignore and proceed with create */
+}
+
 $stmt = $conn->prepare("INSERT INTO application_permit (user_id, applicant_number) VALUES (?, ?)");
 if (!$stmt) {
     echo json_encode(['ok' => false, 'error' => 'Prepare failed: ' . $conn->error]);
@@ -102,7 +128,12 @@ if ($user_id > 0) {
                                     $exam_date = $parts[0];
                                     $timeParts = explode(':', $parts[1]);
                                     $hhmm = (count($timeParts) >= 2) ? ($timeParts[0] . ':' . $timeParts[1]) : $parts[1];
-                                    $exam_time = $hhmm;
+                                    // Convert to 12-hour with AM/PM
+                                    $h = intval($timeParts[0]);
+                                    $m = isset($timeParts[1]) ? $timeParts[1] : '00';
+                                    $ampm = ($h >= 12) ? 'PM' : 'AM';
+                                    $h12 = ($h % 12) ?: 12;
+                                    $exam_time = sprintf('%d:%s %s', $h12, $m, $ampm);
                                 }
                             }
                             $floor = trim((string)($rowSched['floor'] ?? ''));
@@ -114,11 +145,22 @@ if ($user_id > 0) {
                     }
                 }
 
-                // Prefer modal-provided values when present
+                // Prefer modal-provided value when present; normalize to YYYY-MM-DD
                 if ($date_of_exam !== '') {
-                    $exam_date = $date_of_exam;
+                    $normalized = '';
+                    // If it's already YYYY-MM-DD, keep it
+                    if (preg_match('/^\d{4}-\d{2}-\d{2}$/', $date_of_exam)) {
+                        $normalized = $date_of_exam;
+                    } else {
+                        $ts = strtotime($date_of_exam);
+                        if ($ts) {
+                            $normalized = date('Y-m-d', $ts);
+                        }
+                    }
+                    $exam_date = $normalized !== '' ? $normalized : $exam_date;
                 }
                 if ($exam_time_input !== '') {
+                    // Trust provided input (expects 12-hour format like 12:00 AM/PM)
                     $exam_time = $exam_time_input;
                 }
 
@@ -179,10 +221,62 @@ if ($user_id > 0) {
                     // proceed without download link on any exception
                 }
 
-                // Prepare replacements for known placeholders; harmless if not present
+                // Resolve applicant type and academic year for placeholders
+                $applicant_type = '';
+                $academic_year = '';
+                try {
+                    if ($ayStmt = $conn->prepare("SELECT at.name AS type_name, ac.academic_year_start AS ay_start, ac.academic_year_end AS ay_end FROM submissions s INNER JOIN applicant_types at ON at.id = s.applicant_type_id INNER JOIN admission_cycles ac ON ac.id = at.admission_cycle_id WHERE s.user_id = ? ORDER BY s.submitted_at DESC LIMIT 1")) {
+                        $ayStmt->bind_param('i', $user_id);
+                        $ayStmt->execute();
+                        $resAy = $ayStmt->get_result();
+                        if ($resAy && ($rowAy = $resAy->fetch_assoc())) {
+                            $applicant_type = trim((string)($rowAy['type_name'] ?? ''));
+                            $ay_start = trim((string)($rowAy['ay_start'] ?? ''));
+                            $ay_end   = trim((string)($rowAy['ay_end'] ?? ''));
+                            if ($ay_start !== '' && $ay_end !== '') {
+                                $academic_year = $ay_start . ' - ' . $ay_end;
+                            }
+                        }
+                        $ayStmt->close();
+                    }
+                } catch (Throwable $e) { /* ignore */
+                }
+
+                // Build QR link to validator using applicant number
+                $qr_text = $applicant_number;
+                $validator_url = (isset($_SERVER['HTTP_HOST']) ? ('http://' . $_SERVER['HTTP_HOST']) : 'http://localhost') . dirname($_SERVER['PHP_SELF']) . '/validate_exam_permit.php?qr_text=' . urlencode($qr_text);
+                $qr_download_link = 'https://chart.googleapis.com/chart?chs=300x300&cht=qr&chl=' . urlencode($validator_url);
+
+                // Prepare replacements for known and new placeholders; harmless if not present
                 $email_body = str_replace(
-                    ['{{applicant_number}}', '{{exam_date}}', '{{exam_time}}', '{{exam_venue}}'],
-                    [$applicant_number, $exam_date, $exam_time, $exam_venue],
+                    [
+                        '{{registered_fullname}}',
+                        '{{academic_year}}',
+                        '{{applicant_type}}',
+                        '{{applicant_number}}',
+                        '{{room_number}}',
+                        '{{floor}}',
+                        '{{exam_date}}',
+                        '{{start_date}}',
+                        '{{exam_time}}',
+                        '{{start_time}}',
+                        '{{exam_venue}}',
+                        '{{qr_download_link}}'
+                    ],
+                    [
+                        $applicant_name,
+                        $academic_year,
+                        $applicant_type,
+                        $applicant_number,
+                        $room_no,
+                        isset($floor) ? $floor : '',
+                        $exam_date,
+                        $exam_date,
+                        $exam_time,
+                        $exam_time,
+                        $exam_venue,
+                        $qr_download_link
+                    ],
                     $EXAM_PERMIT_TEMPLATE
                 );
                 if ($permit_download_url !== '') {
@@ -225,6 +319,7 @@ if ($user_id > 0) {
                         'application_period_end'    => $period_end_raw,
                         'application_period_text'   => $application_period,
                         'accent_color'              => ($accent_color !== '' ? $accent_color : '#18a558'),
+                        'qr_text'                   => $qr_text,
                         'download_url'              => $permit_download_url,
                         'email_subject'             => $EXAM_PERMIT_SUBJECT,
                         'email_body'                => $email_body,

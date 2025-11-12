@@ -189,10 +189,6 @@ $conn->close();
                         </div>
 
                         <div class="search_button_container">
-                            <button class="button export">Import</button>
-                        </div>
-
-                        <div class="search_button_container">
                             <button class="button export">Export</button>
                         </div>
                     </div>

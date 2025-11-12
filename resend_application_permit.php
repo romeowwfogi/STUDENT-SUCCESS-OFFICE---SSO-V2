@@ -146,7 +146,12 @@ if ($schedule_id) {
                     $exam_date = $parts[0];
                     $timeParts = explode(':', $parts[1]);
                     $hhmm = (count($timeParts) >= 2) ? ($timeParts[0] . ':' . $timeParts[1]) : $parts[1];
-                    $exam_time = $hhmm;
+                    // Convert to 12-hour with AM/PM
+                    $h = intval($timeParts[0]);
+                    $m = isset($timeParts[1]) ? $timeParts[1] : '00';
+                    $ampm = ($h >= 12) ? 'PM' : 'AM';
+                    $h12 = ($h % 12) ?: 12;
+                    $exam_time = sprintf('%d:%s %s', $h12, $m, $ampm);
                 }
             }
             $floor = trim((string)($rowSched['floor'] ?? ''));
@@ -168,7 +173,7 @@ if ($exam_venue === '' && isset($snap_venue)) {
 
 // Prefer provided modal-like overrides if present
 if ($date_of_exam !== '') $exam_date = $date_of_exam;
-if ($exam_time_input !== '') $exam_time = $exam_time_input;
+if ($exam_time_input !== '') $exam_time = $exam_time_input; // expects 12-hour format
 
 // Build application period (if not set from snapshot)
 $application_period = isset($application_period) ? $application_period : '';
@@ -282,7 +287,8 @@ try {
                 $stmtUpd->bind_param('si', $permit_download_url, $permit_id);
                 $stmtUpd->execute();
                 $stmtUpd->close();
-            } catch (Throwable $e2) { /* ignore */ }
+            } catch (Throwable $e2) { /* ignore */
+            }
         }
     }
 } catch (Throwable $e) {
@@ -290,9 +296,62 @@ try {
 }
 
 // Prepare email body with placeholders
+// Resolve applicant type and academic year for placeholders
+$applicant_type = '';
+$academic_year = '';
+try {
+    if ($ayStmt = $conn->prepare("SELECT at.name AS type_name, ac.academic_year_start AS ay_start, ac.academic_year_end AS ay_end FROM submissions s INNER JOIN applicant_types at ON at.id = s.applicant_type_id INNER JOIN admission_cycles ac ON ac.id = at.admission_cycle_id WHERE s.user_id = ? ORDER BY s.submitted_at DESC LIMIT 1")) {
+        $ayStmt->bind_param('i', $user_id);
+        $ayStmt->execute();
+        $resAy = $ayStmt->get_result();
+        if ($resAy && ($rowAy = $resAy->fetch_assoc())) {
+            $applicant_type = trim((string)($rowAy['type_name'] ?? ''));
+            $ay_start = trim((string)($rowAy['ay_start'] ?? ''));
+            $ay_end   = trim((string)($rowAy['ay_end'] ?? ''));
+            if ($ay_start !== '' && $ay_end !== '') {
+                $academic_year = $ay_start . ' - ' . $ay_end;
+            }
+        }
+        $ayStmt->close();
+    }
+} catch (Throwable $e) { /* ignore */
+}
+
+// Build QR link to validator using applicant number
+$qr_text = $applicant_number;
+$validator_url = (isset($_SERVER['HTTP_HOST']) ? ('http://' . $_SERVER['HTTP_HOST']) : 'http://localhost') . dirname($_SERVER['PHP_SELF']) . '/validate_exam_permit.php?qr_text=' . urlencode($qr_text);
+$qr_download_link = 'https://chart.googleapis.com/chart?chs=300x300&cht=qr&chl=' . urlencode($validator_url);
+
+// Prepare email body with extended placeholders
 $email_body = str_replace(
-    ['{{applicant_number}}', '{{exam_date}}', '{{exam_time}}', '{{exam_venue}}'],
-    [$applicant_number, $exam_date, $exam_time, $exam_venue],
+    [
+        '{{registered_fullname}}',
+        '{{academic_year}}',
+        '{{applicant_type}}',
+        '{{applicant_number}}',
+        '{{room_number}}',
+        '{{floor}}',
+        '{{exam_date}}',
+        '{{start_date}}',
+        '{{exam_time}}',
+        '{{start_time}}',
+        '{{exam_venue}}',
+        '{{qr_download_link}}'
+    ],
+    [
+        $applicant_name,
+        $academic_year,
+        $applicant_type,
+        $applicant_number,
+        $room_no,
+        isset($floor) ? $floor : '',
+        $exam_date,
+        $exam_date,
+        $exam_time,
+        $exam_time,
+        $exam_venue,
+        $qr_download_link
+    ],
     $EXAM_PERMIT_TEMPLATE
 );
 if ($permit_download_url !== '') {
@@ -317,12 +376,13 @@ send_status_email($receiver, $EXAM_PERMIT_SUBJECT, $email_body);
 try {
     if (!empty($permit_id)) {
         $sent_at = date('Y-m-d H:i:s');
-        $stmtUpd2 = $conn->prepare("UPDATE application_permit SET email_status = 'sent', email_subject = ?, email_body = ?, email_sent_at = ?, download_url = COALESCE(NULLIF(?, ''), download_url) WHERE id = ?");
-        $stmtUpd2->bind_param('ssssi', $EXAM_PERMIT_SUBJECT, $email_body, $sent_at, $permit_download_url, $permit_id);
+        $stmtUpd2 = $conn->prepare("UPDATE application_permit SET email_status = 'sent', email_subject = ?, email_body = ?, email_sent_at = ?, download_url = COALESCE(NULLIF(?, ''), download_url), qr_text = COALESCE(NULLIF(?, ''), qr_text) WHERE id = ?");
+        $stmtUpd2->bind_param('sssssi', $EXAM_PERMIT_SUBJECT, $email_body, $sent_at, $permit_download_url, $qr_text, $permit_id);
         $stmtUpd2->execute();
         $stmtUpd2->close();
     }
-} catch (Throwable $e3) { /* ignore */ }
+} catch (Throwable $e3) { /* ignore */
+}
 
 echo json_encode(['ok' => true, 'emailed' => true, 'download_url' => $permit_download_url]);
 exit;

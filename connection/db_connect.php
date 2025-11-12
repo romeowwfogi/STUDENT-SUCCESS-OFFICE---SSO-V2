@@ -70,6 +70,10 @@ $EXAM_PERMIT_TITLE = null;
 $EXAM_PERMIT_SUBJECT = null;
 $EXAM_PERMIT_TEMPLATE = "";
 
+$TITLE_SERVICE_REQUEST = 'Student Support Services - Service Request';
+$SUBJECT_SERVICE_REQUEST = null;
+$HTML_CODE_SERVICE_REQUEST = null;
+
 while ($row = $result->fetch_assoc()) {
     if ($row['title'] === $ADMISSION_UPDATE) {
         $ADMISSION_UPDATE_TITLE = $row['title'];
@@ -88,6 +92,13 @@ while ($row = $result->fetch_assoc()) {
         $EXAM_PERMIT_SUBJECT = $row['subject'];
         $EXAM_PERMIT_TEMPLATE = $row['html_code'];
     }
+
+    if ($row['title'] === $TITLE_SERVICE_REQUEST) {
+        $TITLE_SERVICE_REQUEST = $row['title'];
+        $SUBJECT_SERVICE_REQUEST = $row['subject'];
+        $HTML_CODE_SERVICE_REQUEST = $row['html_code'];
+    }
+
     // stop if found
     if (
         $ADMISSION_UPDATE_TITLE &&
@@ -98,7 +109,10 @@ while ($row = $result->fetch_assoc()) {
         $EXAM_SCHEDULE_TEMPLATE &&
         $EXAM_PERMIT_TITLE &&
         $EXAM_PERMIT_SUBJECT &&
-        $EXAM_PERMIT_TEMPLATE
+        $EXAM_PERMIT_TEMPLATE &&
+        $TITLE_SERVICE_REQUEST &&
+        $SUBJECT_SERVICE_REQUEST &&
+        $HTML_CODE_SERVICE_REQUEST
     ) {
         break;
     }

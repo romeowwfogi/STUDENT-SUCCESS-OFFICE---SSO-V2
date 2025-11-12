@@ -25,6 +25,7 @@ if (empty($file_type) || empty($selected_columns)) {
 // Define available columns
 $available_columns = [
     'id' => 'ID',
+    'registered_fullname' => 'Registered Full Name',
     'name' => 'Name',
     'email' => 'Email',
     'type' => 'Application Type',
@@ -69,8 +70,15 @@ $sql = "SELECT
             s.status,
             at.name AS applicant_type,
             ac.id AS cycle_id,
-            ac.cycle_name,
+            ac.academic_year_start,
+            ac.academic_year_end,
+            ac.admission_date_time_start,
+            ac.admission_date_time_end,
             u.email AS user_email,
+            uf.first_name AS reg_first_name,
+            uf.middle_name AS reg_middle_name,
+            uf.last_name AS reg_last_name,
+            uf.suffix AS reg_suffix,
             d_fname.field_value AS first_name,
             d_lname.field_value AS last_name
         FROM
@@ -81,6 +89,8 @@ $sql = "SELECT
             admission_cycles ac ON at.admission_cycle_id = ac.id
         LEFT JOIN
             users u ON s.user_id = u.id
+        LEFT JOIN
+            user_fullname uf ON uf.user_id = u.id
         LEFT JOIN
             submission_data d_fname ON (s.id = d_fname.submission_id AND d_fname.field_name = 'first_name')
         LEFT JOIN
@@ -166,6 +176,14 @@ foreach ($applicants as $applicant) {
             case 'id':
                 $row[] = $applicant['submission_id'];
                 break;
+            case 'registered_fullname':
+                $parts = [];
+                foreach (['reg_first_name','reg_middle_name','reg_last_name','reg_suffix'] as $k) {
+                    $v = trim((string)($applicant[$k] ?? ''));
+                    if ($v !== '') $parts[] = $v;
+                }
+                $row[] = !empty($parts) ? implode(' ', $parts) : 'N/A';
+                break;
             case 'name':
                 $full_name = trim(($applicant['first_name'] ?? '') . ' ' . ($applicant['last_name'] ?? ''));
                 $row[] = !empty($full_name) ? $full_name : 'N/A';
@@ -190,7 +208,7 @@ foreach ($applicants as $applicant) {
                 $row[] = $applicant['submitted_at'] ? date('Y-m-d H:i:s', strtotime($applicant['submitted_at'])) : 'N/A';
                 break;
             case 'cycle':
-                $row[] = $applicant['cycle_name'] ?? 'N/A';
+                $row[] = computeCycleLabel($applicant);
                 break;
             default:
                 // Check if this is a dynamic form field
@@ -227,6 +245,20 @@ switch ($file_type) {
 $conn->close();
 
 // Export functions
+function computeCycleLabel($applicantRow) {
+    $ys = isset($applicantRow['academic_year_start']) ? (int)$applicantRow['academic_year_start'] : null;
+    $ye = isset($applicantRow['academic_year_end']) ? (int)$applicantRow['academic_year_end'] : null;
+    if ($ys && $ye) return $ys . '-' . $ye;
+    $start = isset($applicantRow['admission_date_time_start']) ? $applicantRow['admission_date_time_start'] : null;
+    $end   = isset($applicantRow['admission_date_time_end']) ? $applicantRow['admission_date_time_end'] : null;
+    if ($start && $end) {
+        $s = date('M d, Y', strtotime($start));
+        $e = date('M d, Y', strtotime($end));
+        return $s . ' - ' . $e;
+    }
+    $cid = isset($applicantRow['cycle_id']) ? (int)$applicantRow['cycle_id'] : 0;
+    return $cid ? ('Cycle ' . $cid) : 'N/A';
+}
 function exportToExcel($headers, $data, $filename) {
     header('Content-Type: application/vnd.ms-excel');
     header('Content-Disposition: attachment; filename="' . $filename . '.xls"');

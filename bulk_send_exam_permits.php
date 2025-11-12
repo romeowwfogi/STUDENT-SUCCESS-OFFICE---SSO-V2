@@ -41,7 +41,9 @@ if (empty($user_ids)) {
 }
 
 // Deduplicate and validate
-$user_ids = array_values(array_unique(array_filter($user_ids, function($v){ return intval($v) > 0; })));
+$user_ids = array_values(array_unique(array_filter($user_ids, function ($v) {
+    return intval($v) > 0;
+})));
 if (empty($user_ids)) {
     echo json_encode(['ok' => false, 'error' => 'No user_ids provided']);
     exit;
@@ -89,7 +91,8 @@ try {
         }
         $stmtPref->close();
     }
-} catch (Throwable $e) { /* ignore */ }
+} catch (Throwable $e) { /* ignore */
+}
 
 function compose_applicant_number($prefix, $digits, $order, $seq)
 {
@@ -121,10 +124,15 @@ foreach ($user_ids as $uid) {
     $exam_time = '';
     $exam_venue = '';
     $room_no = '';
+    $floor = '';
     $period_start_raw = '';
     $period_end_raw = '';
     $application_period = '';
     $accent_color = '#18a558';
+    $applicant_type = '';
+    $academic_year = '';
+    $qr_text = '';
+    $qr_download_link = '';
 
     try {
         // Check if permit exists
@@ -146,7 +154,7 @@ foreach ($user_ids as $uid) {
                 $exam_venue        = trim((string)($rowSnap['exam_venue'] ?? $exam_venue));
                 $period_start_raw  = trim((string)($rowSnap['application_period_start'] ?? $period_start_raw));
                 $period_end_raw    = trim((string)($rowSnap['application_period_end'] ?? $period_end_raw));
-                $application_period= trim((string)($rowSnap['application_period_text'] ?? $application_period));
+                $application_period = trim((string)($rowSnap['application_period_text'] ?? $application_period));
                 $accent_color      = trim((string)($rowSnap['accent_color'] ?? $accent_color));
                 $permit_download_url = trim((string)($rowSnap['download_url'] ?? ''));
             }
@@ -176,7 +184,7 @@ foreach ($user_ids as $uid) {
                 $resName = $stmtName->get_result();
                 if ($resName && ($rowName = $resName->fetch_assoc())) {
                     $parts = [];
-                    foreach (['first_name','middle_name','last_name','suffix'] as $k) {
+                    foreach (['first_name', 'middle_name', 'last_name', 'suffix'] as $k) {
                         $v = trim((string)($rowName[$k] ?? ''));
                         if ($v !== '') $parts[] = $v;
                     }
@@ -222,6 +230,25 @@ foreach ($user_ids as $uid) {
             }
         }
 
+        // Resolve applicant type and academic year for placeholders
+        try {
+            if ($ayStmt = $conn->prepare("SELECT at.name AS type_name, ac.academic_year_start AS ay_start, ac.academic_year_end AS ay_end FROM submissions s INNER JOIN applicant_types at ON at.id = s.applicant_type_id INNER JOIN admission_cycles ac ON ac.id = at.admission_cycle_id WHERE s.user_id = ? ORDER BY s.submitted_at DESC LIMIT 1")) {
+                $ayStmt->bind_param('i', $uid);
+                $ayStmt->execute();
+                $resAy = $ayStmt->get_result();
+                if ($resAy && ($rowAy = $resAy->fetch_assoc())) {
+                    $applicant_type = trim((string)($rowAy['type_name'] ?? ''));
+                    $ay_start = trim((string)($rowAy['ay_start'] ?? ''));
+                    $ay_end   = trim((string)($rowAy['ay_end'] ?? ''));
+                    if ($ay_start !== '' && $ay_end !== '') {
+                        $academic_year = $ay_start . ' - ' . $ay_end;
+                    }
+                }
+                $ayStmt->close();
+            }
+        } catch (Throwable $e) { /* ignore */
+        }
+
         // Build application period text if raw dates present and text missing
         if ($application_period === '' && $period_start_raw !== '' && $period_end_raw !== '') {
             $ds = DateTime::createFromFormat('Y-m-d', $period_start_raw);
@@ -238,9 +265,41 @@ foreach ($user_ids as $uid) {
             if (empty($EXAM_PERMIT_TEMPLATE) || empty($EXAM_PERMIT_SUBJECT)) {
                 throw new Exception('Exam permit template not configured');
             }
+            // Build QR link to validator using applicant number
+            $qr_text = $applicant_number;
+            $validator_url = (isset($_SERVER['HTTP_HOST']) ? ('http://' . $_SERVER['HTTP_HOST']) : 'http://localhost') . dirname($_SERVER['PHP_SELF']) . '/validate_exam_permit.php?qr_text=' . urlencode($qr_text);
+            $qr_download_link = 'https://chart.googleapis.com/chart?chs=300x300&cht=qr&chl=' . urlencode($validator_url);
+
+            // Prepare extended placeholders
             $email_body = str_replace(
-                ['{{applicant_number}}','{{exam_date}}','{{exam_time}}','{{exam_venue}}'],
-                [$applicant_number, $exam_date, $exam_time, $exam_venue],
+                [
+                    '{{registered_fullname}}',
+                    '{{academic_year}}',
+                    '{{applicant_type}}',
+                    '{{applicant_number}}',
+                    '{{room_number}}',
+                    '{{floor}}',
+                    '{{exam_date}}',
+                    '{{start_date}}',
+                    '{{exam_time}}',
+                    '{{start_time}}',
+                    '{{exam_venue}}',
+                    '{{qr_download_link}}'
+                ],
+                [
+                    $applicant_name,
+                    $academic_year,
+                    $applicant_type,
+                    $applicant_number,
+                    $room_no,
+                    $floor,
+                    $exam_date,
+                    $exam_date,
+                    $exam_time,
+                    $exam_time,
+                    $exam_venue,
+                    $qr_download_link
+                ],
                 $EXAM_PERMIT_TEMPLATE
             );
             if ($permit_download_url !== '') {
@@ -255,11 +314,12 @@ foreach ($user_ids as $uid) {
                 // Snapshot update
                 try {
                     $sent_at = date('Y-m-d H:i:s');
-                    $stmtUpd = $conn->prepare("UPDATE application_permit SET email_status='sent', email_subject=?, email_body=?, email_sent_at=? WHERE id = ?");
-                    $stmtUpd->bind_param('sssi', $EXAM_PERMIT_SUBJECT, $email_body, $sent_at, $permit_id);
+                    $stmtUpd = $conn->prepare("UPDATE application_permit SET email_status='sent', email_subject=?, email_body=?, email_sent_at=?, qr_text = COALESCE(NULLIF(?, ''), qr_text) WHERE id = ?");
+                    $stmtUpd->bind_param('ssssi', $EXAM_PERMIT_SUBJECT, $email_body, $sent_at, $qr_text, $permit_id);
                     $stmtUpd->execute();
                     $stmtUpd->close();
-                } catch (Throwable $e2) { /* ignore */ }
+                } catch (Throwable $e2) { /* ignore */
+                }
             }
         } else {
             $mode = 'created';
@@ -300,7 +360,7 @@ foreach ($user_ids as $uid) {
                 $ch = curl_init($generator_url);
                 curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
                 curl_setopt($ch, CURLOPT_POST, true);
-                curl_setopt($ch, CURLOPT_HTTPHEADER, ['Content-Type: application/json','Accept: application/json']);
+                curl_setopt($ch, CURLOPT_HTTPHEADER, ['Content-Type: application/json', 'Accept: application/json']);
                 curl_setopt($ch, CURLOPT_POSTFIELDS, json_encode($payload));
                 curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
                 curl_setopt($ch, CURLOPT_SSL_VERIFYHOST, 0);
@@ -315,12 +375,44 @@ foreach ($user_ids as $uid) {
                 curl_close($ch);
                 $log = date('Y-m-d H:i:s') . " BULK CREATE generator payload=" . json_encode($payload) . "\nRESP=" . (is_string($resp) ? $resp : 'null') . "\nURL=" . $permit_download_url . "\n";
                 @file_put_contents(__DIR__ . '/log.txt', $log, FILE_APPEND);
-            } catch (Throwable $e) { /* proceed without link */ }
+            } catch (Throwable $e) { /* proceed without link */
+            }
 
-            // Prepare email body and send
+            // Build QR link to validator using applicant number
+            $qr_text = $applicant_number;
+            $validator_url = (isset($_SERVER['HTTP_HOST']) ? ('http://' . $_SERVER['HTTP_HOST']) : 'http://localhost') . dirname($_SERVER['PHP_SELF']) . '/validate_exam_permit.php?qr_text=' . urlencode($qr_text);
+            $qr_download_link = 'https://chart.googleapis.com/chart?chs=300x300&cht=qr&chl=' . urlencode($validator_url);
+
+            // Prepare email body and send with extended placeholders
             $email_body = str_replace(
-                ['{{applicant_number}}','{{exam_date}}','{{exam_time}}','{{exam_venue}}'],
-                [$applicant_number, $exam_date, $exam_time, $exam_venue],
+                [
+                    '{{registered_fullname}}',
+                    '{{academic_year}}',
+                    '{{applicant_type}}',
+                    '{{applicant_number}}',
+                    '{{room_number}}',
+                    '{{floor}}',
+                    '{{exam_date}}',
+                    '{{start_date}}',
+                    '{{exam_time}}',
+                    '{{start_time}}',
+                    '{{exam_venue}}',
+                    '{{qr_download_link}}'
+                ],
+                [
+                    $applicant_name,
+                    $academic_year,
+                    $applicant_type,
+                    $applicant_number,
+                    $room_no,
+                    $floor,
+                    $exam_date,
+                    $exam_date,
+                    $exam_time,
+                    $exam_time,
+                    $exam_venue,
+                    $qr_download_link
+                ],
                 $EXAM_PERMIT_TEMPLATE
             );
             if ($permit_download_url !== '') {
@@ -334,11 +426,11 @@ foreach ($user_ids as $uid) {
 
             // Persist extended fields snapshot
             try {
-                $stmtUpd = $conn->prepare("UPDATE application_permit SET admission_officer=?, applicant_name=?, exam_date=?, exam_time=?, room_no=?, exam_venue=?, application_period_start=?, application_period_end=?, application_period_text=?, accent_color=?, download_url=?, email_subject=?, email_body=?, email_status=?, email_sent_at=? WHERE id = ?");
+                $stmtUpd = $conn->prepare("UPDATE application_permit SET admission_officer=?, applicant_name=?, exam_date=?, exam_time=?, room_no=?, exam_venue=?, application_period_start=?, application_period_end=?, application_period_text=?, accent_color=?, download_url=?, email_subject=?, email_body=?, email_status=?, email_sent_at=?, qr_text=? WHERE id = ?");
                 $email_status = $emailed ? 'sent' : 'queued';
                 $sent_at = $emailed ? date('Y-m-d H:i:s') : null;
                 $stmtUpd->bind_param(
-                    'sssssssssssssssi',
+                    'sssssssssssssssssi',
                     $admission_officer,
                     $applicant_name,
                     $exam_date,
@@ -354,11 +446,13 @@ foreach ($user_ids as $uid) {
                     $email_body,
                     $email_status,
                     $sent_at,
+                    $qr_text,
                     $permit_id
                 );
                 $stmtUpd->execute();
                 $stmtUpd->close();
-            } catch (Throwable $e3) { /* ignore */ }
+            } catch (Throwable $e3) { /* ignore */
+            }
         }
 
         // Log per user result
@@ -369,7 +463,7 @@ foreach ($user_ids as $uid) {
         ]);
     } catch (Throwable $ex) {
         $error = $ex->getMessage();
-        sso_log_email_event('bulk_error', [ 'user_id' => $uid, 'error' => $error ]);
+        sso_log_email_event('bulk_error', ['user_id' => $uid, 'error' => $error]);
     }
 
     if ($error === null && $emailed) {
@@ -400,4 +494,3 @@ echo json_encode([
     'details' => $details,
 ]);
 exit;
-?>

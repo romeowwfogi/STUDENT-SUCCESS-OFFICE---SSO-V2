@@ -26,19 +26,27 @@ if ($serviceId) {
     } elseif ($colChkFieldId && $colChkFieldId->num_rows > 0 && $colChkValue && $colChkValue->num_rows > 0) {
         $condMode = 'value';
     }
-    if ($colChkFieldId) { $colChkFieldId->close(); }
-    if ($colChkValue) { $colChkValue->close(); }
-    if ($colChkOptId) { $colChkOptId->close(); }
+    if ($colChkFieldId) {
+        $colChkFieldId->close();
+    }
+    if ($colChkValue) {
+        $colChkValue->close();
+    }
+    if ($colChkOptId) {
+        $colChkOptId->close();
+    }
 
     // Detect optional max_file_size_mb column
     $colChkMax = $conn->query("SHOW COLUMNS FROM services_fields LIKE 'max_file_size_mb'");
     $hasMaxCol = ($colChkMax && $colChkMax->num_rows > 0);
-    if ($colChkMax) { $colChkMax->close(); }
+    if ($colChkMax) {
+        $colChkMax->close();
+    }
 
     $sql = "SELECT field_id, label, field_type, is_required, display_order, allowed_file_types" .
-           ($hasMaxCol ? ", max_file_size_mb" : "") .
-           ($condMode === 'value' ? ", visible_when_field_id, visible_when_value" : ($condMode === 'option_id' ? ", visible_when_option_id" : "")) .
-           " FROM services_fields WHERE service_id = ? ORDER BY display_order ASC, field_id ASC";
+        ($hasMaxCol ? ", max_file_size_mb" : "") .
+        ($condMode === 'value' ? ", visible_when_field_id, visible_when_value" : ($condMode === 'option_id' ? ", visible_when_option_id" : "")) .
+        " FROM services_fields WHERE service_id = ? ORDER BY display_order ASC, field_id ASC";
     $stmt = $conn->prepare($sql);
     $stmt->bind_param('i', $serviceId);
     if ($stmt->execute()) {
@@ -114,29 +122,29 @@ if ($serviceId) {
                             <?php if (!empty($serviceFields)): ?>
                                 <?php foreach ($serviceFields as $field): ?>
                                     <?php
-                                        // Compute conditional values for UI regardless of schema
-                                        $visibleWhenFieldIdUi = '';
-                                        $visibleWhenValueUi = '';
-                                        if (array_key_exists('visible_when_field_id', $field) || array_key_exists('visible_when_value', $field)) {
-                                            $visibleWhenFieldIdUi = (string)($field['visible_when_field_id'] ?? '');
-                                            $visibleWhenValueUi = (string)($field['visible_when_value'] ?? '');
-                                        } elseif (array_key_exists('visible_when_option_id', $field)) {
-                                            $optId = $field['visible_when_option_id'] ?? null;
-                                            if ($optId !== null) {
-                                                $stmtOpt = $conn->prepare('SELECT field_id, option_value FROM services_field_options WHERE option_id = ?');
-                                                $stmtOpt->bind_param('i', $optId);
-                                                if ($stmtOpt->execute()) {
-                                                    $resOpt = $stmtOpt->get_result();
-                                                    if ($resOpt && $resOpt->num_rows > 0) {
-                                                        $rowOpt = $resOpt->fetch_assoc();
-                                                        $visibleWhenFieldIdUi = (string)($rowOpt['field_id'] ?? '');
-                                                        $visibleWhenValueUi = (string)($rowOpt['option_value'] ?? '');
-                                                    }
-                                                    $resOpt->close();
+                                    // Compute conditional values for UI regardless of schema
+                                    $visibleWhenFieldIdUi = '';
+                                    $visibleWhenValueUi = '';
+                                    if (array_key_exists('visible_when_field_id', $field) || array_key_exists('visible_when_value', $field)) {
+                                        $visibleWhenFieldIdUi = (string)($field['visible_when_field_id'] ?? '');
+                                        $visibleWhenValueUi = (string)($field['visible_when_value'] ?? '');
+                                    } elseif (array_key_exists('visible_when_option_id', $field)) {
+                                        $optId = $field['visible_when_option_id'] ?? null;
+                                        if ($optId !== null) {
+                                            $stmtOpt = $conn->prepare('SELECT field_id, option_value FROM services_field_options WHERE option_id = ?');
+                                            $stmtOpt->bind_param('i', $optId);
+                                            if ($stmtOpt->execute()) {
+                                                $resOpt = $stmtOpt->get_result();
+                                                if ($resOpt && $resOpt->num_rows > 0) {
+                                                    $rowOpt = $resOpt->fetch_assoc();
+                                                    $visibleWhenFieldIdUi = (string)($rowOpt['field_id'] ?? '');
+                                                    $visibleWhenValueUi = (string)($rowOpt['option_value'] ?? '');
                                                 }
-                                                $stmtOpt->close();
+                                                $resOpt->close();
                                             }
+                                            $stmtOpt->close();
                                         }
+                                    }
                                     ?>
                                     <tr data-field-id="<?php echo (int)$field['field_id']; ?>">
                                         <td><?php echo (int)$field['display_order']; ?></td>
@@ -263,7 +271,8 @@ if ($serviceId) {
                             <option value="">None</option>
                             <?php if (!empty($serviceFields)): ?>
                                 <?php foreach ($serviceFields as $f): ?>
-                                    <?php $ft = strtolower($f['field_type']); if (in_array($ft, ['select','checkbox','radio'], true)): ?>
+                                    <?php $ft = strtolower($f['field_type']);
+                                    if (in_array($ft, ['select', 'checkbox', 'radio'], true)): ?>
                                         <option value="<?php echo (int)$f['field_id']; ?>"><?php echo htmlspecialchars($f['label']); ?></option>
                                     <?php endif; ?>
                                 <?php endforeach; ?>
@@ -361,7 +370,8 @@ if ($serviceId) {
                             <option value="">None</option>
                             <?php if (!empty($serviceFields)): ?>
                                 <?php foreach ($serviceFields as $f): ?>
-                                    <?php $ft = strtolower($f['field_type']); if (in_array($ft, ['select','checkbox','radio'], true)): ?>
+                                    <?php $ft = strtolower($f['field_type']);
+                                    if (in_array($ft, ['select', 'checkbox', 'radio'], true)): ?>
                                         <option value="<?php echo (int)$f['field_id']; ?>"><?php echo htmlspecialchars($f['label']); ?></option>
                                     <?php endif; ?>
                                 <?php endforeach; ?>
@@ -460,8 +470,8 @@ if ($serviceId) {
     </div>
 
     <!-- Confirmation Modal (styled like other pages) -->
-    <div id="confirmationModal" style="display: none; position: fixed; left: 0; top: 0; width: 100%; height: 100%; background-color: rgba(0,0,0,0.4); z-index: 1002; align-items: center; justify-content: center; backdrop-filter: blur(4px);">
-        <div role="dialog" aria-modal="true" style="background: var(--color-card); border-radius: 20px; max-width: 400px; width: 92%; margin: auto; border: 1px solid var(--color-border); color: var(--color-text); box-shadow: 0 20px 60px rgba(0,0,0,0.1); padding: 24px 24px 20px 24px;">
+    <div id="confirmationModal" style="display: none; position: fixed; left: 0; top: 0; width: 100%; height: 100%; background-color: rgba(0,0,0,0.4); z-index: 1002; align-items: center; justify-content: center; backdrop-filter: blur(4px); overflow-y: auto; padding: 16px;">
+        <div role="dialog" aria-modal="true" style="background: var(--color-card); border-radius: 20px; max-width: 400px; width: 92%; margin: auto; border: 1px solid var(--color-border); color: var(--color-text); box-shadow: 0 20px 60px rgba(0,0,0,0.1); padding: 24px 24px 20px 24px; max-height: 85vh; overflow-y: auto;">
             <div style="text-align: center; margin-bottom: 16px;">
                 <div style="width: 56px; height: 56px; background: linear-gradient(135deg, #18a558 0%, #136515 100%); border-radius: 16px; margin: 0 auto 16px auto; display: flex; align-items: center; justify-content: center; color: white;">
                     <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
@@ -519,6 +529,43 @@ if ($serviceId) {
         const editVisibleWhenValueGroup = document.getElementById('editVisibleWhenValueGroup');
         const editVisibleWhenValueInput = document.getElementById('editVisibleWhenValue');
 
+        // --- Helpers: keep controller dropdowns in sync with field changes ---
+        function ensureControllerOption(selectEl, fieldId, label) {
+            if (!selectEl) return;
+            const idStr = String(fieldId);
+            let opt = Array.from(selectEl.options).find(o => String(o.value) === idStr);
+            if (!opt) {
+                opt = document.createElement('option');
+                opt.value = idStr;
+                opt.textContent = label;
+                selectEl.appendChild(opt);
+            } else {
+                opt.textContent = label;
+            }
+        }
+
+        function removeControllerOption(selectEl, fieldId) {
+            if (!selectEl) return;
+            const idStr = String(fieldId);
+            const idx = Array.from(selectEl.options).findIndex(o => String(o.value) === idStr);
+            if (idx >= 0) {
+                // If currently selected, clear selection and hide trigger input
+                const wasSelected = selectEl.selectedIndex === idx;
+                selectEl.remove(idx);
+                if (wasSelected) {
+                    selectEl.value = '';
+                    if (selectEl === visibleWhenFieldIdSelect && visibleWhenValueGroup) {
+                        visibleWhenValueGroup.style.display = 'none';
+                        if (visibleWhenValueInput) visibleWhenValueInput.value = '';
+                    }
+                    if (selectEl === editVisibleWhenFieldIdSelect && editVisibleWhenValueGroup) {
+                        editVisibleWhenValueGroup.style.display = 'none';
+                        if (editVisibleWhenValueInput) editVisibleWhenValueInput.value = '';
+                    }
+                }
+            }
+        }
+
         function appendServiceFieldRow(fieldId, label, fieldType, isRequired, displayOrder, allowedFileTypes, maxFileSizeMb, visibleWhenFieldId, visibleWhenValue) {
             const tbody = document.querySelector('#serviceFieldsTable tbody');
             if (!tbody) return;
@@ -539,6 +586,12 @@ if ($serviceId) {
                 </td>
             `;
             tbody.appendChild(tr);
+
+            // If this field can act as a controller, add it to both dropdowns
+            if (optionTypes.includes(fieldType)) {
+                ensureControllerOption(visibleWhenFieldIdSelect, fieldId, label);
+                ensureControllerOption(editVisibleWhenFieldIdSelect, fieldId, label);
+            }
         }
 
         function updateServiceFieldRow(fieldId, label, fieldType, isRequired, displayOrder, allowedFileTypes, maxFileSizeMb, visibleWhenFieldId, visibleWhenValue) {
@@ -559,6 +612,15 @@ if ($serviceId) {
                         ${optionTypes.includes(fieldType) ? `<button type=\"button\" class=\"table__btn table__btn--view\" title=\"Manage Options\" onclick=\"openOptionsModal(${fieldId}, ${currentServiceId}, '${escapeHtml(label)}')\">Manage Options</button>` : ''}
                     </div>
                 `;
+            }
+
+            // Keep controller dropdowns updated
+            if (optionTypes.includes(fieldType)) {
+                ensureControllerOption(visibleWhenFieldIdSelect, fieldId, label);
+                ensureControllerOption(editVisibleWhenFieldIdSelect, fieldId, label);
+            } else {
+                removeControllerOption(visibleWhenFieldIdSelect, fieldId);
+                removeControllerOption(editVisibleWhenFieldIdSelect, fieldId);
             }
         }
 
@@ -706,7 +768,9 @@ if ($serviceId) {
                         const txt = await res.text();
                         const friendly = toHumanHttpStatus(res.status);
                         showAddFieldMessage('error', friendly);
-                        try { showErrorModal('Couldn’t Add Field', friendly, txt); } catch (e) {}
+                        try {
+                            showErrorModal('Couldn’t Add Field', friendly, txt);
+                        } catch (e) {}
                         return;
                     }
                     let data;
@@ -716,7 +780,9 @@ if ($serviceId) {
                         const txt = await res.text().catch(() => '');
                         const friendly = 'We couldn’t read the server response. Please try again.';
                         showAddFieldMessage('error', friendly);
-                        try { showErrorModal('Couldn’t Add Field', friendly, txt || ''); } catch (e) {}
+                        try {
+                            showErrorModal('Couldn’t Add Field', friendly, txt || '');
+                        } catch (e) {}
                         return;
                     }
                     if (data.ok) {
@@ -745,13 +811,17 @@ if ($serviceId) {
                         closeConfirmationModal();
                         const friendly = toHumanMessage(data.error || '');
                         showAddFieldMessage('error', friendly);
-                        try { showErrorModal('Couldn’t Add Field', friendly, data.error || ''); } catch (e) {}
+                        try {
+                            showErrorModal('Couldn’t Add Field', friendly, data.error || '');
+                        } catch (e) {}
                     }
                 } catch (e) {
                     closeConfirmationModal();
                     const friendly = 'We couldn’t connect to the server. Please check your network and try again.';
                     showAddFieldMessage('error', friendly);
-                    try { showErrorModal('Couldn’t Add Field', friendly, String(e?.message || e)); } catch (err) {}
+                    try {
+                        showErrorModal('Couldn’t Add Field', friendly, String(e?.message || e));
+                    } catch (err) {}
                 } finally {
                     hideLoader();
                 }
@@ -892,7 +962,9 @@ if ($serviceId) {
                         const txt = await res.text();
                         const friendly = toHumanHttpStatus(res.status);
                         showEditFieldMessage('error', friendly);
-                        try { showErrorModal('Couldn’t Update Field', friendly, txt); } catch (e) {}
+                        try {
+                            showErrorModal('Couldn’t Update Field', friendly, txt);
+                        } catch (e) {}
                         return;
                     }
                     let data;
@@ -902,7 +974,9 @@ if ($serviceId) {
                         const txt = await res.text().catch(() => '');
                         const friendly = 'We couldn’t read the server response. Please try again.';
                         showEditFieldMessage('error', friendly);
-                        try { showErrorModal('Couldn’t Update Field', friendly, txt || ''); } catch (e) {}
+                        try {
+                            showErrorModal('Couldn’t Update Field', friendly, txt || '');
+                        } catch (e) {}
                         return;
                     }
                     if (data.ok) {
@@ -929,13 +1003,17 @@ if ($serviceId) {
                         closeConfirmationModal();
                         const friendly = toHumanMessage(data.error || '');
                         showEditFieldMessage('error', friendly);
-                        try { showErrorModal('Couldn’t Update Field', friendly, data.error || ''); } catch (e) {}
+                        try {
+                            showErrorModal('Couldn’t Update Field', friendly, data.error || '');
+                        } catch (e) {}
                     }
                 } catch (e) {
                     closeConfirmationModal();
                     const friendly = 'We couldn’t connect to the server. Please check your network and try again.';
                     showEditFieldMessage('error', friendly);
-                    try { showErrorModal('Couldn’t Update Field', friendly, String(e?.message || e)); } catch (err) {}
+                    try {
+                        showErrorModal('Couldn’t Update Field', friendly, String(e?.message || e));
+                    } catch (err) {}
                 } finally {
                     hideLoader();
                 }
@@ -1159,15 +1237,24 @@ if ($serviceId) {
 
         function toHumanHttpStatus(status) {
             switch (Number(status) || 0) {
-                case 400: return 'The request wasn’t valid. Please double-check the form and try again.';
-                case 401: return 'You’re not signed in. Please log in and try again.';
-                case 403: return 'You don’t have permission to do this.';
-                case 404: return 'We couldn’t reach the service. Try reloading the page.';
-                case 409: return 'There’s a conflict with existing data. Try changing the inputs.';
-                case 422: return 'Some inputs are invalid. Please review the form and try again.';
-                case 500: return 'The server had a problem. Please try again.';
-                case 503: return 'The service is temporarily unavailable. Please try again shortly.';
-                default: return 'We couldn’t complete the request. Please try again.';
+                case 400:
+                    return 'The request wasn’t valid. Please double-check the form and try again.';
+                case 401:
+                    return 'You’re not signed in. Please log in and try again.';
+                case 403:
+                    return 'You don’t have permission to do this.';
+                case 404:
+                    return 'We couldn’t reach the service. Try reloading the page.';
+                case 409:
+                    return 'There’s a conflict with existing data. Try changing the inputs.';
+                case 422:
+                    return 'Some inputs are invalid. Please review the form and try again.';
+                case 500:
+                    return 'The server had a problem. Please try again.';
+                case 503:
+                    return 'The service is temporarily unavailable. Please try again shortly.';
+                default:
+                    return 'We couldn’t complete the request. Please try again.';
             }
         }
 

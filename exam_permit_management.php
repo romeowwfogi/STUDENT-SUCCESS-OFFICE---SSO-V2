@@ -6,7 +6,7 @@ require_once 'connection/db_connect.php';
 // Fetch submissions with applicant name, cycle, and exam permit status
 // If application_permit not found => "Exam Permit NOT Sent"
 // If found => use application_permit.status (enum: 'pending','used')
-$sql = "SELECT\n  s.user_id,\n  s.submitted_at,\n  TRIM(CONCAT_WS(' ',\n    uf.first_name,\n    NULLIF(uf.middle_name, ''),\n    uf.last_name,\n    NULLIF(uf.suffix, '')\n  )) AS applicant_name,\n  c.cycle_name AS admission_cycle_name,\n  CASE WHEN ap.id IS NULL THEN 'Exam Permit NOT Sent' ELSE ap.status END AS status,\n  CASE WHEN ap.id IS NULL THEN 0 ELSE 1 END AS has_permit\nFROM submissions s\nLEFT JOIN user_fullname uf\n  ON uf.user_id = s.user_id\nLEFT JOIN applicant_types at\n  ON at.id = s.applicant_type_id\nLEFT JOIN admission_cycles c\n  ON c.id = at.admission_cycle_id\nLEFT JOIN application_permit ap\n  ON ap.id = (SELECT MAX(ap2.id) FROM application_permit ap2 WHERE ap2.user_id = s.user_id)\nORDER BY s.submitted_at DESC";
+$sql = "SELECT\n  s.user_id,\n  s.submitted_at,\n  TRIM(CONCAT_WS(' ',\n    uf.first_name,\n    NULLIF(uf.middle_name, ''),\n    uf.last_name,\n    NULLIF(uf.suffix, '')\n  )) AS applicant_name,\n  CASE\n    WHEN c.academic_year_start IS NOT NULL AND c.academic_year_end IS NOT NULL THEN CONCAT('Academic Year ', c.academic_year_start, '-', c.academic_year_end)\n    ELSE CONCAT(DATE_FORMAT(c.admission_date_time_start, '%b %d, %Y'), ' – ', DATE_FORMAT(c.admission_date_time_end, '%b %d, %Y'))\n  END AS admission_cycle_name,\n  CASE WHEN ap.id IS NULL THEN 'Exam Permit NOT Sent' ELSE ap.status END AS status,\n  CASE WHEN ap.id IS NULL THEN 0 ELSE 1 END AS has_permit\nFROM submissions s\nLEFT JOIN user_fullname uf\n  ON uf.user_id = s.user_id\nLEFT JOIN applicant_types at\n  ON at.id = s.applicant_type_id\nLEFT JOIN admission_cycles c\n  ON c.id = at.admission_cycle_id\nLEFT JOIN application_permit ap\n  ON ap.id = (SELECT MAX(ap2.id) FROM application_permit ap2 WHERE ap2.user_id = s.user_id)\nORDER BY s.submitted_at DESC";
 $result_rows = [];
 if ($res = $conn->query($sql)) {
     while ($row = $res->fetch_assoc()) {
@@ -71,12 +71,12 @@ function statusBadgeClass($status)
                     <p class="header__subtitle"></p>
                 </div>
                 <div class="header__actions">
-                    <button class="btn btn--primary">
+                    <!-- <button class="btn btn--primary">
                         <svg class="icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
                         </svg>
                         Generate Exam Permit
-                    </button>
+                    </button> -->
                 </div>
             </header>
 

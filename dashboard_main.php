@@ -5,12 +5,32 @@ require_once 'connection/db_connect.php';
 
 // Get filter parameters
 $selected_cycle_id = isset($_GET['cycle_id']) ? (int)$_GET['cycle_id'] : null;
+// Time aggregation granularity for charts: day, week, month, year
+$selected_granularity = isset($_GET['granularity']) ? strtolower(trim($_GET['granularity'])) : 'month';
+$allowed_granularities = ['day', 'week', 'month', 'year'];
+if (!in_array($selected_granularity, $allowed_granularities, true)) {
+    $selected_granularity = 'month';
+}
 
 // Fetch all admission cycles for dropdown
-$cycles_sql = "SELECT id, cycle_name FROM admission_cycles WHERE is_archived = 0 ORDER BY cycle_name DESC";
+// Note: 'admission_cycles' table does not have a 'cycle_name' column; derive display name.
+$cycles_sql = "SELECT id, admission_date_time_start, admission_date_time_end, academic_year_start, academic_year_end FROM admission_cycles WHERE is_archived = 0 ORDER BY academic_year_end DESC, admission_date_time_end DESC";
 $cycles_result = $conn->query($cycles_sql);
 $cycles = [];
 while ($cycle = $cycles_result->fetch_assoc()) {
+    $ayStart = $cycle['academic_year_start'] ?? null;
+    $ayEnd = $cycle['academic_year_end'] ?? null;
+    $startDt = $cycle['admission_date_time_start'] ?? null;
+    $endDt = $cycle['admission_date_time_end'] ?? null;
+
+    if ($ayStart && $ayEnd) {
+        $cycle['cycle_name'] = "Academic Year {$ayStart}-{$ayEnd}";
+    } elseif ($startDt && $endDt) {
+        $cycle['cycle_name'] = date('M d, Y H:i', strtotime($startDt)) . ' – ' . date('M d, Y H:i', strtotime($endDt));
+    } else {
+        $cycle['cycle_name'] = 'Cycle ' . $cycle['id'];
+    }
+
     $cycles[] = $cycle;
 }
 
@@ -25,8 +45,7 @@ while ($status = $statuses_result->fetch_assoc()) {
 // Build the main query for application statistics
 $stats_sql = "SELECT 
     s.status,
-    COUNT(*) as count,
-    ac.cycle_name
+    COUNT(*) as count
 FROM submissions s
 LEFT JOIN applicant_types at ON s.applicant_type_id = at.id
 LEFT JOIN admission_cycles ac ON at.admission_cycle_id = ac.id
@@ -70,7 +89,7 @@ foreach ($statuses as $status) {
 }
 
 // Get selected cycle name for display
-$selected_cycle_name = 'All Cycles';
+$selected_cycle_name = 'All Academic Year';
 if ($selected_cycle_id) {
     foreach ($cycles as $cycle) {
         if ($cycle['id'] == $selected_cycle_id) {
@@ -80,16 +99,61 @@ if ($selected_cycle_id) {
     }
 }
 
-// Fetch monthly application data for chart
+// Fetch application data for chart based on selected granularity
+switch ($selected_granularity) {
+    case 'day':
+        $bucket_expr = "DATE(s.submitted_at)"; // e.g., 2025-11-10
+        $bucket_alias = 'bucket';
+        $window_clause = "s.submitted_at >= DATE_SUB(CURDATE(), INTERVAL 30 DAY)";
+        $x_axis_label = 'Day';
+        $period_desc = 'Past 30 days';
+        $bucket_to_readable = function ($bucket) {
+            return date('M d, Y', strtotime($bucket));
+        };
+        break;
+    case 'week':
+        // ISO year-week label like 2025-W45
+        $bucket_expr = "CONCAT(DATE_FORMAT(s.submitted_at, '%x'), '-W', DATE_FORMAT(s.submitted_at, '%v'))";
+        $bucket_alias = 'bucket';
+        $window_clause = "s.submitted_at >= DATE_SUB(CURDATE(), INTERVAL 12 WEEK)";
+        $x_axis_label = 'Week';
+        $period_desc = 'Past 12 weeks';
+        $bucket_to_readable = function ($bucket) {
+            return $bucket;
+        };
+        break;
+    case 'year':
+        $bucket_expr = "YEAR(s.submitted_at)"; // e.g., 2025
+        $bucket_alias = 'bucket';
+        $window_clause = "s.submitted_at >= DATE_SUB(CURDATE(), INTERVAL 5 YEAR)";
+        $x_axis_label = 'Year';
+        $period_desc = 'Past 5 years';
+        $bucket_to_readable = function ($bucket) {
+            return (string)$bucket;
+        };
+        break;
+    case 'month':
+    default:
+        $bucket_expr = "DATE_FORMAT(s.submitted_at, '%Y-%m')"; // e.g., 2025-11
+        $bucket_alias = 'bucket';
+        $window_clause = "s.submitted_at >= DATE_SUB(NOW(), INTERVAL 12 MONTH)";
+        $x_axis_label = 'Month';
+        $period_desc = 'Past 12 months';
+        $bucket_to_readable = function ($bucket) {
+            return date('M Y', strtotime($bucket . '-01'));
+        };
+        break;
+}
+
 $chart_sql = "SELECT 
-    DATE_FORMAT(s.submitted_at, '%Y-%m') as month,
+    $bucket_expr AS $bucket_alias,
     s.status,
     COUNT(*) as count
 FROM submissions s
 LEFT JOIN applicant_types at ON s.applicant_type_id = at.id
 LEFT JOIN admission_cycles ac ON at.admission_cycle_id = ac.id
 WHERE ac.is_archived = 0 
-    AND s.submitted_at >= DATE_SUB(NOW(), INTERVAL 12 MONTH)";
+    AND $window_clause";
 
 $chart_params = [];
 $chart_types = "";
@@ -101,8 +165,8 @@ if ($selected_cycle_id) {
     $chart_types .= "i";
 }
 
-$chart_sql .= " GROUP BY DATE_FORMAT(s.submitted_at, '%Y-%m'), s.status 
-                ORDER BY month ASC, s.status";
+$chart_sql .= " GROUP BY $bucket_expr, s.status 
+                ORDER BY $bucket_alias ASC, s.status";
 
 // Execute chart query
 $chart_stmt = $conn->prepare($chart_sql);
@@ -116,7 +180,7 @@ $chart_result = $chart_stmt->get_result();
 $chart_data = [];
 $months = [];
 while ($row = $chart_result->fetch_assoc()) {
-    $month = $row['month'];
+    $month = $row['bucket'];
     $status = $row['status'];
     $count = $row['count'];
 
@@ -141,10 +205,10 @@ foreach ($chart_data as $status => $data) {
     ksort($chart_data[$status]);
 }
 
-// Convert months to readable format
+// Convert buckets to readable labels
 $readable_months = [];
 foreach ($months as $month) {
-    $readable_months[] = date('M Y', strtotime($month . '-01'));
+    $readable_months[] = $bucket_to_readable($month);
 }
 
 // ==================== SERVICES DATA (LIST + STATUS COUNTS) ====================
@@ -177,23 +241,67 @@ foreach ($service_statuses as $status_name) {
     }
 }
 
-// ==================== SERVICE REQUEST TRENDS (past 12 months) ====================
+// ==================== SERVICE REQUEST TRENDS ====================
+switch ($selected_granularity) {
+    case 'day':
+        $svc_bucket_expr = "DATE(sr.requested_at)";
+        $svc_bucket_alias = 'bucket';
+        $svc_window_clause = "sr.requested_at >= DATE_SUB(CURDATE(), INTERVAL 30 DAY)";
+        $svc_x_axis_label = 'Day';
+        $svc_period_desc = 'Past 30 days';
+        $svc_bucket_to_readable = function ($bucket) {
+            return date('M d, Y', strtotime($bucket));
+        };
+        break;
+    case 'week':
+        $svc_bucket_expr = "CONCAT(DATE_FORMAT(sr.requested_at, '%x'), '-W', DATE_FORMAT(sr.requested_at, '%v'))";
+        $svc_bucket_alias = 'bucket';
+        $svc_window_clause = "sr.requested_at >= DATE_SUB(CURDATE(), INTERVAL 12 WEEK)";
+        $svc_x_axis_label = 'Week';
+        $svc_period_desc = 'Past 12 weeks';
+        $svc_bucket_to_readable = function ($bucket) {
+            return $bucket;
+        };
+        break;
+    case 'year':
+        $svc_bucket_expr = "YEAR(sr.requested_at)";
+        $svc_bucket_alias = 'bucket';
+        $svc_window_clause = "sr.requested_at >= DATE_SUB(CURDATE(), INTERVAL 5 YEAR)";
+        $svc_x_axis_label = 'Year';
+        $svc_period_desc = 'Past 5 years';
+        $svc_bucket_to_readable = function ($bucket) {
+            return (string)$bucket;
+        };
+        break;
+    case 'month':
+    default:
+        $svc_bucket_expr = "DATE_FORMAT(sr.requested_at, '%Y-%m')";
+        $svc_bucket_alias = 'bucket';
+        $svc_window_clause = "sr.requested_at >= DATE_SUB(NOW(), INTERVAL 12 MONTH)";
+        $svc_x_axis_label = 'Month';
+        $svc_period_desc = 'Past 12 months';
+        $svc_bucket_to_readable = function ($bucket) {
+            return date('M Y', strtotime($bucket . '-01'));
+        };
+        break;
+}
+
 $svc_chart_sql = "SELECT 
-    DATE_FORMAT(sr.requested_at, '%Y-%m') AS month,
+    $svc_bucket_expr AS $svc_bucket_alias,
     srs.status_name AS status_name,
     COUNT(*) AS count
 FROM services_requests sr
 JOIN services_request_statuses srs ON sr.status_id = srs.status_id
-WHERE sr.requested_at >= DATE_SUB(NOW(), INTERVAL 12 MONTH)
-GROUP BY DATE_FORMAT(sr.requested_at, '%Y-%m'), srs.status_id
-ORDER BY month ASC, srs.status_id";
+WHERE $svc_window_clause
+GROUP BY $svc_bucket_expr, srs.status_id
+ORDER BY $svc_bucket_alias ASC, srs.status_id";
 
 $svc_chart_result = $conn->query($svc_chart_sql);
 $svc_chart_data = [];
 $svc_months = [];
 if ($svc_chart_result) {
     while ($row = $svc_chart_result->fetch_assoc()) {
-        $month = $row['month'];
+        $month = $row['bucket'];
         $statusName = $row['status_name'];
         $count = (int)$row['count'];
 
@@ -219,10 +327,10 @@ foreach ($svc_chart_data as $statusName => $data) {
     ksort($svc_chart_data[$statusName]);
 }
 
-// Convert months to readable format for service chart
+// Convert buckets to readable format for service chart
 $svc_readable_months = [];
 foreach ($svc_months as $month) {
-    $svc_readable_months[] = date('M Y', strtotime($month . '-01'));
+    $svc_readable_months[] = $svc_bucket_to_readable($month);
 }
 ?>
 
@@ -238,6 +346,7 @@ foreach ($svc_months as $month) {
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="dashboard.css">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.9.1/chart.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
     <style>
         .filters-container {
             background: var(--color-card);
@@ -366,12 +475,12 @@ foreach ($svc_months as $month) {
 
             <section class="section active" id="main_content_section">
                 <!-- Filters Section -->
-                <div class="filters-container">
-                    <form method="GET" action="" style="display: flex; gap: 20px; align-items: end; flex-wrap: wrap; width: 100%;">
+                <div class="filters-container" style="display: flex; align-items: end; gap: 16px; flex-wrap: nowrap; width: 100%; justify-content: space-between;">
+                    <form method="GET" action="" style="display: flex; gap: 16px; align-items: end; flex-wrap: nowrap; width: 100%; flex: 1 1 auto;">
                         <div class="filter-group">
                             <label for="cycle_id">Admission Cycle:</label>
                             <select name="cycle_id" id="cycle_id">
-                                <option value="">All Cycles</option>
+                                <option value="">All Academic Year</option>
                                 <?php foreach ($cycles as $cycle): ?>
                                     <option value="<?php echo $cycle['id']; ?>"
                                         <?php echo ($selected_cycle_id == $cycle['id']) ? 'selected' : ''; ?>>
@@ -381,10 +490,28 @@ foreach ($svc_months as $month) {
                             </select>
                         </div>
 
+                        <div class="filter-group">
+                            <label for="granularity">Aggregate By:</label>
+                            <select name="granularity" id="granularity">
+                                <option value="day" <?php echo $selected_granularity === 'day' ? 'selected' : ''; ?>>Day</option>
+                                <option value="week" <?php echo $selected_granularity === 'week' ? 'selected' : ''; ?>>Week</option>
+                                <option value="month" <?php echo $selected_granularity === 'month' ? 'selected' : ''; ?>>Month</option>
+                                <option value="year" <?php echo $selected_granularity === 'year' ? 'selected' : ''; ?>>Year</option>
+                            </select>
+                        </div>
 
+                        <div class="filter-group" style="margin: 0;">
+                            <label for="reportScope" class="filter-label">Report Content</label>
+                            <select name="reportScope" id="reportScope" class="filter-input" style="min-width: 220px;">
+                                <option value="both" selected>Applications + Services</option>
+                                <option value="applications">Applications only</option>
+                                <option value="services">Services only</option>
+                            </select>
+                        </div>
 
-                        <button type="submit" class="apply-filters-btn">Apply Filters</button>
+                        <button type="submit" class="apply-filters-btn" style="display:none;">Apply Filters</button>
                     </form>
+                    <button type="button" id="downloadPdfBtn" class="apply-filters-btn" style="margin-top: 0; flex: 0 0 auto; white-space: nowrap;">Download Report (PDF)</button>
                 </div>
 
                 <!-- Statistics Header -->
@@ -442,7 +569,7 @@ foreach ($svc_months as $month) {
                 <div class="chart-container">
                     <div class="chart-container__header">
                         <h2 class="chart-container__title">Application Trends</h2>
-                        <p class="chart-container__subtitle">Monthly application statistics for <?php echo htmlspecialchars($selected_cycle_name); ?> - Past 12 months</p>
+                        <p class="chart-container__subtitle"><?php echo htmlspecialchars(ucfirst($selected_granularity)); ?> application statistics for <?php echo htmlspecialchars($selected_cycle_name); ?> - <?php echo htmlspecialchars($period_desc); ?></p>
                     </div>
                     <div class="chart-container__canvas">
                         <?php if (empty($chart_data) || empty($months)): ?>
@@ -502,7 +629,7 @@ foreach ($svc_months as $month) {
                 <div class="chart-container" style="margin-top: 24px;">
                     <div class="chart-container__header">
                         <h2 class="chart-container__title">Service Request Trends</h2>
-                        <p class="chart-container__subtitle">Monthly service request statistics - Past 12 months</p>
+                        <p class="chart-container__subtitle"><?php echo htmlspecialchars(ucfirst($selected_granularity)); ?> service request statistics - <?php echo htmlspecialchars($svc_period_desc); ?></p>
                     </div>
                     <div class="chart-container__canvas">
                         <?php if (empty($svc_chart_data) || empty($svc_months)): ?>
@@ -529,6 +656,7 @@ foreach ($svc_months as $month) {
         // Add AJAX functionality for dynamic filtering
         document.addEventListener('DOMContentLoaded', function() {
             const cycleSelect = document.getElementById('cycle_id');
+            const granularitySelect = document.getElementById('granularity');
 
             // Auto-submit form when filters change
             function handleFilterChange() {
@@ -545,11 +673,136 @@ foreach ($svc_months as $month) {
             }
 
             cycleSelect.addEventListener('change', handleFilterChange);
+            if (granularitySelect) {
+                granularitySelect.addEventListener('change', handleFilterChange);
+            }
 
             // Remove the submit button since we're auto-submitting
             const submitBtn = document.querySelector('.apply-filters-btn');
             if (submitBtn) {
                 submitBtn.style.display = 'none';
+            }
+
+            // PDF Generation
+            const downloadPdfBtn = document.getElementById('downloadPdfBtn');
+            const reportScopeEl = document.getElementById('reportScope');
+            const selectedGranularity = '<?php echo addslashes($selected_granularity); ?>';
+            const selectedCycleName = '<?php echo addslashes($selected_cycle_name); ?>';
+            const periodDesc = '<?php echo addslashes($period_desc); ?>';
+            const svcPeriodDesc = '<?php echo addslashes($svc_period_desc); ?>';
+            const appStats = <?php echo json_encode($application_stats); ?>;
+            const totalApplications = <?php echo (int)$total_applications; ?>;
+            const svcStats = <?php echo json_encode($service_request_stats); ?>;
+            const totalServiceRequests = <?php echo (int)$total_service_requests; ?>;
+
+            function generatePdfReport() {
+                const {
+                    jsPDF
+                } = window.jspdf;
+                if (!jsPDF) return;
+                const doc = new jsPDF({
+                    orientation: 'portrait',
+                    unit: 'pt',
+                    format: 'a4'
+                });
+                const pageWidth = doc.internal.pageSize.getWidth();
+                const pageHeight = doc.internal.pageSize.getHeight();
+                const margin = 36; // 0.5in
+                let cursorY = margin;
+                const scope = reportScopeEl ? reportScopeEl.value : 'both';
+                const scopeLabel = scope === 'both' ? 'Applications + Services' : (scope === 'applications' ? 'Applications' : 'Services');
+
+                // Header
+                doc.setFont('helvetica', 'bold');
+                doc.setFontSize(16);
+                doc.text('SSO Dashboard Report', margin, cursorY);
+                cursorY += 22;
+                doc.setFontSize(12);
+                doc.setFont('helvetica', 'normal');
+                doc.text(`Cycle: ${selectedCycleName || 'All Academic Year'}`, margin, cursorY);
+                cursorY += 16;
+                doc.text(`Aggregate By: ${selectedGranularity}`, margin, cursorY);
+                cursorY += 16;
+                doc.text(`Application Period: ${periodDesc}`, margin, cursorY);
+                cursorY += 16;
+                doc.text(`Service Period: ${svcPeriodDesc}`, margin, cursorY);
+                cursorY += 22;
+                doc.text(`Sections: ${scopeLabel}`, margin, cursorY);
+                cursorY += 18;
+
+                // Application stats and chart (if scope includes applications)
+                if (scope !== 'services') {
+                    doc.setFont('helvetica', 'bold');
+                    doc.text('Application Statistics', margin, cursorY);
+                    cursorY += 18;
+                    doc.setFont('helvetica', 'normal');
+                    doc.text(`Total Applications: ${totalApplications}`, margin, cursorY);
+                    cursorY += 16;
+                    Object.keys(appStats).forEach((status) => {
+                        doc.text(`${status}: ${appStats[status]}`, margin, cursorY);
+                        cursorY += 14;
+                    });
+                    cursorY += 10;
+
+                    // Application chart image
+                    const appCanvas = document.getElementById('applicationChart');
+                    if (appCanvas) {
+                        try {
+                            const imgData = appCanvas.toDataURL('image/png', 1.0);
+                            const imgWidth = pageWidth - margin * 2;
+                            const ratio = appCanvas.height / appCanvas.width;
+                            const imgHeight = imgWidth * ratio;
+                            if (cursorY + imgHeight > pageHeight - margin) {
+                                doc.addPage();
+                                cursorY = margin;
+                            }
+                            doc.addImage(imgData, 'PNG', margin, cursorY, imgWidth, imgHeight);
+                            cursorY += imgHeight + 18;
+                        } catch (e) {}
+                    }
+                }
+
+                // Service stats and chart (if scope includes services)
+                if (scope !== 'applications') {
+                    doc.setFont('helvetica', 'bold');
+                    doc.text('Service Request Statistics', margin, cursorY);
+                    cursorY += 18;
+                    doc.setFont('helvetica', 'normal');
+                    doc.text(`Total Service Requests: ${totalServiceRequests}`, margin, cursorY);
+                    cursorY += 16;
+                    Object.keys(svcStats).forEach((status) => {
+                        doc.text(`${status}: ${svcStats[status]}`, margin, cursorY);
+                        cursorY += 14;
+                    });
+                    cursorY += 10;
+
+                    // Service chart image
+                    const svcCanvas = document.getElementById('serviceChart');
+                    if (svcCanvas) {
+                        try {
+                            const imgData2 = svcCanvas.toDataURL('image/png', 1.0);
+                            const imgWidth2 = pageWidth - margin * 2;
+                            const ratio2 = svcCanvas.height / svcCanvas.width;
+                            const imgHeight2 = imgWidth2 * ratio2;
+                            if (cursorY + imgHeight2 > pageHeight - margin) {
+                                doc.addPage();
+                                cursorY = margin;
+                            }
+                            doc.addImage(imgData2, 'PNG', margin, cursorY, imgWidth2, imgHeight2);
+                            cursorY += imgHeight2 + 18;
+                        } catch (e) {}
+                    }
+                }
+
+                // Footer
+                doc.setFontSize(10);
+                doc.text(`Generated: ${new Date().toLocaleString()}`, margin, pageHeight - margin);
+
+                doc.save(`SSO-Dashboard-Report-${scope}-${selectedGranularity}.pdf`);
+            }
+
+            if (downloadPdfBtn) {
+                downloadPdfBtn.addEventListener('click', generatePdfReport);
             }
 
             // Initialize Application Trends Chart only if there's data
@@ -560,7 +813,9 @@ foreach ($svc_months as $month) {
 
                 // Prepare chart data from PHP
                 const chartLabels = <?php echo json_encode($readable_months); ?>;
+                const chartBucketKeys = <?php echo json_encode($months); ?>;
                 const chartData = <?php echo json_encode($chart_data); ?>;
+                const xAxisLabel = '<?php echo addslashes($x_axis_label); ?>';
 
                 // Only create chart if we have data
                 if (chartLabels.length > 0 && Object.keys(chartData).length > 0) {
@@ -594,11 +849,8 @@ foreach ($svc_months as $month) {
                     Object.keys(chartData).forEach(status => {
                         // Create data array that matches the chart labels order
                         const data = [];
-                        chartLabels.forEach((readableMonth, index) => {
-                            // Convert readable month back to YYYY-MM format to match chart data keys
-                            const monthDate = new Date(readableMonth + ' 01');
-                            const yearMonth = monthDate.getFullYear() + '-' + String(monthDate.getMonth() + 1).padStart(2, '0');
-                            data.push(chartData[status][yearMonth] || 0);
+                        chartBucketKeys.forEach((bucketKey) => {
+                            data.push(chartData[status][bucketKey] || 0);
                         });
 
                         const colors = statusColors[status] || {
@@ -619,8 +871,8 @@ foreach ($svc_months as $month) {
 
                     // Get selected cycle name for chart title
                     const selectedCycleName = '<?php echo addslashes($selected_cycle_name); ?>';
-                    const chartTitle = selectedCycleName === 'All Cycles' ?
-                        'Application Trends Over Time (All Cycles)' :
+                    const chartTitle = selectedCycleName === 'All Academic Year' ?
+                        'Application Trends Over Time (All Academic Year)' :
                         'Application Trends Over Time - ' + selectedCycleName;
 
                     // Create the chart
@@ -661,7 +913,7 @@ foreach ($svc_months as $month) {
                                 x: {
                                     title: {
                                         display: true,
-                                        text: 'Month'
+                                        text: xAxisLabel
                                     }
                                 }
                             },
@@ -681,7 +933,9 @@ foreach ($svc_months as $month) {
                 const sctx = svcChartCanvas.getContext('2d');
 
                 const svcChartLabels = <?php echo json_encode($svc_readable_months); ?>;
+                const svcBucketKeys = <?php echo json_encode($svc_months); ?>;
                 const svcChartData = <?php echo json_encode($svc_chart_data); ?>;
+                const svcXAxisLabel = '<?php echo addslashes($svc_x_axis_label); ?>';
 
                 if (svcChartLabels.length > 0 && Object.keys(svcChartData).length > 0) {
                     const serviceStatusColors = {
@@ -710,10 +964,8 @@ foreach ($svc_months as $month) {
                     const svcDatasets = [];
                     Object.keys(svcChartData).forEach(statusName => {
                         const data = [];
-                        svcChartLabels.forEach(readableMonth => {
-                            const monthDate = new Date(readableMonth + ' 01');
-                            const yearMonth = monthDate.getFullYear() + '-' + String(monthDate.getMonth() + 1).padStart(2, '0');
-                            data.push(svcChartData[statusName][yearMonth] || 0);
+                        svcBucketKeys.forEach((bucketKey) => {
+                            data.push(svcChartData[statusName][bucketKey] || 0);
                         });
 
                         const colors = serviceStatusColors[statusName] || {
@@ -768,7 +1020,7 @@ foreach ($svc_months as $month) {
                                 x: {
                                     title: {
                                         display: true,
-                                        text: 'Month'
+                                        text: svcXAxisLabel
                                     }
                                 }
                             },

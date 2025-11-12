@@ -2,6 +2,7 @@
 // Authentication middleware - protect this page
 require_once 'middleware/auth.php';
 include 'connection/db_connect.php';
+require_once 'function/decrypt.php';
 
 // --- Require cycle_id ---
 if (!isset($_GET['cycle_id'])) {
@@ -113,7 +114,12 @@ $conn->close();
                         <tr>
                             <td><?php echo $app['submission_id']; ?></td>
                             <td><?php echo htmlspecialchars(($app['first_name'] ?? '') . ' ' . ($app['last_name'] ?? '')); ?></td>
-                            <td><?php echo htmlspecialchars($app['user_email'] ?? 'N/A'); ?></td>
+                            <td><?php
+                                $email = $app['user_email'] ?? null;
+                                $dec = $email ? decryptData($email) : null;
+                                $displayEmail = ($dec !== false && !empty($dec)) ? $dec : ($email ?? 'N/A');
+                                echo htmlspecialchars($displayEmail);
+                            ?></td>
                             <td><?php echo htmlspecialchars($app['applicant_type'] ?? 'N/A'); ?></td>
                             <td><?php echo date('M j, Y, g:i A', strtotime($app['submitted_at'])); ?></td>
                             <td>

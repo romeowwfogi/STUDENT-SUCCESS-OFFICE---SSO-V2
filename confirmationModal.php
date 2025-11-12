@@ -1,5 +1,5 @@
-<div id="confirmationModal" style="display: none; position: fixed; left: 0; top: 0; width: 100%; height: 100%; background-color: rgba(0,0,0,0.5); z-index: 1000; align-items: center; justify-content: center;">
-<div style="background: var(--color-card); padding: 30px; border-radius: 8px; text-align: center; max-width: 400px; box-shadow: 0 5px 15px rgba(0,0,0,0.2); border: 1px solid var(--color-border); color: var(--color-text);">
+<div id="confirmationModal" style="display: none; position: fixed; left: 0; top: 0; width: 100%; height: 100%; background-color: rgba(0,0,0,0.5); z-index: 1000; align-items: center; justify-content: center; overflow-y: auto; padding: 16px;">
+<div style="background: var(--color-card); padding: 30px; border-radius: 8px; text-align: center; max-width: 400px; width: 90%; box-shadow: 0 5px 15px rgba(0,0,0,0.2); border: 1px solid var(--color-border); color: var(--color-text); max-height: 85vh; overflow-y: auto;">
         <h3 id="modalTitle" style="margin-top: 0; color: var(--primary-color);">Confirm Action</h3>
         <p id="modalMessage">Are you sure you want to proceed?</p>
         <div style="margin-top: 20px;">

@@ -1,6 +1,21 @@
 <?php
 require_once 'middleware/auth.php';
 include 'connection/db_connect.php';
+require_once 'function/decrypt.php';
+include 'function/sendEmail.php';
+
+// Attempt to decrypt email values when stored encrypted; otherwise return as-is
+function resolve_email($value)
+{
+    $value = trim($value ?? '');
+    if ($value === '') return '';
+    if (strpos($value, '@') !== false) return $value;
+    $decrypted = decryptData($value);
+    if ($decrypted && strpos($decrypted, '@') !== false) {
+        return $decrypted;
+    }
+    return $value;
+}
 
 header('Content-Type: application/json');
 
@@ -98,9 +113,14 @@ if (!$stmt->execute()) {
 $stmt->close();
 
 // Fetch back the updated status and remarks
-$sqlFetch = "SELECT sr.request_id, sr.admin_remarks, sr.status_id, srs.status_name, srs.color_hex
+$sqlFetch = "SELECT sr.request_id, sr.admin_remarks, sr.status_id,
+                    srs.status_name, srs.color_hex,
+                    su.email AS user_email, su.first_name, su.middle_name, su.last_name, su.suffix,
+                    sl.name AS service_name
              FROM services_requests sr
              JOIN services_request_statuses srs ON srs.status_id = sr.status_id
+             LEFT JOIN services_users su ON su.id = sr.user_id
+             LEFT JOIN services_list sl ON sl.service_id = sr.service_id
              WHERE sr.request_id = ? LIMIT 1";
 $stmtF = $conn->prepare($sqlFetch);
 if (!$stmtF) {
@@ -118,6 +138,32 @@ if (!$row) {
     http_response_code(500);
     echo json_encode(['ok' => false, 'error' => 'Failed to fetch updated record']);
     exit;
+}
+
+// Send status update email to the requestor using Service Request template
+$receiver = resolve_email($row['user_email'] ?? '');
+if ($receiver !== '' && !empty($HTML_CODE_SERVICE_REQUEST) && !empty($SUBJECT_SERVICE_REQUEST)) {
+    // Build registered full name
+    $parts = [];
+    if (!empty($row['first_name'])) $parts[] = $row['first_name'];
+    if (!empty($row['middle_name'])) $parts[] = $row['middle_name'];
+    if (!empty($row['last_name'])) $parts[] = $row['last_name'];
+    $full_name = trim(implode(' ', $parts));
+    if (!empty($row['suffix'])) $full_name = trim($full_name . ' ' . $row['suffix']);
+
+    $status = $row['status_name'] ?? '';
+    $remarks = $row['admin_remarks'] ?? '';
+    $service_name = $row['service_name'] ?? 'Service Request';
+    $body = $HTML_CODE_SERVICE_REQUEST;
+
+    $email_body = str_replace(
+        ['{{registered_fullname}}', '{{service_name}}', '{{request_id}}', '{{status}}', '{{remarks}}'],
+        [$full_name, $service_name, (string)$row['request_id'], $status, $remarks],
+        $body
+    );
+
+    // Fire-and-forget; logging handled in send_status_email
+    send_status_email($receiver, $SUBJECT_SERVICE_REQUEST, $email_body);
 }
 
 echo json_encode([

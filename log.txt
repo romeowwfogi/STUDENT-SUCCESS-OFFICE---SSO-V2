@@ -211,3 +211,78 @@ URL=https://gold-lion-549609.hostingersite.com/permit.php?permit_no=PLPPasig-000
 2025-11-07 16:09:46 [email:attempt] {"api":"https://gold-lion-549609.hostingersite.com/email-api.php","sender":"admin@sso.edu","receiver":"adorromeojohn0105@gmail.com","subject":"PLP - Student Success Office [Exam Permit]"}
 2025-11-07 16:09:52 [email:response] {"http_code":200,"body":"{\"success\":true,\"message\":\"Email sent successfully.\"}"}
 2025-11-07 16:09:52 [email:success] {"receiver":"adorromeojohn0105@gmail.com","subject":"PLP - Student Success Office [Exam Permit]","http_code":200,"transport":"json"}
+2025-11-09 10:07:44 [email:attempt] {"api":"https://gold-lion-549609.hostingersite.com/email-api.php","sender":"admin@sso.edu","receiver":"renheartimpulsement@gmail.com","subject":"PLP - Student Success Office [Admission Update]"}
+2025-11-09 10:07:49 [email:response] {"http_code":200,"body":"{\"success\":true,\"message\":\"Email sent successfully.\"}"}
+2025-11-09 10:07:49 [email:success] {"receiver":"renheartimpulsement@gmail.com","subject":"PLP - Student Success Office [Admission Update]","http_code":200,"transport":"json"}
+2025-11-09 11:36:32 [email:attempt] {"api":"https://gold-lion-549609.hostingersite.com/email-api.php","sender":"admin@sso.edu","receiver":"renheartimpulsement@gmail.com","subject":"PLP - Student Support Services - Service Request"}
+2025-11-09 11:36:36 [email:response] {"http_code":200,"body":"{\"success\":true,\"message\":\"Email sent successfully.\"}"}
+2025-11-09 11:36:36 [email:success] {"receiver":"renheartimpulsement@gmail.com","subject":"PLP - Student Support Services - Service Request","http_code":200,"transport":"json"}
+2025-11-10 10:20:09 [email:attempt] {"api":"https://gold-lion-549609.hostingersite.com/email-api.php","sender":"admin@sso.edu","receiver":"datus_markandrie@plpasig.edu.ph","subject":"PLP - Student Support Services - Service Request"}
+2025-11-10 10:20:14 [email:response] {"http_code":200,"body":"{\"success\":true,\"message\":\"Email sent successfully.\"}"}
+2025-11-10 10:20:14 [email:success] {"receiver":"datus_markandrie@plpasig.edu.ph","subject":"PLP - Student Support Services - Service Request","http_code":200,"transport":"json"}
+2025-11-11 18:52:31 CREATE generator payload={"text_color":"#18a558","email":"admin@sso.edu","password":"admin123","applicant_number":"PLPPasig-10000000","date_of_exam":"November 17, 2025","time":"16:28","room_no":"Room 301","admission_officer":"Arlene Daniel - Student Success Office Director","applicant_name":"Mark Andrie Datus","application_period":"November 10 to November 17, 2025"}
+RESP={"success":true,"message":"Permit generated. Click the download link to save the PDF.","download_url":"https:\/\/gold-lion-549609.hostingersite.com\/permit.php?permit_no=PLPPasig-10000000"}
+URL=https://gold-lion-549609.hostingersite.com/permit.php?permit_no=PLPPasig-10000000
+2025-11-11 18:52:31 [email:attempt] {"api":"https://gold-lion-549609.hostingersite.com/email-api.php","sender":"admin@sso.edu","receiver":"ricoimpulsement@gmail.com","subject":"PLP - Student Success Office [Exam Permit]"}
+2025-11-11 18:52:34 [email:response] {"http_code":200,"body":"{\"success\":true,\"message\":\"Email sent successfully.\"}"}
+2025-11-11 18:52:34 [email:success] {"receiver":"ricoimpulsement@gmail.com","subject":"PLP - Student Success Office [Exam Permit]","http_code":200,"transport":"json"}
+2025-11-11 19:09:22 CREATE generator payload={"text_color":"#18a558","email":"admin@sso.edu","password":"admin123","applicant_number":"PLPPasig-00000012","date_of_exam":"November 17, 2025","time":"16:28","room_no":"Room 301","admission_officer":"","applicant_name":"Mark Andrie Datus","application_period":"November 10 to November 17, 2025"}
+RESP={"error":"Missing required fields","missing_fields":["admission_officer"]}
+URL=
+2025-11-11 19:09:22 [email:attempt] {"api":"https://gold-lion-549609.hostingersite.com/email-api.php","sender":"admin@sso.edu","receiver":"ricoimpulsement@gmail.com","subject":"PLP - Student Success Office [Exam Permit]"}
+2025-11-11 19:09:26 [email:response] {"http_code":200,"body":"{\"success\":true,\"message\":\"Email sent successfully.\"}"}
+2025-11-11 19:09:26 [email:success] {"receiver":"ricoimpulsement@gmail.com","subject":"PLP - Student Success Office [Exam Permit]","http_code":200,"transport":"json"}
+2025-11-11 19:09:40 CREATE generator payload={"text_color":"#18a558","email":"admin@sso.edu","password":"admin123","applicant_number":"PLPPasig-00000012","date_of_exam":"November 17, 2025","time":"16:28","room_no":"Room 301","admission_officer":"Arlene Daniel","applicant_name":"Mark Andrie Datus","application_period":"November 10 to November 17, 2025"}
+RESP={"success":true,"message":"Permit generated. Click the download link to save the PDF.","download_url":"https:\/\/gold-lion-549609.hostingersite.com\/permit.php?permit_no=PLPPasig-00000012"}
+URL=https://gold-lion-549609.hostingersite.com/permit.php?permit_no=PLPPasig-00000012
+2025-11-11 19:09:40 [email:attempt] {"api":"https://gold-lion-549609.hostingersite.com/email-api.php","sender":"admin@sso.edu","receiver":"ricoimpulsement@gmail.com","subject":"PLP - Student Success Office [Exam Permit]"}
+2025-11-11 19:09:48 [email:response] {"http_code":200,"body":"{\"success\":true,\"message\":\"Email sent successfully.\"}"}
+2025-11-11 19:09:48 [email:success] {"receiver":"ricoimpulsement@gmail.com","subject":"PLP - Student Success Office [Exam Permit]","http_code":200,"transport":"json"}
+2025-11-11 19:11:18 CREATE generator payload={"text_color":"#ecf000","email":"admin@sso.edu","password":"admin123","applicant_number":"PLPPasig-10000000","date_of_exam":"November 17, 2025","time":"16:28","room_no":"Room 301","admission_officer":"Arlene Daniel","applicant_name":"Mark Andrie Datus","application_period":"November 10 to November 17, 2025"}
+RESP={"success":true,"message":"Permit generated. Click the download link to save the PDF.","download_url":"https:\/\/gold-lion-549609.hostingersite.com\/permit.php?permit_no=PLPPasig-10000000"}
+URL=https://gold-lion-549609.hostingersite.com/permit.php?permit_no=PLPPasig-10000000
+2025-11-11 19:11:18 [email:attempt] {"api":"https://gold-lion-549609.hostingersite.com/email-api.php","sender":"admin@sso.edu","receiver":"ricoimpulsement@gmail.com","subject":"PLP - Student Success Office [Exam Permit]"}
+2025-11-11 19:11:21 [email:response] {"http_code":200,"body":"{\"success\":true,\"message\":\"Email sent successfully.\"}"}
+2025-11-11 19:11:21 [email:success] {"receiver":"ricoimpulsement@gmail.com","subject":"PLP - Student Success Office [Exam Permit]","http_code":200,"transport":"json"}
+2025-11-11 23:00:54 CREATE generator payload={"text_color":"#ff2600","email":"admin@sso.edu","password":"admin123","applicant_number":"PLPPasig-10000000","date_of_exam":"November 17, 2025","time":"4:28 PM","room_no":"Room 301","admission_officer":"Arlene Daniel","applicant_name":"Mark Andrie Datus","application_period":"November 10 to November 17, 2025"}
+RESP={"success":true,"message":"Permit generated. Click the download link to save the PDF.","download_url":"https:\/\/gold-lion-549609.hostingersite.com\/permit.php?permit_no=PLPPasig-10000000"}
+URL=https://gold-lion-549609.hostingersite.com/permit.php?permit_no=PLPPasig-10000000
+2025-11-11 23:00:54 [email:attempt] {"api":"https://gold-lion-549609.hostingersite.com/email-api.php","sender":"admin@sso.edu","receiver":"ricoimpulsement@gmail.com","subject":"PLP - Student Success Office [Exam Permit]"}
+2025-11-11 23:00:58 [email:response] {"http_code":200,"body":"{\"success\":true,\"message\":\"Email sent successfully.\"}"}
+2025-11-11 23:00:58 [email:success] {"receiver":"ricoimpulsement@gmail.com","subject":"PLP - Student Success Office [Exam Permit]","http_code":200,"transport":"json"}
+2025-11-12 00:01:04 CREATE generator payload={"text_color":"#18a558","email":"admin@sso.edu","password":"admin123","applicant_number":"PLPPasig-00000001","date_of_exam":"2025-11-17","time":"4:28 PM","room_no":"Room 301","admission_officer":"","applicant_name":"Mark Andrie Datus","application_period":"November 10 to November 17, 2025"}
+RESP={"error":"Missing required fields","missing_fields":["admission_officer"]}
+URL=
+2025-11-12 00:01:04 [email:attempt] {"api":"https://gold-lion-549609.hostingersite.com/email-api.php","sender":"admin@sso.edu","receiver":"ricoimpulsement@gmail.com","subject":"PLP - Student Success Office [Exam Permit]"}
+2025-11-12 00:01:08 [email:response] {"http_code":200,"body":"{\"success\":true,\"message\":\"Email sent successfully.\"}"}
+2025-11-12 00:01:08 [email:success] {"receiver":"ricoimpulsement@gmail.com","subject":"PLP - Student Success Office [Exam Permit]","http_code":200,"transport":"json"}
+2025-11-12 00:16:08 RESEND generator payload={"text_color":"#18a558","email":"admin@sso.edu","password":"admin123","applicant_number":"PLPPasig-00000001","date_of_exam":"2025-11-17","time":"04:28:00","room_no":"Room 301","admission_officer":"Admissions Office","applicant_name":"Mark Andrie Datus","application_period":"November 10 to November 17, 2025"}
+RESP={"success":true,"message":"Permit generated. Click the download link to save the PDF.","download_url":"https:\/\/gold-lion-549609.hostingersite.com\/permit.php?permit_no=PLPPasig-00000001"}
+URL=https://gold-lion-549609.hostingersite.com/permit.php?permit_no=PLPPasig-00000001
+2025-11-12 00:16:08 [email:attempt] {"api":"https://gold-lion-549609.hostingersite.com/email-api.php","sender":"admin@sso.edu","receiver":"ricoimpulsement@gmail.com","subject":"PLP - Student Success Office [Exam Permit]"}
+2025-11-12 00:16:12 [email:response] {"http_code":200,"body":"{\"success\":true,\"message\":\"Email sent successfully.\"}"}
+2025-11-12 00:16:12 [email:success] {"receiver":"ricoimpulsement@gmail.com","subject":"PLP - Student Success Office [Exam Permit]","http_code":200,"transport":"json"}
+2025-11-12 00:29:06 [email:attempt] {"api":"https://gold-lion-549609.hostingersite.com/email-api.php","sender":"admin@sso.edu","receiver":"ricoimpulsement@gmail.com","subject":"PLP - Student Success Office [Exam Permit]"}
+2025-11-12 00:29:10 [email:response] {"http_code":200,"body":"{\"success\":true,\"message\":\"Email sent successfully.\"}"}
+2025-11-12 00:29:10 [email:success] {"receiver":"ricoimpulsement@gmail.com","subject":"PLP - Student Success Office [Exam Permit]","http_code":200,"transport":"json"}
+2025-11-12 03:44:21 CREATE generator payload={"text_color":"#f00000","email":"admin@sso.edu","password":"admin123","applicant_number":"PLPPasig-10000000","date_of_exam":"2025-11-17","time":"4:28 PM","room_no":"Room 301","admission_officer":"Arlene Daniel","applicant_name":"Mark Andrie Datus","application_period":"November 10 to November 17, 2025"}
+RESP={"success":true,"message":"Permit generated. Click the download link to save the PDF.","download_url":"https:\/\/gold-lion-549609.hostingersite.com\/permit.php?permit_no=PLPPasig-10000000"}
+URL=https://gold-lion-549609.hostingersite.com/permit.php?permit_no=PLPPasig-10000000
+2025-11-12 03:44:22 [email:attempt] {"api":"https://gold-lion-549609.hostingersite.com/email-api.php","sender":"admin@sso.edu","receiver":"ricoimpulsement@gmail.com","subject":"PLP - Student Success Office [Exam Permit]"}
+2025-11-12 03:44:28 [email:response] {"http_code":200,"body":"{\"success\":true,\"message\":\"Email sent successfully.\"}"}
+2025-11-12 03:44:28 [email:success] {"receiver":"ricoimpulsement@gmail.com","subject":"PLP - Student Success Office [Exam Permit]","http_code":200,"transport":"json"}
+2025-11-12 03:46:20 [email:attempt] {"api":"https://gold-lion-549609.hostingersite.com/email-api.php","sender":"admin@sso.edu","receiver":"ricoimpulsement@gmail.com","subject":"PLP - Student Success Office [Exam Permit]"}
+2025-11-12 03:46:26 [email:response] {"http_code":200,"body":"{\"success\":true,\"message\":\"Email sent successfully.\"}"}
+2025-11-12 03:46:26 [email:success] {"receiver":"ricoimpulsement@gmail.com","subject":"PLP - Student Success Office [Exam Permit]","http_code":200,"transport":"json"}
+2025-11-12 13:21:33 [email:attempt] {"api":"https://gold-lion-549609.hostingersite.com/email-api.php","sender":"admin@sso.edu","receiver":"ricoimpulsement@gmail.com","subject":"PLP - Student Success Office [Admission Update]"}
+2025-11-12 13:21:39 [email:response] {"http_code":200,"body":"{\"success\":true,\"message\":\"Email sent successfully.\"}"}
+2025-11-12 13:21:39 [email:success] {"receiver":"ricoimpulsement@gmail.com","subject":"PLP - Student Success Office [Admission Update]","http_code":200,"transport":"json"}
+2025-11-12 14:37:25 [email:attempt] {"api":"https://gold-lion-549609.hostingersite.com/email-api.php","sender":"admin@sso.edu","receiver":"ricoimpulsement@gmail.com","subject":"PLP - Student Success Office [Exam Permit]"}
+2025-11-12 14:37:30 [email:response] {"http_code":200,"body":"{\"success\":true,\"message\":\"Email sent successfully.\"}"}
+2025-11-12 14:37:30 [email:success] {"receiver":"ricoimpulsement@gmail.com","subject":"PLP - Student Success Office [Exam Permit]","http_code":200,"transport":"json"}
+2025-11-12 16:34:29 [email:attempt] {"api":"https://gold-lion-549609.hostingersite.com/email-api.php","sender":"admin@sso.edu","receiver":"datusmarkandrei@gmail.com","subject":"PLP - Student Support Services - Service Request"}
+2025-11-12 16:34:39 [email:response] {"http_code":200,"body":"{\"success\":true,\"message\":\"Email sent successfully.\"}"}
+2025-11-12 16:34:39 [email:success] {"receiver":"datusmarkandrei@gmail.com","subject":"PLP - Student Support Services - Service Request","http_code":200,"transport":"json"}
+2025-11-12 17:18:12 [email:attempt] {"api":"https://gold-lion-549609.hostingersite.com/email-api.php","sender":"admin@sso.edu","receiver":"datusmarkandrei@gmail.com","subject":"PLP - Student Support Services - Service Request"}
+2025-11-12 17:18:20 [email:response] {"http_code":200,"body":"{\"success\":true,\"message\":\"Email sent successfully.\"}"}
+2025-11-12 17:18:20 [email:success] {"receiver":"datusmarkandrei@gmail.com","subject":"PLP - Student Support Services - Service Request","http_code":200,"transport":"json"}

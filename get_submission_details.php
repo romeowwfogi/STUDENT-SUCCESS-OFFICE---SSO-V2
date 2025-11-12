@@ -16,10 +16,18 @@ $response = ['ok' => true];
 
 // Fetch main submission info
 $main_info = null;
-if ($stmt = $conn->prepare("SELECT s.*, at.name AS applicant_type, c.cycle_name, u.email
+// Note: 'admission_cycles' does not have a 'cycle_name' column. Select fields needed to derive it.
+if ($stmt = $conn->prepare("SELECT s.*, 
+                                    at.name AS applicant_type,
+                                    ac.id AS cycle_id,
+                                    ac.academic_year_start,
+                                    ac.academic_year_end,
+                                    ac.admission_date_time_start,
+                                    ac.admission_date_time_end,
+                                    u.email
                              FROM submissions s
                              LEFT JOIN applicant_types at ON s.applicant_type_id = at.id
-                             LEFT JOIN admission_cycles c ON at.admission_cycle_id = c.id
+                             LEFT JOIN admission_cycles ac ON at.admission_cycle_id = ac.id
                              LEFT JOIN users u ON s.user_id = u.id
                              WHERE s.id = ?")) {
     $stmt->bind_param('i', $submission_id);
@@ -101,14 +109,33 @@ if ($applicant_type_id > 0) {
     }
 }
 
+// Derive cycle display name (Academic Year or Date Range)
+$cycle_name = null;
+if ($main_info) {
+    $ayStart = $main_info['academic_year_start'] ?? null;
+    $ayEnd = $main_info['academic_year_end'] ?? null;
+    if (!empty($ayStart) && !empty($ayEnd)) {
+        $cycle_name = "Academic Year {$ayStart}-{$ayEnd}";
+    } else {
+        $startDt = $main_info['admission_date_time_start'] ?? null;
+        $endDt = $main_info['admission_date_time_end'] ?? null;
+        if (!empty($startDt) && !empty($endDt)) {
+            $cycle_name = date('M d, Y H:i', strtotime($startDt)) . ' – ' . date('M d, Y H:i', strtotime($endDt));
+        }
+    }
+}
+
 $response['main'] = [
     'submission_id' => $submission_id,
     'applicant_type' => $main_info['applicant_type'] ?? null,
-    'cycle_name' => $main_info['cycle_name'] ?? null,
+    'cycle_name' => $cycle_name,
     'email' => $display_email ?? null,
     'submitted_at' => $main_info['submitted_at'] ?? null,
     'status' => $status_name,
-    'status_hex' => $status_hex
+    'status_hex' => $status_hex,
+    'user_id' => isset($main_info['user_id']) ? (int)$main_info['user_id'] : null,
+    'remarks' => $main_info['remarks'] ?? null,
+    'can_update' => isset($main_info['can_update']) ? (int)$main_info['can_update'] : 0
 ];
 $response['text_data'] = $text_data;
 $response['files'] = $files;
@@ -158,6 +185,20 @@ if ($user_id > 0) {
         $stmtSched->close();
     }
 }
+
+// Fetch applicant number if present in submission data
+$applicant_number = null;
+if ($stmtAN = $conn->prepare("SELECT field_value FROM submission_data WHERE submission_id = ? AND field_name = 'applicant_number' LIMIT 1")) {
+    $stmtAN->bind_param('i', $submission_id);
+    $stmtAN->execute();
+    $resAN = $stmtAN->get_result();
+    if ($resAN && ($rowAN = $resAN->fetch_assoc())) {
+        $applicant_number = $rowAN['field_value'] ?? null;
+    }
+    $stmtAN->close();
+}
+if (!isset($response['main'])) $response['main'] = [];
+$response['main']['applicant_number'] = $applicant_number;
 
 echo json_encode($response);
 exit;
