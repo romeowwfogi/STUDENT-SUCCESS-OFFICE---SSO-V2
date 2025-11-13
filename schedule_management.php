@@ -116,7 +116,7 @@ $conn->close();
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 
     <link rel="stylesheet" href="admin_style.css">
-    
+
     <link rel="stylesheet" href="dashboard.css">
     <style>
         /* Ensure the table keeps dashboard layout and not admin defaults */
@@ -131,6 +131,58 @@ $conn->close();
 
         .table tr:nth-child(even) {
             background-color: transparent;
+        }
+
+        #scheduling_section td[data-cell="Actions"],
+        #scheduling_section th:last-child {
+            width: 200px;
+        }
+
+        .status-pill {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 6px 10px;
+            border-radius: 999px;
+            font-weight: 600;
+            font-size: 0.85rem;
+        }
+
+        .pill-open {
+            background: #ecfdf5;
+            color: #065f46;
+            border: 1px solid #10b981;
+        }
+
+        .pill-full {
+            background: #fee2e2;
+            color: #7f1d1d;
+            border: 1px solid #ef4444;
+        }
+
+        .pill-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            display: inline-block;
+        }
+
+        .pill-open .pill-dot { background: #10b981; }
+        .pill-full .pill-dot { background: #ef4444; }
+
+        #scheduling_section .table__actions .table__btn {
+            background-color: var(--color-card);
+            color: var(--color-accent);
+            border: 1.5px solid rgba(16, 185, 129, 0.35);
+            padding: 8px 14px;
+            font-weight: 100;
+        }
+
+        #scheduling_section .table__actions .table__btn:hover {
+            background-color: var(--color-accent);
+            color: var(--color-white);
+            border-color: var(--color-accent);
+            transform: translateY(-1px);
         }
     </style>
 
@@ -188,9 +240,9 @@ $conn->close();
                             <input type="text" placeholder="Search schedules...">
                         </div>
 
-                        <div class="search_button_container">
+                        <!-- <div class="search_button_container">
                             <button class="button export">Export</button>
-                        </div>
+                        </div> -->
                     </div>
 
                     <table class="table" id="schedulesTable">
@@ -455,7 +507,7 @@ $conn->close();
                     <input type="hidden" name="action" value="add_room">
                     <div class="form-group">
                         <label for="floor">
-<svg style="width: 18px; height: 18px; color: #18a558;" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <svg style="width: 18px; height: 18px; color: #18a558;" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 7l9-4 9 4-9 4-9-4zm0 8l9 4 9-4M3 7v8m18-8v8" />
                             </svg>
                             Floor
@@ -464,7 +516,7 @@ $conn->close();
                     </div>
                     <div class="form-group">
                         <label for="room">
-<svg style="width: 18px; height: 18px; color: #18a558;" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <svg style="width: 18px; height: 18px; color: #18a558;" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 10h16M4 14h16M4 18h16" />
                             </svg>
                             Room
@@ -473,7 +525,7 @@ $conn->close();
                     </div>
                     <div class="form-group">
                         <label for="capacity">
-<svg style="width: 18px; height: 18px; color: #18a558;" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <svg style="width: 18px; height: 18px; color: #18a558;" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-3-3h-2M9 20H4v-2a3 3 0 013-3h2m4-12a4 4 0 110 8 4 4 0 010-8z" />
                             </svg>
                             Capacity
@@ -482,7 +534,7 @@ $conn->close();
                     </div>
                     <div class="form-group">
                         <label for="start_date_and_time">
-<svg style="width: 18px; height: 18px; color: #18a558;" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <svg style="width: 18px; height: 18px; color: #18a558;" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3M3 11h18M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
                             </svg>
                             Start Date & Time
@@ -491,7 +543,7 @@ $conn->close();
                     </div>
                     <div class="form-group">
                         <label for="status">
-<svg style="width: 18px; height: 18px; color: #18a558;" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <svg style="width: 18px; height: 18px; color: #18a558;" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
                             </svg>
                             Status
@@ -517,7 +569,7 @@ $conn->close();
                 <button type="button" class="close-btn" id="closeEditScheduleModal">&times;</button>
                 <div class="add-step-modal-icon">
                     <div class="add-step-modal-icon-container">
-<svg style="width: 40px; height: 40px; color: #18a558;" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <svg style="width: 40px; height: 40px; color: #18a558;" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5h2m-1 14V5m7 7H5" />
                         </svg>
                     </div>
@@ -531,7 +583,7 @@ $conn->close();
                     <input type="hidden" id="edit_schedule_id" name="schedule_id" value="">
                     <div class="form-group">
                         <label for="edit_floor">
-<svg style="width: 18px; height: 18px; color: #18a558;" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <svg style="width: 18px; height: 18px; color: #18a558;" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 7l9-4 9 4-9 4-9-4zm0 8l9 4 9-4M3 7v8m18-8v8" />
                             </svg>
                             Floor
@@ -540,7 +592,7 @@ $conn->close();
                     </div>
                     <div class="form-group">
                         <label for="edit_room">
-<svg style="width: 18px; height: 18px; color: #18a558;" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <svg style="width: 18px; height: 18px; color: #18a558;" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 10h16M4 14h16M4 18h16" />
                             </svg>
                             Room
@@ -549,7 +601,7 @@ $conn->close();
                     </div>
                     <div class="form-group">
                         <label for="edit_capacity">
-<svg style="width: 18px; height: 18px; color: #18a558;" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <svg style="width: 18px; height: 18px; color: #18a558;" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-3-3h-2M9 20H4v-2a3 3 0 013-3h2m4-12a4 4 0 110 8 4 4 0 010-8z" />
                             </svg>
                             Capacity
@@ -558,7 +610,7 @@ $conn->close();
                     </div>
                     <div class="form-group">
                         <label for="edit_start_date_and_time">
-<svg style="width: 18px; height: 18px; color: #18a558;" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <svg style="width: 18px; height: 18px; color: #18a558;" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3M3 11h18M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
                             </svg>
                             Start Date & Time
@@ -677,10 +729,8 @@ $conn->close();
 
             const schedules = <?php echo json_encode($schedules, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES); ?>;
 
-            // Clear any static rows
             tbody.innerHTML = '';
 
-            // Helper to format datetime for display
             function formatDatetime(dt) {
                 try {
                     const iso = (dt || '').replace(' ', 'T');
@@ -708,14 +758,16 @@ $conn->close();
                 return;
             }
 
-            // Simple client-side pagination
             const paginationSelect = document.querySelector('.pagination__select');
             const paginationInfo = document.querySelector('.pagination__info');
             const prevButton = document.querySelector('.pagination__bttns:first-of-type');
             const nextButton = document.querySelector('.pagination__bttns:last-of-type');
+            const searchInput = document.querySelector('.search_input_container input');
 
             let rowsPerPage = parseInt(paginationSelect?.value || '10', 10);
             let currentPage = 1;
+            let searchQuery = '';
+            let filteredSchedules = schedules.slice();
 
             function updateButtons(totalPages) {
                 const isFirst = currentPage <= 1;
@@ -730,52 +782,76 @@ $conn->close();
                 }
             }
 
+            function applyFilter() {
+                const q = searchQuery.trim().toLowerCase();
+                if (!q) {
+                    filteredSchedules = schedules.slice();
+                    return;
+                }
+                filteredSchedules = schedules.filter(s => {
+                    const room = (s.room_name || s.room || '').toLowerCase();
+                    const floor = (s.floor_label || s.floor || '').toLowerCase();
+                    const status = (s.status || '').toLowerCase();
+                    const code = String(s.schedule_code || s.schedule_id || '').toLowerCase();
+                    const cap = String((s.booked_count ?? 0) + '/' + (s.capacity ?? 0)).toLowerCase();
+                    const start = String(formatDatetime(s.starts_at || s.start_date_and_time) || '').toLowerCase();
+                    return room.includes(q) || floor.includes(q) || status.includes(q) || code.includes(q) || cap.includes(q) || start.includes(q);
+                });
+            }
+
             function renderPage() {
-                const totalRows = schedules.length;
+                applyFilter();
+                const totalRows = filteredSchedules.length;
                 const totalPages = Math.max(1, Math.ceil(totalRows / rowsPerPage));
-                // Clamp current page
                 currentPage = Math.min(Math.max(1, currentPage), totalPages);
 
                 const startIdx = (currentPage - 1) * rowsPerPage;
                 const endIdx = Math.min(startIdx + rowsPerPage, totalRows);
 
-                // Clear and render current page
                 tbody.innerHTML = '';
-                schedules.slice(startIdx, endIdx).forEach((s, localIdx) => {
-                    const statusClass = (s.status === 'Full') ? 'badge--danger' : 'badge--success';
-                    const startsAtText = formatDatetime(s.starts_at || s.start_date_and_time);
-                    const overallIdx = startIdx + localIdx;
-                    let displayNo = overallIdx + 1;
-                    if (currentSort.column === 'no') {
-                        displayNo = currentSort.direction === 'desc' ? (totalRows - overallIdx) : (overallIdx + 1);
-                    }
+                if (totalRows === 0) {
                     const tr = document.createElement('tr');
                     tr.innerHTML = `
-                        <td data-cell="no">${displayNo}</td>
-                        <td data-cell="room">${s.room_name || s.room || ''}</td>
-                        <td data-cell="floor">${s.floor_label || s.floor || ''}</td>
-                        <td data-cell="capacity">${(s.booked_count ?? 0)}/${(s.capacity ?? 0)}</td>
-                        <td data-cell="start-date-time">${startsAtText}</td>
-                        <td data-cell="status"><span class="badge ${statusClass}">${s.status}</span></td>
-                        <td data-cell="Actions">
-                            <div class="table__actions">
-                                <button class="table__btn table__btn--view" data-id="${s.schedule_id}">View</button>
-                                <button class="table__btn table__btn--edit" data-id="${s.schedule_id}">Edit</button>
-                            </div>
-                        </td>
+                        <td colspan="8" style="text-align:center; color:#666; padding:16px;">No schedules found</td>
                     `;
                     tbody.appendChild(tr);
-                });
+                } else {
+                    filteredSchedules.slice(startIdx, endIdx).forEach((s, localIdx) => {
+                        const pillClass = (String(s.status).toLowerCase() === 'full') ? 'pill-full' : 'pill-open';
+                        const startsAtText = formatDatetime(s.starts_at || s.start_date_and_time);
+                        const overallIdx = startIdx + localIdx;
+                        let displayNo = overallIdx + 1;
+                        if (currentSort.column === 'no') {
+                            displayNo = currentSort.direction === 'desc' ? (totalRows - overallIdx) : (overallIdx + 1);
+                        }
+                        const tr = document.createElement('tr');
+                        tr.innerHTML = `
+                            <td data-cell="no">${displayNo}</td>
+                            <td data-cell="room">${s.room_name || s.room || ''}</td>
+                            <td data-cell="floor">${s.floor_label || s.floor || ''}</td>
+                            <td data-cell="capacity">${(s.booked_count ?? 0)}/${(s.capacity ?? 0)}</td>
+                            <td data-cell="start-date-time">${startsAtText}</td>
+                        <td data-cell="status"><span class="status-pill ${pillClass}"><span class="pill-dot"></span> ${s.status}</span></td>
+                            <td data-cell="Actions">
+                                <div class="table__actions">
+                                    <button class="table__btn table__btn--view" data-id="${s.schedule_id}">View</button>
+                                    <button class="table__btn table__btn--edit" data-id="${s.schedule_id}">Edit</button>
+                                </div>
+                            </td>
+                        `;
+                        tbody.appendChild(tr);
+                    });
+                }
 
-                // Update info
                 if (paginationInfo) {
-                    paginationInfo.textContent = `Showing ${totalRows === 0 ? 0 : startIdx + 1}-${endIdx} of ${totalRows} • Page ${currentPage}/${totalPages}`;
+                    const startText = totalRows === 0 ? 0 : startIdx + 1;
+                    const endText = totalRows === 0 ? 0 : endIdx;
+                    paginationInfo.textContent = `Showing ${startText}-${endText} of ${totalRows} • Page ${currentPage}/${Math.max(1, Math.ceil(totalRows / rowsPerPage))}`;
                 }
 
                 updateButtons(totalPages);
             }
 
-            // Header-based sorting integrated with dataset and pagination
             const scheduleTable = document.getElementById('schedulesTable');
             const sortableHeaders = scheduleTable ? scheduleTable.querySelectorAll('.sortable') : [];
             const columnTypeMap = {
@@ -826,8 +902,6 @@ $conn->close();
             function sortSchedulesBy(column, direction = null) {
                 if (!column) return;
                 const type = columnTypeMap[column] || 'text';
-
-                // Determine sort direction
                 if (direction === null) {
                     if (currentSort.column === column) {
                         direction = currentSort.direction === 'asc' ? 'desc' : 'asc';
@@ -839,7 +913,6 @@ $conn->close();
                     column,
                     direction
                 };
-
                 schedules.sort((a, b) => {
                     const aVal = getScheduleValue(a, column);
                     const bVal = getScheduleValue(b, column);
@@ -866,7 +939,6 @@ $conn->close();
                 }
             }
 
-            // Attach click listeners to headers
             sortableHeaders.forEach(header => {
                 header.addEventListener('click', () => {
                     const col = header.dataset.column;
@@ -877,7 +949,6 @@ $conn->close();
                 });
             });
 
-            // Events
             if (paginationSelect) {
                 paginationSelect.addEventListener('change', function() {
                     rowsPerPage = parseInt(this.value, 10);
@@ -894,6 +965,13 @@ $conn->close();
             if (nextButton) {
                 nextButton.addEventListener('click', function() {
                     currentPage += 1;
+                    renderPage();
+                });
+            }
+            if (searchInput) {
+                searchInput.addEventListener('keyup', function() {
+                    searchQuery = this.value || '';
+                    currentPage = 1;
                     renderPage();
                 });
             }

@@ -330,8 +330,18 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
             justify-content: center;
             z-index: 9999;
         }
-        .loader-overlay.active { display: flex; }
-        .loader-wrap { display: flex; flex-direction: column; align-items: center; gap: 12px; }
+
+        .loader-overlay.active {
+            display: flex;
+        }
+
+        .loader-wrap {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 12px;
+        }
+
         .loader {
             width: 56px;
             height: 56px;
@@ -340,8 +350,17 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
             border-radius: 50%;
             animation: spin 0.9s linear infinite;
         }
-        .loader-text { color: #fff; font-weight: 600; }
-        @keyframes spin { to { transform: rotate(360deg); } }
+
+        .loader-text {
+            color: #fff;
+            font-weight: 600;
+        }
+
+        @keyframes spin {
+            to {
+                transform: rotate(360deg);
+            }
+        }
     </style>
 </head>
 
@@ -778,7 +797,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
         const loginForm = document.querySelector('form');
         const loaderOverlay = document.getElementById('loaderOverlay');
         if (loginForm && loaderOverlay) {
-            loginForm.addEventListener('submit', function () {
+            loginForm.addEventListener('submit', function() {
                 loaderOverlay.classList.add('active');
             });
         }

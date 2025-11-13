@@ -55,7 +55,27 @@ $user_fullname = isset($_SESSION['user_name']) ? $_SESSION['user_name'] : 'Guest
                     <span class="nav-menu__text">Services Management</span>
                 </a>
             </li>
-            <!-- <li class="nav-menu__item" data-target="settings_section">
+            <li class="nav-menu__item" data-target="settings_section">
+                <a href="./account_management.php" class="nav-menu__link">
+                    <svg class="nav-menu__icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" />
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                    </svg>
+                    <span class="nav-menu__text">Account Management</span>
+                </a>
+            </li>
+
+            <li class="nav-menu__item" data-target="settings_section">
+                <a href="./account_management.php" class="nav-menu__link">
+                    <svg class="nav-menu__icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" />
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                    </svg>
+                    <span class="nav-menu__text">Announcement Management</span>
+                </a>
+            </li>
+
+            <li class="nav-menu__item" data-target="settings_section">
                 <a href="./dashboard_settings.php" class="nav-menu__link">
                     <svg class="nav-menu__icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" />
@@ -63,7 +83,16 @@ $user_fullname = isset($_SESSION['user_name']) ? $_SESSION['user_name'] : 'Guest
                     </svg>
                     <span class="nav-menu__text">Settings</span>
                 </a>
-            </li> -->
+            </li>
+            <li class="nav-menu__item" data-target="settings_section">
+                <a href="./system_settings.php" class="nav-menu__link">
+                    <svg class="nav-menu__icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" />
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                    </svg>
+                    <span class="nav-menu__text">System Settings</span>
+                </a>
+            </li>
             <li class="nav-menu__item nav-menu__logout">
                 <a href="./logout.php" class="nav-menu__link nav-menu__logout-link" onclick="return confirm('Are you sure you want to logout?')">
                     <svg class="nav-menu__icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -75,3 +104,41 @@ $user_fullname = isset($_SESSION['user_name']) ? $_SESSION['user_name'] : 'Guest
         </ul>
     </nav>
 </aside>
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        var links = document.querySelectorAll('.nav-menu__link');
+        var page = window.location.pathname.split('/').pop().split('?')[0];
+        var map = {
+            'manage_applicant_types.php': 'application_management.php',
+            'manage_form.php': 'application_management.php',
+            'manage_step_fields.php': 'application_management.php',
+            'manage_step_options.php': 'application_management.php',
+            'manage_services.php': 'services_management.php',
+            'manage_service_fields.php': 'services_management.php',
+            'manage_service_options.php': 'services_management.php',
+            'schedule_room_view.php': 'schedule_management.php',
+            'list_exam_schedules.php': 'schedule_management.php',
+            'get_exam_schedule.php': 'schedule_management.php',
+            'bulk_send_exam_permits.php': 'exam_permit_management.php',
+            'resend_application_permit.php': 'exam_permit_management.php',
+            'create_application_permit.php': 'exam_permit_management.php',
+            'validate_exam_permit.php': 'exam_permit_management.php',
+            'update_exam_permit_status.php': 'exam_permit_management.php',
+            'get_latest_permit.php': 'exam_permit_management.php',
+            'get_next_permit_id.php': 'exam_permit_management.php'
+        };
+        var target = map[page] || page;
+        links.forEach(function(link) {
+            var hrefBase = (link.getAttribute('href') || '').split('/').pop().split('?')[0];
+            var li = link.closest('.nav-menu__item');
+            var match = hrefBase === target || hrefBase === ('./' + target);
+            if (match) {
+                link.classList.add('active');
+                if (li) li.classList.add('active');
+            } else {
+                link.classList.remove('active');
+                if (li) li.classList.remove('active');
+            }
+        });
+    });
+</script>
