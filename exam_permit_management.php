@@ -7,6 +7,7 @@ require_once 'connection/db_connect.php';
 // If application_permit not found => "Exam Permit NOT Sent"
 // If found => use application_permit.status (enum: 'pending','used')
 $sql = "SELECT\n  s.user_id,\n  s.submitted_at,\n  TRIM(CONCAT_WS(' ',\n    uf.first_name,\n    NULLIF(uf.middle_name, ''),\n    uf.last_name,\n    NULLIF(uf.suffix, '')\n  )) AS applicant_name,\n  CASE\n    WHEN c.academic_year_start IS NOT NULL AND c.academic_year_end IS NOT NULL THEN CONCAT('Academic Year ', c.academic_year_start, '-', c.academic_year_end)\n    ELSE CONCAT(DATE_FORMAT(c.admission_date_time_start, '%b %d, %Y'), ' – ', DATE_FORMAT(c.admission_date_time_end, '%b %d, %Y'))\n  END AS admission_cycle_name,\n  CASE WHEN ap.id IS NULL THEN 'Exam Permit NOT Sent' ELSE ap.status END AS status,\n  CASE WHEN ap.id IS NULL THEN 0 ELSE 1 END AS has_permit\nFROM submissions s\nLEFT JOIN user_fullname uf\n  ON uf.user_id = s.user_id\nLEFT JOIN applicant_types at\n  ON at.id = s.applicant_type_id\nLEFT JOIN admission_cycles c\n  ON c.id = at.admission_cycle_id\nLEFT JOIN application_permit ap\n  ON ap.id = (SELECT MAX(ap2.id) FROM application_permit ap2 WHERE ap2.user_id = s.user_id)\nORDER BY s.submitted_at DESC";
+$sql = str_replace('Exam Permit NOT Sent', 'pending', $sql);
 $result_rows = [];
 if ($res = $conn->query($sql)) {
     while ($row = $res->fetch_assoc()) {
@@ -17,17 +18,8 @@ if ($res = $conn->query($sql)) {
 function statusBadgeClass($status)
 {
     $s = strtolower(trim((string)$status));
-    // Exam permit specific statuses
-    if ($s === 'exam permit sent') return 'badge--success';
-    if ($s === 'exam permit not sent') return 'badge--danger';
-    // application_permit statuses
+    if ($s === 'used') return 'badge--danger';
     if ($s === 'pending') return 'badge--warning';
-    if ($s === 'used') return 'badge--success';
-    // Fallbacks for submission lifecycle statuses
-    if ($s === 'accepted' || $s === 'approved') return 'badge--success';
-    if ($s === 'pending' || $s === 'waitlisted') return 'badge--warning';
-    if ($s === 'rejected' || $s === 'failed') return 'badge--danger';
-    if ($s === 'in review' || $s === 'examination') return 'badge--info';
     return 'badge--secondary';
 }
 ?>
@@ -43,6 +35,62 @@ function statusBadgeClass($status)
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 
     <link rel="stylesheet" href="dashboard.css">
+
+    <style>
+        .status-pill {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 6px 10px;
+            border-radius: 9999px;
+            border: 1px solid;
+            font-weight: 100;
+            text-transform: capitalize;
+            font-size: 13px;
+        }
+
+        .pill-open {
+            background: #ecfdf5;
+            color: #065f46;
+            border-color: #10b981;
+        }
+
+        .pill-full {
+            background: #fee2e2;
+            color: #7f1d1d;
+            border-color: #ef4444;
+        }
+
+        .pill-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            display: inline-block;
+        }
+
+        .pill-open .pill-dot {
+            background: #10b981;
+        }
+
+        .pill-full .pill-dot {
+            background: #ef4444;
+        }
+
+        #exam_permit_generation_section .table__actions .table__btn {
+            background-color: var(--color-card);
+            color: var(--color-accent);
+            border: 1.5px solid rgba(16, 185, 129, 0.35);
+            padding: 8px 14px;
+            font-weight: 100;
+        }
+
+        #exam_permit_generation_section .table__actions .table__btn:hover {
+            background-color: var(--color-accent);
+            color: var(--color-white);
+            border-color: var(--color-accent);
+            transform: translateY(-1px);
+        }
+    </style>
 
     <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.9.1/chart.min.js"></script>
 
@@ -115,7 +163,6 @@ function statusBadgeClass($status)
                     <table class="table">
                         <thead>
                             <tr>
-                                <th><input type="checkbox" id="selectAllPermits" class="table-checkbox"></th>
                                 <th class="sortable" data-column="no">#
                                     <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="sort-icon">
                                         <path d="m3 16 4 4 4-4" />
@@ -171,9 +218,10 @@ function statusBadgeClass($status)
                                 $applicant = htmlspecialchars($r['applicant_name'] ?? '—');
                                 $cycle = htmlspecialchars($r['admission_cycle_name'] ?? '—');
                                 $submittedRaw = $r['submitted_at'] ?? null;
-                                $submitted = isset($submittedRaw) ? date('M d, Y', strtotime($submittedRaw)) : '—';
+                                $submitted = isset($submittedRaw) ? date('F d, Y - h:i A', strtotime($submittedRaw)) : '—';
                                 $status = htmlspecialchars($r['status'] ?? 'Pending');
                                 $badgeClass = statusBadgeClass($status);
+                                $pillClass = (strtolower($status) === 'used') ? 'pill-full' : 'pill-open';
                                 // Resolve submission id for View modal
                                 $submissionId = 0;
                                 if (!empty($r['user_id']) && !empty($submittedRaw)) {
@@ -190,20 +238,17 @@ function statusBadgeClass($status)
                                 }
                             ?>
                                 <tr>
-                                    <td><input type="checkbox" class="table-checkbox row-checkbox" data-id="USR-<?php echo (int)($r['user_id'] ?? 0); ?>"></td>
                                     <td data-cell="no"><?php echo $rowNum++; ?></td>
                                     <td data-cell="applicant-name"><?php echo $applicant; ?></td>
                                     <td data-cell="academic-year"><?php echo $cycle; ?></td>
                                     <td data-cell="date-applied"><?php echo $submitted; ?></td>
-                                    <td data-cell="status"><span class="badge <?php echo $badgeClass; ?> status"><?php echo $status; ?></span></td>
+                                    <td data-cell="status"><span class="status-pill <?php echo $pillClass; ?>"><span class="pill-dot"></span> <span class="status"><?php echo $status; ?></span></span></td>
                                     <td data-cell="action">
                                         <div class="table__actions">
                                             <?php $hasPermit = (int)($r['has_permit'] ?? 0) === 1; ?>
-                                            <button class="table__btn table__btn--delete showResendbtn" data-applicant-name="<?php echo htmlspecialchars($applicant); ?>" data-user-id="<?php echo (int)($r['user_id'] ?? 0); ?>" style="<?php echo $hasPermit ? 'display:inline-block;' : 'display:none;'; ?>">Resend</button>
-                                            <button class="table__btn showViewbtn" data-submission-id="<?php echo $submissionId; ?>">View</button>
-                                            <?php if (!$hasPermit): ?>
-                                                <button class="table__btn table__btn--edit sendbtn" data-applicant-name="<?php echo htmlspecialchars($applicant); ?>" data-user-id="<?php echo (int)($r['user_id'] ?? 0); ?>">Send</button>
-                                            <?php endif; ?>
+
+                                            <button class="table__btn table__btn--view showViewbtn" data-submission-id="<?php echo $submissionId; ?>">View</button>
+                                            <button class="table__btn table__btn--edit" data-user-id="<?php echo (int)($r['user_id'] ?? 0); ?>" data-applicant-name="<?php echo $applicant; ?>" data-status="<?php echo $status; ?>">Edit</button>
                                         </div>
                                     </td>
                                 </tr>
@@ -216,14 +261,16 @@ function statusBadgeClass($status)
                         <div class="pagination__left">
                             <span class="pagination__label">Rows per page:</span>
                             <select class="pagination__select">
-                                <option value="10">10</option>
-                                <option value="25">25</option>
+                                <option value="5">5</option>
+                                <option value="10" selected>10</option>
+                                <option value="20">20</option>
                                 <option value="50">50</option>
                                 <option value="100">100</option>
+                                <option value="All">All</option>
                             </select>
                         </div>
                         <div class="pagination__center">
-                            <span class="pagination__info">Showing 1-10 of 75 • Page 1/8</span>
+                            <span class="pagination__info">Showing 1-10 of 0 • Page 1/1</span>
                         </div>
                         <div class="pagination__right">
                             <button class="pagination__bttns pagination__button--disabled" disabled>Prev</button>
@@ -425,24 +472,7 @@ function statusBadgeClass($status)
         </div>
     </div>
 
-    <!-- Resend Confirmation Modal -->
-    <div id="resendConfirmModal" style="display:none; position: fixed; left: 0; top: 0; width: 100%; height: 100%; background: linear-gradient(135deg, rgba(24, 165, 88, 0.10) 0%, rgba(19, 101, 21, 0.10) 100%); z-index: 2250; align-items: center; justify-content: center; backdrop-filter: blur(8px); padding: 20px;">
-        <div style="background: var(--color-card); border-radius: 24px; max-width: 560px; width: 95%; margin: 0 auto; overflow: hidden; box-shadow: 0 25px 80px rgba(0,0,0,0.15), 0 10px 40px rgba(0,0,0,0.1); border: 1px solid var(--color-border); position: relative; display: flex; flex-direction: column;">
-            <div style="height: 100px; background: linear-gradient(135deg, #18a558 0%, #136515 100%); position: relative; overflow: hidden;"></div>
-            <div style="padding: 20px 32px 8px 32px;">
-                <h3 style="margin: 0 0 8px 0; color: #1a202c; font-size: 1.4rem; font-weight: 800; text-align:center;">Confirm Resend</h3>
-                <p style="color:#4a5568; text-align:center; margin:0 0 16px 0;">Send the exam permit again to the applicant below.</p>
-                <div style="border:1px solid #e2e8f0; border-radius:12px; background:#f7fafc; padding:12px 16px;">
-                    <div style="color:#2d3748; font-weight:600;">Applicant</div>
-                    <div id="resendConfirmName" style="color:#4a5568; margin-top:6px;">Name</div>
-                </div>
-                <div style="display:flex; justify-content:flex-end; gap:12px; margin-top:16px;">
-                    <button type="button" id="resendCancelBtn" style="padding: 10px 16px; border: 3px solid var(--color-border); background: var(--color-card); color: var(--color-text); border-radius: 12px; font-weight: 700; cursor: pointer;">Cancel</button>
-                    <button type="button" id="resendConfirmBtn" style="padding: 10px 16px; border: none; background: linear-gradient(135deg, #18a558 0%, #136515 100%); color: white; border-radius: 12px; font-weight: 700; cursor: pointer;">Resend Permit</button>
-                </div>
-            </div>
-        </div>
-    </div>
+
 
     <!-- Bulk Send Confirmation Modal -->
     <div id="bulkConfirmModal" style="display:none; position: fixed; left: 0; top: 0; width: 100%; height: 100%; background: linear-gradient(135deg, rgba(24, 165, 88, 0.10) 0%, rgba(19, 101, 21, 0.10) 100%); z-index: 2250; align-items: center; justify-content: center; backdrop-filter: blur(8px); padding: 20px;">
@@ -541,7 +571,7 @@ function statusBadgeClass($status)
                     <div><strong>Current Status:</strong> <span id="upsCurrent" class="badge">-</span></div>
                 </div>
                 <div style="display:flex; gap:10px; justify-content:center; margin: 14px 0;">
-                    <button type="button" id="markUsedBtn" style="padding:10px 14px; border:none; background:#38a169; color:white; border-radius:10px; font-weight:700; cursor:pointer;">Mark as Used</button>
+                    <button type="button" id="markUsedBtn" style="padding:10px 14px; border:none; background:#e53e3e; color:white; border-radius:10px; font-weight:700; cursor:pointer;">Mark as Used</button>
                     <button type="button" id="markPendingBtn" style="padding:10px 14px; border:none; background:#d69e2e; color:white; border-radius:10px; font-weight:700; cursor:pointer;">Mark as Pending</button>
                 </div>
                 <div id="upsFeedback" style="display:none; margin-top:10px; text-align:center; font-weight:700; padding:10px; border-radius:10px;"></div>
@@ -651,10 +681,8 @@ function statusBadgeClass($status)
                                 if (row) {
                                     const statusEl = row.querySelector('.status');
                                     if (statusEl) statusEl.textContent = 'pending';
-                                    const resendBtn = row.querySelector('.showResendbtn');
                                     if (item.mode === 'created') {
                                         if (sendBtn) sendBtn.style.display = 'none';
-                                        if (resendBtn) resendBtn.style.display = 'inline-block';
                                     }
                                 }
                             });
@@ -772,9 +800,8 @@ function statusBadgeClass($status)
 
             function badgeClassForStatus(s) {
                 const val = (s || '').toLowerCase().trim();
-                if (val === 'used') return 'badge badge--success';
+                if (val === 'used') return 'badge badge--danger';
                 if (val === 'pending') return 'badge badge--warning';
-                if (val === 'exam permit not sent') return 'badge badge--danger';
                 return 'badge badge--secondary';
             }
 
@@ -993,6 +1020,36 @@ function statusBadgeClass($status)
             if (upsModal) upsModal.addEventListener('click', function(e) {
                 if (e.target === upsModal) closeStatusUpdateModal();
             });
+            document.querySelectorAll('.table__btn--edit').forEach(btn => {
+                btn.addEventListener('click', async function() {
+                    const uid = parseInt(this.getAttribute('data-user-id') || '0', 10);
+                    const name = this.getAttribute('data-applicant-name') || '-';
+                    const status = this.getAttribute('data-status') || 'pending';
+                    try {
+                        if (typeof window.showLoader === 'function') window.showLoader();
+                    } catch (e) {}
+                    try {
+                        const res = await fetch('get_latest_permit.php?user_id=' + encodeURIComponent(uid));
+                        const data = await res.json();
+                        const num = (data && data.ok && (data.applicant_number || data.permit?.applicant_number)) ? (data.applicant_number || data.permit.applicant_number) : '-';
+                        openStatusUpdateModal({
+                            name: name,
+                            number: num,
+                            status: status
+                        });
+                    } catch (e) {
+                        openStatusUpdateModal({
+                            name: name,
+                            number: '-',
+                            status: status
+                        });
+                    } finally {
+                        try {
+                            if (typeof window.hideLoader === 'function') window.hideLoader();
+                        } catch (e) {}
+                    }
+                });
+            });
             // Initialize buttons state on load
             updateScanButtons();
         });
@@ -1115,12 +1172,8 @@ function statusBadgeClass($status)
 
             function statusClass(name) {
                 const s = (name || '').toLowerCase();
-                if (s === 'exam permit sent') return 'badge badge--success';
-                if (s === 'exam permit not sent') return 'badge badge--danger';
-                if (s === 'accepted' || s === 'approved') return 'badge badge--success';
-                if (s === 'pending' || s === 'waitlisted') return 'badge badge--warning';
-                if (s === 'rejected' || s === 'failed') return 'badge badge--danger';
-                if (s === 'in review' || s === 'examination') return 'badge badge--info';
+                if (s === 'used') return 'badge badge--danger';
+                if (s === 'pending') return 'badge badge--warning';
                 return 'badge badge--secondary';
             }
 
@@ -1425,56 +1478,7 @@ function statusBadgeClass($status)
                     openSendModal(name, uid);
                 });
             });
-            // Resend button behavior: open confirmation modal then call backend
-            function openResendModal(name, uid) {
-                const modal = document.getElementById('resendConfirmModal');
-                const nameEl = document.getElementById('resendConfirmName');
-                const cancelBtn = document.getElementById('resendCancelBtn');
-                const confirmBtn = document.getElementById('resendConfirmBtn');
-                if (!modal || !nameEl || !cancelBtn || !confirmBtn) return;
-                nameEl.textContent = name;
-                modal.style.display = 'flex';
-                cancelBtn.onclick = function() {
-                    modal.style.display = 'none';
-                };
-                confirmBtn.onclick = async function() {
-                    modal.style.display = 'none';
-                    if (typeof window.showLoader === 'function') window.showLoader();
-                    try {
-                        const defaultAccent = document.getElementById('sendAccentColor')?.value || '#18a558';
-                        const params = new URLSearchParams();
-                        params.append('user_id', String(uid));
-                        params.append('accent_color', defaultAccent);
-                        params.append('applicant_name', name);
-                        const res = await fetch('resend_application_permit.php', {
-                            method: 'POST',
-                            headers: {
-                                'Content-Type': 'application/x-www-form-urlencoded'
-                            },
-                            body: params.toString(),
-                        });
-                        const data = await res.json();
-                        if (!data || !data.ok) {
-                            throw new Error(data?.error || 'Failed to resend permit');
-                        }
-                        showFeedbackModal('Exam Permit resent successfully.', true);
-                    } catch (err) {
-                        console.error(err);
-                        showFeedbackModal('Error resending permit: ' + err.message, false);
-                    } finally {
-                        if (typeof window.hideLoader === 'function') window.hideLoader();
-                    }
-                };
-            }
-            document.querySelectorAll('.showResendbtn').forEach(btn => {
-                btn.addEventListener('click', function() {
-                    const name = this.getAttribute('data-applicant-name') || 'this applicant';
-                    const uidStr = this.getAttribute('data-user-id') || '0';
-                    const uid = parseInt(uidStr, 10) || 0;
-                    if (!uid) return;
-                    openResendModal(name, uid);
-                });
-            });
+
             // Wire applicant number option changes
             if (applicantPrefixSelect) applicantPrefixSelect.addEventListener('change', updateApplicantNumberFromOptions);
             if (applicantDigitsInput) applicantDigitsInput.addEventListener('input', updateApplicantNumberFromOptions);
@@ -1551,8 +1555,6 @@ function statusBadgeClass($status)
                         const statusEl = row ? row.querySelector('.status') : null;
                         if (statusEl) statusEl.textContent = 'pending';
                         if (sendBtn) sendBtn.style.display = 'none';
-                        const resendBtn = row ? row.querySelector('.showResendbtn') : null;
-                        if (resendBtn) resendBtn.style.display = 'inline-block';
                         closeSendModal();
                         showFeedbackModal('Exam Permit sent successfully.', true);
                     } catch (err) {
@@ -1563,6 +1565,175 @@ function statusBadgeClass($status)
                     }
                 });
             }
+        });
+    </script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            var section = document.getElementById('exam_permit_generation_section');
+            if (!section) return;
+            var table = section.querySelector('.table');
+            var tbody = table ? table.querySelector('tbody') : null;
+            if (!tbody) return;
+            var rows = Array.from(tbody.querySelectorAll('tr')).map(function(tr) {
+                var get = function(sel) {
+                    var el = tr.querySelector(sel);
+                    return el ? el.textContent.trim() : ''
+                };
+                return {
+                    tr: tr,
+                    values: {
+                        'no': (function() {
+                            var t = get('[data-cell="no"]');
+                            var n = parseInt(t, 10);
+                            return isNaN(n) ? t : n
+                        })(),
+                        'applicant-name': get('[data-cell="applicant-name"]'),
+                        'academic-year': get('[data-cell="academic-year"]'),
+                        'date-applied': get('[data-cell="date-applied"]'),
+                        'status': (function() {
+                            var s = tr.querySelector('[data-cell="status"] .status');
+                            return s ? s.textContent.trim() : get('[data-cell="status"]')
+                        })()
+                    }
+                }
+            });
+            var searchInput = section.querySelector('.search_input_container input');
+            var select = section.querySelector('.pagination__select');
+            var info = section.querySelector('.pagination__info');
+            var btns = section.querySelectorAll('.pagination__bttns');
+            var prevBtn = btns[0];
+            var nextBtn = btns[btns.length - 1];
+            var sortHeaders = section.querySelectorAll('th.sortable');
+            var state = {
+                query: '',
+                pageSize: parseInt(select && select.value ? select.value : 10, 10) || 10,
+                page: 1,
+                sortCol: null,
+                sortDir: 'asc'
+            };
+
+            function parseDate(t) {
+                if (!t || t === '—') return 0;
+                var r = /^([A-Za-z]+)\s+(\d{1,2}),\s+(\d{4})\s*-\s*(\d{1,2}):(\d{2})\s*(AM|PM)$/;
+                var m = t.match(r);
+                if (m) {
+                    var months = {
+                        January: 0,
+                        February: 1,
+                        March: 2,
+                        April: 3,
+                        May: 4,
+                        June: 5,
+                        July: 6,
+                        August: 7,
+                        September: 8,
+                        October: 9,
+                        November: 10,
+                        December: 11
+                    };
+                    var monthIdx = months[m[1]];
+                    if (monthIdx === undefined) return 0;
+                    var day = parseInt(m[2], 10) || 1;
+                    var year = parseInt(m[3], 10) || 1970;
+                    var hour = parseInt(m[4], 10) || 0;
+                    var minute = parseInt(m[5], 10) || 0;
+                    var ampm = m[6].toUpperCase();
+                    if (ampm === 'PM' && hour < 12) hour += 12;
+                    if (ampm === 'AM' && hour === 12) hour = 0;
+                    var d = new Date(year, monthIdx, day, hour, minute, 0, 0);
+                    return d.getTime();
+                }
+                var d = new Date(t);
+                return isNaN(d.getTime()) ? 0 : d.getTime();
+            }
+
+            function comparator(a, b) {
+                var c = state.sortCol;
+                if (!c) return 0;
+                var va = a.values[c],
+                    vb = b.values[c];
+                var res = 0;
+                switch (c) {
+                    case 'no':
+                        res = (typeof va === 'number' ? va : parseInt(va, 10) || 0) - (typeof vb === 'number' ? vb : parseInt(vb, 10) || 0);
+                        break;
+                    case 'date-applied':
+                        res = parseDate(va) - parseDate(vb);
+                        break;
+                    default:
+                        var sa = (va || '').toString().toLowerCase();
+                        var sb = (vb || '').toString().toLowerCase();
+                        res = sa.localeCompare(sb)
+                }
+                return state.sortDir === 'asc' ? res : -res
+            }
+
+            function filtered() {
+                if (!state.query) return rows.slice();
+                var q = state.query.toLowerCase();
+                return rows.filter(function(r) {
+                    var s = [r.values['applicant-name'], r.values['academic-year'], r.values['date-applied'], r.values['status']].join(' ').toLowerCase();
+                    return s.indexOf(q) !== -1
+                })
+            }
+
+            function render() {
+                var data = filtered();
+                if (state.sortCol) data.sort(comparator);
+                var total = data.length;
+                var ps = (select && select.value === 'All') ? total : state.pageSize;
+                if (ps <= 0 || isNaN(ps)) ps = 10;
+                var pages = Math.max(1, Math.ceil(total / ps));
+                if (state.page > pages) state.page = 1;
+                var start = total === 0 ? 0 : (state.page - 1) * ps + 1;
+                var end = Math.min(total, state.page * ps);
+                tbody.innerHTML = '';
+                var slice = (select && select.value === 'All') ? data : data.slice((state.page - 1) * ps, (state.page - 1) * ps + ps);
+                slice.forEach(function(r) {
+                    tbody.appendChild(r.tr)
+                });
+                info.textContent = 'Showing ' + (total === 0 ? 0 : start) + '-' + (total === 0 ? 0 : end) + ' of ' + total + ' • Page ' + state.page + '/' + pages;
+                var disablePrev = state.page <= 1 || total === 0;
+                var disableNext = state.page >= pages || total === 0;
+                prevBtn.disabled = disablePrev;
+                nextBtn.disabled = disableNext;
+                prevBtn.classList.toggle('pagination__button--disabled', disablePrev);
+                nextBtn.classList.toggle('pagination__button--disabled', disableNext)
+            }
+            if (searchInput) searchInput.addEventListener('input', function() {
+                state.query = this.value;
+                state.page = 1;
+                render()
+            });
+            if (select) select.addEventListener('change', function() {
+                state.pageSize = this.value === 'All' ? rows.length : parseInt(this.value, 10) || 10;
+                state.page = 1;
+                render()
+            });
+            if (prevBtn) prevBtn.addEventListener('click', function() {
+                if (state.page > 1) {
+                    state.page--;
+                    render()
+                }
+            });
+            if (nextBtn) nextBtn.addEventListener('click', function() {
+                state.page++;
+                render()
+            });
+            sortHeaders.forEach(function(th) {
+                th.addEventListener('click', function() {
+                    var col = th.getAttribute('data-column');
+                    if (state.sortCol === col) {
+                        state.sortDir = state.sortDir === 'asc' ? 'desc' : 'asc'
+                    } else {
+                        state.sortCol = col;
+                        state.sortDir = 'asc'
+                    }
+                    state.page = 1;
+                    render()
+                })
+            });
+            render()
         });
     </script>
 </body>

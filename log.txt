@@ -352,3 +352,6 @@ URL=
 2025-11-13 14:07:06 [email:response] {"http_code":401,"body":"{\"success\":false,\"error\":\"Invalid password.\"}"}
 2025-11-13 14:07:06 [email:fail] {"receiver":"ricoimpulsement@gmail.com","subject":"PLP - Student Success Office [Exam Permit]","http_code":401,"transport":"json"}
 2025-11-13 14:07:07 [email:bulk_fail] {"user_id":5,"mode":"reuse","applicant_number":"PLPPasig-10000000"}
+2025-11-14 13:33:40 [email:attempt] {"api":"https://gold-lion-549609.hostingersite.com/email-api.php","sender":"admin@sso.edu","receiver":"ricoimpulsement@gmail.com","subject":"PLP - Student Success Office [Exam Permit]"}
+2025-11-14 13:33:45 [email:response] {"http_code":200,"body":"{\"success\":true,\"message\":\"Email sent successfully.\"}"}
+2025-11-14 13:33:45 [email:success] {"receiver":"ricoimpulsement@gmail.com","subject":"PLP - Student Success Office [Exam Permit]","http_code":200,"transport":"json"}

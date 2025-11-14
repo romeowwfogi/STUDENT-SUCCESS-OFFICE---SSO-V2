@@ -34,7 +34,7 @@ require_once 'middleware/auth.php';
                     </div>
 
                     <div class="settings-content">
-                        <div class="settings-item">
+                        <div class="settings-item" onclick="window.location.href = 'officer_management.php';">
                             <div class="settings-item__label">
                                 <span class="settings-item__text">Officer Management</span>
                                 <span class="settings-item__description">Manage officer information efficiently, including profiles, roles, and permissions. This module helps streamline administrative oversight and maintain accurate personnel records.</span>
@@ -48,7 +48,7 @@ require_once 'middleware/auth.php';
                             </div>
                         </div>
 
-                        <div class="settings-item">
+                        <!-- <div class="settings-item">
                             <div class="settings-item__label">
                                 <span class="settings-item__text">Expiration Configuration</span>
                                 <span class="settings-item__description">Configure and manage expiration time limits for registration verification links, OTPs, and password reset links. This ensures enhanced security by preventing the use of expired credentials and maintaining system integrity.</span>
@@ -60,9 +60,9 @@ require_once 'middleware/auth.php';
                                     </svg>
                                 </button>
                             </div>
-                        </div>
+                        </div> -->
 
-                        <div class="settings-item">
+                        <div class="settings-item" onclick="window.location.href = 'faqs_management.php';">
                             <div class="settings-item__label">
                                 <span class="settings-item__text">Email Template Management</span>
                                 <span class="settings-item__description">Create, edit, and organize email templates for consistent communication. This feature ensures standardized messaging for admissions, notifications, and service updates.</span>
@@ -76,7 +76,7 @@ require_once 'middleware/auth.php';
                             </div>
                         </div>
 
-                        <div class="settings-item">
+                        <div class="settings-item" onclick="window.location.href = 'faqs_management.php';">
                             <div class="settings-item__label">
                                 <span class="settings-item__text">FAQ's Management</span>
                                 <span class="settings-item__description">Create, edit, and organize email templates for consistent communication. This feature ensures standardized messaging for admissions, notifications, and service updates.</span>
@@ -90,7 +90,7 @@ require_once 'middleware/auth.php';
                             </div>
                         </div>
 
-                        <div class="settings-item">
+                        <div class="settings-item" onclick="window.location.href = 'contact_details.php';">
                             <div class="settings-item__label">
                                 <span class="settings-item__text">Contact Details</span>
                                 <span class="settings-item__description">Create, edit, and organize email templates for consistent communication. This feature ensures standardized messaging for admissions, notifications, and service updates.</span>
@@ -118,7 +118,6 @@ require_once 'middleware/auth.php';
                             </div>
                         </div>
 
-                        
                         <div class="settings-item">
                             <div class="settings-item__label">
                                 <span class="settings-item__text">Terms and Conditions</span>
@@ -133,7 +132,7 @@ require_once 'middleware/auth.php';
                             </div>
                         </div>
 
-                        <div class="settings-item">
+                        <div class="settings-item" onclick="window.location.href = 'admission_status_remarks.php';">
                             <div class="settings-item__label">
                                 <span class="settings-item__text">Admission Status-Remarks Management</span>
                                 <span class="settings-item__description">Track and update admission statuses with detailed remarks. This allows for transparent communication and easy monitoring of application progress.</span>
@@ -147,7 +146,7 @@ require_once 'middleware/auth.php';
                             </div>
                         </div>
 
-                        <div class="settings-item">
+                        <div class="settings-item" onclick="window.location.href = 'services_status_remarks.php';">
                             <div class="settings-item__label">
                                 <span class="settings-item__text">Services Status-Remarks Management</span>
                                 <span class="settings-item__description">Monitor and update the status of various services along with remarks. This feature supports better service tracking, accountability, and communication with stakeholders.</span>
@@ -161,7 +160,7 @@ require_once 'middleware/auth.php';
                             </div>
                         </div>
 
-                        <div class="settings-item">
+                        <div class="settings-item" onclick="window.location.href = 'link_management.php';">
                             <div class="settings-item__label">
                                 <span class="settings-item__text">Link Management</span>
                                 <span class="settings-item__description">Manage and organize important links in one centralized location. This module simplifies access to frequently used resources and ensures proper linkage across systems.</span>
