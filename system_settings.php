@@ -78,6 +78,63 @@ require_once 'middleware/auth.php';
 
                         <div class="settings-item">
                             <div class="settings-item__label">
+                                <span class="settings-item__text">FAQ's Management</span>
+                                <span class="settings-item__description">Create, edit, and organize email templates for consistent communication. This feature ensures standardized messaging for admissions, notifications, and service updates.</span>
+                            </div>
+                            <div class="settings-item__control">
+                                <button class="btn btn--icon" id="openEmailModalBtn" aria-label="Change email">
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-chevron-right-icon lucide-chevron-right">
+                                        <path d="m9 18 6-6-6-6" />
+                                    </svg>
+                                </button>
+                            </div>
+                        </div>
+
+                        <div class="settings-item">
+                            <div class="settings-item__label">
+                                <span class="settings-item__text">Contact Details</span>
+                                <span class="settings-item__description">Create, edit, and organize email templates for consistent communication. This feature ensures standardized messaging for admissions, notifications, and service updates.</span>
+                            </div>
+                            <div class="settings-item__control">
+                                <button class="btn btn--icon" id="openEmailModalBtn" aria-label="Change email">
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-chevron-right-icon lucide-chevron-right">
+                                        <path d="m9 18 6-6-6-6" />
+                                    </svg>
+                                </button>
+                            </div>
+                        </div>
+
+                        <div class="settings-item">
+                            <div class="settings-item__label">
+                                <span class="settings-item__text">Privacy Policy</span>
+                                <span class="settings-item__description">Create, edit, and organize email templates for consistent communication. This feature ensures standardized messaging for admissions, notifications, and service updates.</span>
+                            </div>
+                            <div class="settings-item__control">
+                                <button class="btn btn--icon" id="openEmailModalBtn" aria-label="Change email">
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-chevron-right-icon lucide-chevron-right">
+                                        <path d="m9 18 6-6-6-6" />
+                                    </svg>
+                                </button>
+                            </div>
+                        </div>
+
+                        
+                        <div class="settings-item">
+                            <div class="settings-item__label">
+                                <span class="settings-item__text">Terms and Conditions</span>
+                                <span class="settings-item__description">Create, edit, and organize email templates for consistent communication. This feature ensures standardized messaging for admissions, notifications, and service updates.</span>
+                            </div>
+                            <div class="settings-item__control">
+                                <button class="btn btn--icon" id="openEmailModalBtn" aria-label="Change email">
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-chevron-right-icon lucide-chevron-right">
+                                        <path d="m9 18 6-6-6-6" />
+                                    </svg>
+                                </button>
+                            </div>
+                        </div>
+
+                        <div class="settings-item">
+                            <div class="settings-item__label">
                                 <span class="settings-item__text">Admission Status-Remarks Management</span>
                                 <span class="settings-item__description">Track and update admission statuses with detailed remarks. This allows for transparent communication and easy monitoring of application progress.</span>
                             </div>

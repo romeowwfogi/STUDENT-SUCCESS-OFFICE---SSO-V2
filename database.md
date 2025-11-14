@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1
--- Generation Time: Nov 11, 2025 at 01:40 AM
+-- Generation Time: Nov 13, 2025 at 05:02 PM
 -- Server version: 11.8.3-MariaDB-log
 -- PHP Version: 7.2.34
 
@@ -41,7 +41,34 @@ CREATE TABLE `acc_locking` (
 INSERT INTO `acc_locking` (`id`, `user_id`, `attempt_left`, `last_attempt_at`) VALUES
 (1, 1, 5, '2025-10-17 16:10:01'),
 (2, 2, 5, '2025-11-03 04:31:28'),
-(3, 3, 5, '2025-11-07 20:34:12');
+(3, 3, 5, '2025-11-07 20:34:12'),
+(4, 4, 5, '2025-11-11 02:49:55'),
+(5, 5, 5, '2025-11-11 02:54:03'),
+(11, 11, 5, '2025-11-12 06:17:59'),
+(19, 19, 5, '2025-11-13 14:48:37');
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `admission_controller`
+--
+
+CREATE TABLE `admission_controller` (
+  `id` int(11) NOT NULL,
+  `user_id` int(11) NOT NULL,
+  `can_apply` tinyint(1) NOT NULL DEFAULT 1
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+--
+-- Dumping data for table `admission_controller`
+--
+
+INSERT INTO `admission_controller` (`id`, `user_id`, `can_apply`) VALUES
+(1, 5, 0),
+(2, 11, 0),
+(3, 1, 0),
+(4, 1, 0),
+(5, 19, 0);
 
 -- --------------------------------------------------------
 
@@ -64,7 +91,34 @@ CREATE TABLE `admission_cycles` (
 --
 
 INSERT INTO `admission_cycles` (`id`, `admission_date_time_start`, `admission_date_time_end`, `academic_year_start`, `academic_year_end`, `is_automatically_open_closed`, `is_archived`) VALUES
-(1, '2025-11-10 06:32:00', '2025-11-17 06:32:00', '2025', '2026', 0, 0);
+(1, '2025-11-10 06:32:00', '2025-11-17 06:32:00', '2025', '2026', 0, 0),
+(2, '2025-11-10 12:58:00', '2025-11-17 12:58:00', '2025', '2026', 0, 1);
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `announcement`
+--
+
+CREATE TABLE `announcement` (
+  `id` int(11) NOT NULL,
+  `title` varchar(255) NOT NULL,
+  `description` text NOT NULL,
+  `tag` varchar(100) DEFAULT NULL,
+  `date_added` datetime DEFAULT current_timestamp()
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `announcement_tag`
+--
+
+CREATE TABLE `announcement_tag` (
+  `id` int(11) NOT NULL,
+  `name` varchar(100) NOT NULL,
+  `hex_color` varchar(10) DEFAULT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 -- --------------------------------------------------------
 
@@ -92,7 +146,8 @@ INSERT INTO `api_list` (`id`, `name`, `api_url`, `description`, `created_at`, `u
 (4, 'UPLOAD_REQUIREMENTS_IMAGES', 'https://gold-lion-549609.hostingersite.com/upload.php', 'handles updating existing image assets in the requirements image system.', '2025-10-29 22:21:49', '2025-11-02 00:08:28'),
 (5, 'UPDATE_REQUIREMENTS_API', 'https://gold-lion-549609.hostingersite.com/update-requirement.php', 'handles image assets in the requirements image system.', '2025-10-29 22:21:49', '2025-11-02 20:25:30'),
 (6, 'UPLOAD_REQUIREMENTS_BASE_URL', 'https://gold-lion-549609.hostingersite.com/', 'handles image assets in the requirements image system.', '2025-10-29 22:21:49', '2025-11-02 20:24:08'),
-(7, 'PREVIEW_REQUIREMENTS_URL', 'https://gold-lion-549609.hostingersite.com/preview-requirement.php', 'handles image assets in the requirements image system.', '2025-10-29 22:21:49', '2025-11-02 20:24:08');
+(7, 'PREVIEW_REQUIREMENTS_URL', 'https://gold-lion-549609.hostingersite.com/preview-requirement.php', 'handles image assets in the requirements image system.', '2025-10-29 22:21:49', '2025-11-02 20:24:08'),
+(9, 'LANDING_PAGE_URL', 'https://plpasig-admission.icu/', 'appears to be a web address for an online admission or enrollment portal, possibly related to Pamantasan ng Lungsod ng Pasig (PLPasig). It likely hosts information or forms for student applications and admissions.', '2025-11-13 14:57:37', '2025-11-13 14:57:37');
 
 -- --------------------------------------------------------
 
@@ -134,7 +189,9 @@ CREATE TABLE `applicant_types` (
 INSERT INTO `applicant_types` (`id`, `admission_cycle_id`, `name`, `is_active`) VALUES
 (1, 1, 'SHS Graduate', 1),
 (2, 1, 'Transferee', 1),
-(3, 1, 'On-Going Grade 12', 1);
+(3, 1, 'On-Going Grade 12', 1),
+(4, 2, 'Testing', 1),
+(5, 1, 'Testing', 0);
 
 -- --------------------------------------------------------
 
@@ -168,6 +225,15 @@ CREATE TABLE `application_permit` (
   `updated_at` datetime NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp()
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
+--
+-- Dumping data for table `application_permit`
+--
+
+INSERT INTO `application_permit` (`id`, `user_id`, `applicant_number`, `status`, `date_sent`, `admission_officer`, `applicant_name`, `exam_date`, `exam_time`, `room_no`, `exam_venue`, `application_period_start`, `application_period_end`, `application_period_text`, `accent_color`, `qr_text`, `download_url`, `email_subject`, `email_body`, `email_status`, `email_sent_at`, `used_at`, `updated_at`) VALUES
+(17, 5, 'PLPPasig-10000000', 'pending', '2025-11-11 19:44:16', 'Arlene Daniel', 'Mark Andrie Datus', '2025-11-17', '04:28:00', 'Room 301', '3rd Floor • Room 301', '2025-11-10', '2025-11-17', 'November 10 to November 17, 2025', '#f00000', 'PLPPasig-10000000', 'https://gold-lion-549609.hostingersite.com/permit.php?permit_no=PLPPasig-10000000', 'PLP - Student Success Office [Exam Permit]', '<!DOCTYPE html>\n<html>\n\n<head>\n    <meta charset=\"UTF-8\">\n    <title>{{subject}}</title>\n    <link href=\"https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap\" rel=\"stylesheet\">\n    <style>\n        body {\n            font-family: \'Poppins\', Arial, sans-serif;\n            background-color: #f4f4f4;\n            padding: 20px;\n            margin: 0;\n        }\n\n        .email-container {\n            max-width: 600px;\n            margin: 0 auto;\n            background: #ffffff;\n            border-radius: 8px;\n            overflow: hidden;\n            box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.1);\n        }\n\n        /* Header */\n        .header-table {\n            width: 100%;\n            background: #ffffff;\n            padding: 10px 15px;\n        }\n\n        .header-table img {\n            max-height: 70px;\n            vertical-align: middle;\n            margin: 0 5px;\n        }\n\n        .header-text {\n            text-align: center;\n            padding-top: 5px;\n            padding-bottom: 10px;\n        }\n\n        .header-text .school-name {\n            background: #0c326f;\n            color: white;\n            font-weight: 600;\n            font-size: 12px;\n            padding: 10px;\n            display: inline-block;\n            border-radius: 15px 0 0 15px;\n            margin-bottom: 4px;\n        }\n\n        .header-text .college-name {\n            font-size: 14px;\n            font-weight: 600;\n            color: #000;\n        }\n\n        .header-text .address {\n            font-size: 12px;\n            color: #333;\n        }\n\n        /* Content */\n        .content {\n            padding: 20px;\n            font-size: 14px;\n            line-height: 1.6;\n            color: #333;\n        }\n\n        .content p {\n            margin: 0 0 15px;\n        }\n\n        .button {\n            display: inline-block;\n            background: #004aad;\n            color: #fff !important;\n            padding: 10px 15px;\n            text-decoration: none;\n            border-radius: 4px;\n            margin-top: 10px;\n        }\n\n        .notice {\n            font-size: 13px;\n            color: #555;\n            background: #f8f8f8;\n            padding: 10px;\n            border-radius: 6px;\n            margin-top: 20px;\n            border-left: 4px solid #004aad;\n        }\n\n        .official-email {\n            text-align: center;\n            font-size: 14px;\n            color: #004aad;\n            font-weight: 600;\n            margin-top: 5px;\n        }\n\n        .footer {\n            font-size: 12px;\n            color: #888;\n            text-align: center;\n            padding: 15px;\n            background: #f9f9f9;\n        }\n\n        /* ✅ Responsive Header for Mobile */\n        @media only screen and (max-width: 480px) {\n            .header-table td {\n                display: block !important;\n                width: 100% !important;\n                text-align: center !important;\n            }\n\n            .header-table img {\n                display: inline-block !important;\n                max-height: 60px !important;\n                margin: 5px 3px !important;\n            }\n\n            .header-table td[align=\"right\"] {\n                text-align: center !important;\n                padding-top: 10px !important;\n            }\n        }\n    </style>\n</head>\n\n<body>\n    <div class=\"email-container\">\n        <!-- HEADER -->\n        <table class=\"header-table\" cellpadding=\"0\" cellspacing=\"0\" role=\"presentation\">\n            <tr>\n                <!-- LOGOS -->\n                <td align=\"left\" valign=\"middle\" style=\"white-space:nowrap;\">\n                    <img src=\"https://gcdnb.pbrd.co/images/Pni5FEz4UOEJ.png?o=1\" alt=\"PLP Logo\">\n                    <img src=\"https://gcdnb.pbrd.co/images/EFxDeFIopVQN.png?o=1\" alt=\"SSO Logo\">\n                </td>\n\n                <!-- TEXT -->\n                <td align=\"right\" valign=\"middle\" style=\"text-align:right;\">\n                    <div style=\"background:#0c326f; color:#fff; font-weight:600; font-size:12px; padding:5px 10px; display:inline-block; border-radius:15px 0 0 15px; margin-bottom:4px;\">\n                        PAMANTASAN NG LUNGSOD NG PASIG\n                    </div><br>\n                    <div style=\"font-size:14px; font-weight:600; color:#000;\">\n                        Student Success Office\n                    </div>\n                    <div style=\"font-size:12px; color:#333;\">\n                        Alkalde Jose St. Kapasigan Pasig City, Philippines 1600\n                    </div>\n                </td>\n            </tr>\n        </table>\n\n        <!-- EMAIL CONTENT -->\n        <div class=\"content\">\n            <p>Hello <strong>Mark Andrie Datus</strong>!</p>\n\n            <p>\n                This is to inform you that your admission for\n                <strong>2025 - 2026</strong>-<strong>Testing</strong> has been updated by the\n                <strong>Pamantasan ng Lungsod ng Pasig – Student Success Office (SSO)</strong>.\n            </p>\n\n            <table style=\"width: 100%; border-collapse: collapse; margin: 20px 0;\">\n                <tr>\n                    <td style=\"padding: 8px; border: 1px solid #ddd; font-weight: bold;\">Applicant #</td>\n                    <td style=\"padding: 8px; border: 1px solid #ddd;\">PLPPasig-10000000</td>\n                </tr>\n                <tr>\n                    <td style=\"padding: 8px; border: 1px solid #ddd; font-weight: bold;\">Venue</td>\n                    <td style=\"padding: 8px; border: 1px solid #ddd;\">Room 301 - 3rd Floor</td>\n                </tr>\n                <tr>\n                    <td style=\"padding: 8px; border: 1px solid #ddd; font-weight: bold;\">Start-End Date Time</td>\n                    <td style=\"padding: 8px; border: 1px solid #ddd; color: #004aad; font-weight: bold;\">2025-11-17-04:28:00</td>\n                </tr>\n            </table>\n\n            <p style=\"text-align: center; margin: 25px 0;\">\n                <a href=\"https://gold-lion-549609.hostingersite.com/permit.php?permit_no=PLPPasig-10000000\"\n                    style=\"background-color: #004aad; color: #ffffff; text-decoration: none; padding: 12px 20px; border-radius: 5px; display: inline-block; font-weight: bold; margin-right:10px;\">\n                    Download Exam Permit\n                </a>\n                <a href=\"https://chart.googleapis.com/chart?chs=300x300&cht=qr&chl=http%3A%2F%2Flocalhost%2FSTUDENT+SUCCESS+OFFICE+-+SSO+V2%2Fvalidate_exam_permit.php%3Fqr_text%3DPLPPasig-10000000\"\n                    style=\"background-color: #004aad; color: #ffffff; text-decoration: none; padding: 12px 20px; border-radius: 5px; display: inline-block; font-weight: bold;\">\n                    Download QR Code\n                </a>\n            </p>\n\n            <div class=\"notice\">\n                This is an automated notification from the\n                <strong>Student Success Office (SSO)</strong>.\n                For security and authenticity, please note that the <strong>only official sender email address</strong> from our office is:\n                <div class=\"official-email\">plpasig.sso@gmail.com</div>\n                Any other email claiming to represent the SSO should be considered unauthorized.\n            </div>\n\n            <p style=\"margin-top: 20px;\">\n                Best regards,<br>\n                <strong>Pamantasan ng Lungsod ng Pasig<br>\n                    Student Success Office</strong>\n            </p>\n        </div>\n\n\n        <!-- FOOTER -->\n        <div class=\"footer\">\n            <p>Pamantasan ng Lungsod ng Pasig - Student Success Office</p>\n        </div>\n    </div>\n</body>\n\n</html>', 'sent', '2025-11-13 14:07:06', NULL, '2025-11-13 06:07:08'),
+(18, 1, 'PLPPasig-00000018', 'pending', '2025-11-13 05:47:08', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, '#18a558', 'PLPPasig-00000018', NULL, 'PLP - Student Success Office [Exam Permit]', '<!DOCTYPE html>\n<html>\n\n<head>\n    <meta charset=\"UTF-8\">\n    <title>{{subject}}</title>\n    <link href=\"https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap\" rel=\"stylesheet\">\n    <style>\n        body {\n            font-family: \'Poppins\', Arial, sans-serif;\n            background-color: #f4f4f4;\n            padding: 20px;\n            margin: 0;\n        }\n\n        .email-container {\n            max-width: 600px;\n            margin: 0 auto;\n            background: #ffffff;\n            border-radius: 8px;\n            overflow: hidden;\n            box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.1);\n        }\n\n        /* Header */\n        .header-table {\n            width: 100%;\n            background: #ffffff;\n            padding: 10px 15px;\n        }\n\n        .header-table img {\n            max-height: 70px;\n            vertical-align: middle;\n            margin: 0 5px;\n        }\n\n        .header-text {\n            text-align: center;\n            padding-top: 5px;\n            padding-bottom: 10px;\n        }\n\n        .header-text .school-name {\n            background: #0c326f;\n            color: white;\n            font-weight: 600;\n            font-size: 12px;\n            padding: 10px;\n            display: inline-block;\n            border-radius: 15px 0 0 15px;\n            margin-bottom: 4px;\n        }\n\n        .header-text .college-name {\n            font-size: 14px;\n            font-weight: 600;\n            color: #000;\n        }\n\n        .header-text .address {\n            font-size: 12px;\n            color: #333;\n        }\n\n        /* Content */\n        .content {\n            padding: 20px;\n            font-size: 14px;\n            line-height: 1.6;\n            color: #333;\n        }\n\n        .content p {\n            margin: 0 0 15px;\n        }\n\n        .button {\n            display: inline-block;\n            background: #004aad;\n            color: #fff !important;\n            padding: 10px 15px;\n            text-decoration: none;\n            border-radius: 4px;\n            margin-top: 10px;\n        }\n\n        .notice {\n            font-size: 13px;\n            color: #555;\n            background: #f8f8f8;\n            padding: 10px;\n            border-radius: 6px;\n            margin-top: 20px;\n            border-left: 4px solid #004aad;\n        }\n\n        .official-email {\n            text-align: center;\n            font-size: 14px;\n            color: #004aad;\n            font-weight: 600;\n            margin-top: 5px;\n        }\n\n        .footer {\n            font-size: 12px;\n            color: #888;\n            text-align: center;\n            padding: 15px;\n            background: #f9f9f9;\n        }\n\n        /* ✅ Responsive Header for Mobile */\n        @media only screen and (max-width: 480px) {\n            .header-table td {\n                display: block !important;\n                width: 100% !important;\n                text-align: center !important;\n            }\n\n            .header-table img {\n                display: inline-block !important;\n                max-height: 60px !important;\n                margin: 5px 3px !important;\n            }\n\n            .header-table td[align=\"right\"] {\n                text-align: center !important;\n                padding-top: 10px !important;\n            }\n        }\n    </style>\n</head>\n\n<body>\n    <div class=\"email-container\">\n        <!-- HEADER -->\n        <table class=\"header-table\" cellpadding=\"0\" cellspacing=\"0\" role=\"presentation\">\n            <tr>\n                <!-- LOGOS -->\n                <td align=\"left\" valign=\"middle\" style=\"white-space:nowrap;\">\n                    <img src=\"https://gcdnb.pbrd.co/images/Pni5FEz4UOEJ.png?o=1\" alt=\"PLP Logo\">\n                    <img src=\"https://gcdnb.pbrd.co/images/EFxDeFIopVQN.png?o=1\" alt=\"SSO Logo\">\n                </td>\n\n                <!-- TEXT -->\n                <td align=\"right\" valign=\"middle\" style=\"text-align:right;\">\n                    <div style=\"background:#0c326f; color:#fff; font-weight:600; font-size:12px; padding:5px 10px; display:inline-block; border-radius:15px 0 0 15px; margin-bottom:4px;\">\n                        PAMANTASAN NG LUNGSOD NG PASIG\n                    </div><br>\n                    <div style=\"font-size:14px; font-weight:600; color:#000;\">\n                        Student Success Office\n                    </div>\n                    <div style=\"font-size:12px; color:#333;\">\n                        Alkalde Jose St. Kapasigan Pasig City, Philippines 1600\n                    </div>\n                </td>\n            </tr>\n        </table>\n\n        <!-- EMAIL CONTENT -->\n        <div class=\"content\">\n            <p>Hello <strong>Romeo John Ador</strong>!</p>\n\n            <p>\n                This is to inform you that your admission for\n                <strong>2025 - 2026</strong>-<strong>On-Going Grade 12</strong> has been updated by the\n                <strong>Pamantasan ng Lungsod ng Pasig – Student Success Office (SSO)</strong>.\n            </p>\n\n            <table style=\"width: 100%; border-collapse: collapse; margin: 20px 0;\">\n                <tr>\n                    <td style=\"padding: 8px; border: 1px solid #ddd; font-weight: bold;\">Applicant #</td>\n                    <td style=\"padding: 8px; border: 1px solid #ddd;\">PLPPasig-00000018</td>\n                </tr>\n                <tr>\n                    <td style=\"padding: 8px; border: 1px solid #ddd; font-weight: bold;\">Venue</td>\n                    <td style=\"padding: 8px; border: 1px solid #ddd;\"> - </td>\n                </tr>\n                <tr>\n                    <td style=\"padding: 8px; border: 1px solid #ddd; font-weight: bold;\">Start-End Date Time</td>\n                    <td style=\"padding: 8px; border: 1px solid #ddd; color: #004aad; font-weight: bold;\">-</td>\n                </tr>\n            </table>\n\n            <p style=\"text-align: center; margin: 25px 0;\">\n                <a href=\"{{exam_permit_download_link}}\"\n                    style=\"background-color: #004aad; color: #ffffff; text-decoration: none; padding: 12px 20px; border-radius: 5px; display: inline-block; font-weight: bold; margin-right:10px;\">\n                    Download Exam Permit\n                </a>\n                <a href=\"https://chart.googleapis.com/chart?chs=300x300&cht=qr&chl=http%3A%2F%2Flocalhost%2FSTUDENT+SUCCESS+OFFICE+-+SSO+V2%2Fvalidate_exam_permit.php%3Fqr_text%3DPLPPasig-00000018\"\n                    style=\"background-color: #004aad; color: #ffffff; text-decoration: none; padding: 12px 20px; border-radius: 5px; display: inline-block; font-weight: bold;\">\n                    Download QR Code\n                </a>\n            </p>\n\n            <div class=\"notice\">\n                This is an automated notification from the\n                <strong>Student Success Office (SSO)</strong>.\n                For security and authenticity, please note that the <strong>only official sender email address</strong> from our office is:\n                <div class=\"official-email\">plpasig.sso@gmail.com</div>\n                Any other email claiming to represent the SSO should be considered unauthorized.\n            </div>\n\n            <p style=\"margin-top: 20px;\">\n                Best regards,<br>\n                <strong>Pamantasan ng Lungsod ng Pasig<br>\n                    Student Success Office</strong>\n            </p>\n        </div>\n\n\n        <!-- FOOTER -->\n        <div class=\"footer\">\n            <p>Pamantasan ng Lungsod ng Pasig - Student Success Office</p>\n        </div>\n    </div>\n</body>\n\n</html>', 'sent', '2025-11-13 14:06:55', NULL, '2025-11-13 06:06:58'),
+(19, 11, 'PLPPasig-00000019', 'pending', '2025-11-13 05:47:14', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, '#18a558', 'PLPPasig-00000019', NULL, 'PLP - Student Success Office [Exam Permit]', '<!DOCTYPE html>\n<html>\n\n<head>\n    <meta charset=\"UTF-8\">\n    <title>{{subject}}</title>\n    <link href=\"https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap\" rel=\"stylesheet\">\n    <style>\n        body {\n            font-family: \'Poppins\', Arial, sans-serif;\n            background-color: #f4f4f4;\n            padding: 20px;\n            margin: 0;\n        }\n\n        .email-container {\n            max-width: 600px;\n            margin: 0 auto;\n            background: #ffffff;\n            border-radius: 8px;\n            overflow: hidden;\n            box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.1);\n        }\n\n        /* Header */\n        .header-table {\n            width: 100%;\n            background: #ffffff;\n            padding: 10px 15px;\n        }\n\n        .header-table img {\n            max-height: 70px;\n            vertical-align: middle;\n            margin: 0 5px;\n        }\n\n        .header-text {\n            text-align: center;\n            padding-top: 5px;\n            padding-bottom: 10px;\n        }\n\n        .header-text .school-name {\n            background: #0c326f;\n            color: white;\n            font-weight: 600;\n            font-size: 12px;\n            padding: 10px;\n            display: inline-block;\n            border-radius: 15px 0 0 15px;\n            margin-bottom: 4px;\n        }\n\n        .header-text .college-name {\n            font-size: 14px;\n            font-weight: 600;\n            color: #000;\n        }\n\n        .header-text .address {\n            font-size: 12px;\n            color: #333;\n        }\n\n        /* Content */\n        .content {\n            padding: 20px;\n            font-size: 14px;\n            line-height: 1.6;\n            color: #333;\n        }\n\n        .content p {\n            margin: 0 0 15px;\n        }\n\n        .button {\n            display: inline-block;\n            background: #004aad;\n            color: #fff !important;\n            padding: 10px 15px;\n            text-decoration: none;\n            border-radius: 4px;\n            margin-top: 10px;\n        }\n\n        .notice {\n            font-size: 13px;\n            color: #555;\n            background: #f8f8f8;\n            padding: 10px;\n            border-radius: 6px;\n            margin-top: 20px;\n            border-left: 4px solid #004aad;\n        }\n\n        .official-email {\n            text-align: center;\n            font-size: 14px;\n            color: #004aad;\n            font-weight: 600;\n            margin-top: 5px;\n        }\n\n        .footer {\n            font-size: 12px;\n            color: #888;\n            text-align: center;\n            padding: 15px;\n            background: #f9f9f9;\n        }\n\n        /* ✅ Responsive Header for Mobile */\n        @media only screen and (max-width: 480px) {\n            .header-table td {\n                display: block !important;\n                width: 100% !important;\n                text-align: center !important;\n            }\n\n            .header-table img {\n                display: inline-block !important;\n                max-height: 60px !important;\n                margin: 5px 3px !important;\n            }\n\n            .header-table td[align=\"right\"] {\n                text-align: center !important;\n                padding-top: 10px !important;\n            }\n        }\n    </style>\n</head>\n\n<body>\n    <div class=\"email-container\">\n        <!-- HEADER -->\n        <table class=\"header-table\" cellpadding=\"0\" cellspacing=\"0\" role=\"presentation\">\n            <tr>\n                <!-- LOGOS -->\n                <td align=\"left\" valign=\"middle\" style=\"white-space:nowrap;\">\n                    <img src=\"https://gcdnb.pbrd.co/images/Pni5FEz4UOEJ.png?o=1\" alt=\"PLP Logo\">\n                    <img src=\"https://gcdnb.pbrd.co/images/EFxDeFIopVQN.png?o=1\" alt=\"SSO Logo\">\n                </td>\n\n                <!-- TEXT -->\n                <td align=\"right\" valign=\"middle\" style=\"text-align:right;\">\n                    <div style=\"background:#0c326f; color:#fff; font-weight:600; font-size:12px; padding:5px 10px; display:inline-block; border-radius:15px 0 0 15px; margin-bottom:4px;\">\n                        PAMANTASAN NG LUNGSOD NG PASIG\n                    </div><br>\n                    <div style=\"font-size:14px; font-weight:600; color:#000;\">\n                        Student Success Office\n                    </div>\n                    <div style=\"font-size:12px; color:#333;\">\n                        Alkalde Jose St. Kapasigan Pasig City, Philippines 1600\n                    </div>\n                </td>\n            </tr>\n        </table>\n\n        <!-- EMAIL CONTENT -->\n        <div class=\"content\">\n            <p>Hello <strong>E Fernandez</strong>!</p>\n\n            <p>\n                This is to inform you that your admission for\n                <strong>2025 - 2026</strong>-<strong>On-Going Grade 12</strong> has been updated by the\n                <strong>Pamantasan ng Lungsod ng Pasig – Student Success Office (SSO)</strong>.\n            </p>\n\n            <table style=\"width: 100%; border-collapse: collapse; margin: 20px 0;\">\n                <tr>\n                    <td style=\"padding: 8px; border: 1px solid #ddd; font-weight: bold;\">Applicant #</td>\n                    <td style=\"padding: 8px; border: 1px solid #ddd;\">PLPPasig-00000019</td>\n                </tr>\n                <tr>\n                    <td style=\"padding: 8px; border: 1px solid #ddd; font-weight: bold;\">Venue</td>\n                    <td style=\"padding: 8px; border: 1px solid #ddd;\"> - </td>\n                </tr>\n                <tr>\n                    <td style=\"padding: 8px; border: 1px solid #ddd; font-weight: bold;\">Start-End Date Time</td>\n                    <td style=\"padding: 8px; border: 1px solid #ddd; color: #004aad; font-weight: bold;\">-</td>\n                </tr>\n            </table>\n\n            <p style=\"text-align: center; margin: 25px 0;\">\n                <a href=\"{{exam_permit_download_link}}\"\n                    style=\"background-color: #004aad; color: #ffffff; text-decoration: none; padding: 12px 20px; border-radius: 5px; display: inline-block; font-weight: bold; margin-right:10px;\">\n                    Download Exam Permit\n                </a>\n                <a href=\"https://chart.googleapis.com/chart?chs=300x300&cht=qr&chl=http%3A%2F%2Flocalhost%2FSTUDENT+SUCCESS+OFFICE+-+SSO+V2%2Fvalidate_exam_permit.php%3Fqr_text%3DPLPPasig-00000019\"\n                    style=\"background-color: #004aad; color: #ffffff; text-decoration: none; padding: 12px 20px; border-radius: 5px; display: inline-block; font-weight: bold;\">\n                    Download QR Code\n                </a>\n            </p>\n\n            <div class=\"notice\">\n                This is an automated notification from the\n                <strong>Student Success Office (SSO)</strong>.\n                For security and authenticity, please note that the <strong>only official sender email address</strong> from our office is:\n                <div class=\"official-email\">plpasig.sso@gmail.com</div>\n                Any other email claiming to represent the SSO should be considered unauthorized.\n            </div>\n\n            <p style=\"margin-top: 20px;\">\n                Best regards,<br>\n                <strong>Pamantasan ng Lungsod ng Pasig<br>\n                    Student Success Office</strong>\n            </p>\n        </div>\n\n\n        <!-- FOOTER -->\n        <div class=\"footer\">\n            <p>Pamantasan ng Lungsod ng Pasig - Student Success Office</p>\n        </div>\n    </div>\n</body>\n\n</html>', 'sent', '2025-11-13 14:07:00', NULL, '2025-11-13 06:07:03');
+
 -- --------------------------------------------------------
 
 --
@@ -197,6 +263,28 @@ INSERT INTO `contact_support` (`id`, `name`, `email`, `subject`, `message`, `cre
 -- --------------------------------------------------------
 
 --
+-- Table structure for table `downloadable_forms`
+--
+
+CREATE TABLE `downloadable_forms` (
+  `id` int(11) NOT NULL,
+  `title` varchar(255) NOT NULL,
+  `slug` varchar(255) DEFAULT NULL,
+  `description` text DEFAULT NULL,
+  `file_url` varchar(1000) DEFAULT NULL,
+  `file_name` varchar(255) DEFAULT NULL,
+  `category` varchar(100) DEFAULT NULL,
+  `is_active` tinyint(1) NOT NULL DEFAULT 1,
+  `download_count` int(11) NOT NULL DEFAULT 0,
+  `version` varchar(32) DEFAULT NULL,
+  `published_at` datetime DEFAULT NULL,
+  `created_at` timestamp NULL DEFAULT current_timestamp(),
+  `updated_at` timestamp NULL DEFAULT current_timestamp() ON UPDATE current_timestamp()
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- --------------------------------------------------------
+
+--
 -- Table structure for table `email_template`
 --
 
@@ -219,9 +307,9 @@ INSERT INTO `email_template` (`id`, `title`, `subject`, `html_code`, `date_added
 (3, 'Reset Password With Link', 'PLP - Student Success Office [Reset Password]', '<!DOCTYPE html>\n<html>\n\n<head>\n    <meta charset=\"UTF-8\">\n    <title>{{subject}}</title>\n    <link href=\"https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap\" rel=\"stylesheet\">\n    <style>\n        body {\n            font-family: \'Poppins\', Arial, sans-serif;\n            background-color: #f4f4f4;\n            padding: 20px;\n            margin: 0;\n        }\n\n        .email-container {\n            max-width: 600px;\n            margin: 0 auto;\n            background: #ffffff;\n            border-radius: 8px;\n            overflow: hidden;\n            box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.1);\n        }\n\n        /* Header */\n        .header-table {\n            width: 100%;\n            background: #ffffff;\n            padding: 10px 15px;\n        }\n\n        .header-table img {\n            max-height: 70px;\n            vertical-align: middle;\n            margin: 0 5px;\n        }\n\n        .header-text {\n            text-align: center;\n            padding-top: 5px;\n            padding-bottom: 10px;\n        }\n\n        .header-text .school-name {\n            background: #0c326f;\n            color: white;\n            font-weight: 600;\n            font-size: 12px;\n            padding: 10px;\n            display: inline-block;\n            border-radius: 15px 0 0 15px;\n            margin-bottom: 4px;\n        }\n\n        .header-text .college-name {\n            font-size: 14px;\n            font-weight: 600;\n            color: #000;\n        }\n\n        .header-text .address {\n            font-size: 12px;\n            color: #333;\n        }\n\n        /* Content */\n        .content {\n            padding: 20px;\n            font-size: 14px;\n            line-height: 1.6;\n            color: #333;\n        }\n\n        .content p {\n            margin: 0 0 15px;\n        }\n\n        .button {\n            display: inline-block;\n            background: #004aad;\n            color: #fff !important;\n            padding: 10px 15px;\n            text-decoration: none;\n            border-radius: 4px;\n            margin-top: 10px;\n        }\n\n        .notice {\n            font-size: 13px;\n            color: #555;\n            background: #f8f8f8;\n            padding: 10px;\n            border-radius: 6px;\n            margin-top: 20px;\n            border-left: 4px solid #004aad;\n        }\n\n        .official-email {\n            text-align: center;\n            font-size: 14px;\n            color: #004aad;\n            font-weight: 600;\n            margin-top: 5px;\n        }\n\n        .footer {\n            font-size: 12px;\n            color: #888;\n            text-align: center;\n            padding: 15px;\n            background: #f9f9f9;\n        }\n\n        /* ✅ Responsive Header for Mobile */\n        @media only screen and (max-width: 480px) {\n            .header-table td {\n                display: block !important;\n                width: 100% !important;\n                text-align: center !important;\n            }\n\n            .header-table img {\n                display: inline-block !important;\n                max-height: 60px !important;\n                margin: 5px 3px !important;\n            }\n\n            .header-table td[align=\"right\"] {\n                text-align: center !important;\n                padding-top: 10px !important;\n            }\n        }\n    </style>\n</head>\n\n<body>\n    <div class=\"email-container\">\n        <!-- HEADER -->\n        <table class=\"header-table\" cellpadding=\"0\" cellspacing=\"0\" role=\"presentation\">\n            <tr>\n                <!-- LOGOS -->\n                <td align=\"left\" valign=\"middle\" style=\"white-space:nowrap;\">\n                    <img src=\"https://gcdnb.pbrd.co/images/Pni5FEz4UOEJ.png?o=1\" alt=\"PLP Logo\">\n                    <img src=\"https://gcdnb.pbrd.co/images/EFxDeFIopVQN.png?o=1\" alt=\"SSO Logo\">\n                </td>\n\n                <!-- TEXT -->\n                <td align=\"right\" valign=\"middle\" style=\"text-align:right;\">\n                    <div style=\"background:#0c326f; color:#fff; font-weight:600; font-size:12px; padding:5px 10px; display:inline-block; border-radius:15px 0 0 15px; margin-bottom:4px;\">\n                        PAMANTASAN NG LUNGSOD NG PASIG\n                    </div><br>\n                    <div style=\"font-size:14px; font-weight:600; color:#000;\">\n                        Student Success Office\n                    </div>\n                    <div style=\"font-size:12px; color:#333;\">\n                        Alkalde Jose St. Kapasigan Pasig City, Philippines 1600\n                    </div>\n                </td>\n            </tr>\n        </table>\n\n        <!-- EMAIL CONTENT -->\n        <div class=\"content\">\n            <p>{{greetings}},</p>\n            <p>We received a request to reset the password for your <strong>Pamantasan ng Lungsod ng Pasig - Student Success Office (SSO)</strong> account. To proceed, please click the button below to reset your password:</p>\n\n            <p style=\"text-align: center; margin: 25px 0;\">\n                <a href=\"{{reset_link}}\"\n                    style=\"background-color: #004aad; color: #ffffff; text-decoration: none; padding: 12px 20px; border-radius: 5px; display: inline-block; font-weight: bold;\">\n                    Reset Password\n                </a>\n            </p>\n\n            <p>This link will remain valid until <strong>{{expire_at}}</strong>. If it expires, simply request a new password reset link through the <strong>Forgot Password</strong> page.</p>\n\n            <div class=\"notice\">\n                If you did not initiate this password reset request, you can safely ignore this email. For your security, please note that the <strong>only legitimate sender email address</strong> from our office is:\n                <div class=\"official-email\">plpasig.sso@gmail.com</div>\n                Any other email addresses claiming to represent the SSO should be considered unauthorized.\n            </div>\n\n            <p style=\"margin-top: 20px;\">Best regards,<br>\n                <strong>Pamantasan ng Lungsod ng Pasig<br>\n                    Student Success Office</strong>\n            </p>\n        </div>\n\n        <!-- FOOTER -->\n        <div class=\"footer\">\n            <p>Pamantasan ng Lungsod ng Pasig - Student Success Office</p>\n        </div>\n    </div>\n</body>\n\n</html>', '2025-10-08 20:54:58', 1),
 (4, 'Account Reactivation', 'PLP - Student Success Office [Reactivate Account]', '<!DOCTYPE html>\n<html>\n\n<head>\n    <meta charset=\"UTF-8\">\n    <title>{{subject}}</title>\n    <link href=\"https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap\" rel=\"stylesheet\">\n    <style>\n        body {\n            font-family: \'Poppins\', Arial, sans-serif;\n            background-color: #f4f4f4;\n            padding: 20px;\n            margin: 0;\n        }\n\n        .email-container {\n            max-width: 600px;\n            margin: 0 auto;\n            background: #ffffff;\n            border-radius: 8px;\n            overflow: hidden;\n            box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.1);\n        }\n\n        /* Header */\n        .header-table {\n            width: 100%;\n            background: #ffffff;\n            padding: 10px 15px;\n        }\n\n        .header-table img {\n            max-height: 70px;\n            vertical-align: middle;\n            margin: 0 5px;\n        }\n\n        .header-text {\n            text-align: center;\n            padding-top: 5px;\n            padding-bottom: 10px;\n        }\n\n        .header-text .school-name {\n            background: #0c326f;\n            color: white;\n            font-weight: 600;\n            font-size: 12px;\n            padding: 10px;\n            display: inline-block;\n            border-radius: 15px 0 0 15px;\n            margin-bottom: 4px;\n        }\n\n        .header-text .college-name {\n            font-size: 14px;\n            font-weight: 600;\n            color: #000;\n        }\n\n        .header-text .address {\n            font-size: 12px;\n            color: #333;\n        }\n\n        /* Content */\n        .content {\n            padding: 20px;\n            font-size: 14px;\n            line-height: 1.6;\n            color: #333;\n        }\n\n        .content p {\n            margin: 0 0 15px;\n        }\n\n        .button {\n            display: inline-block;\n            background: #004aad;\n            color: #fff !important;\n            padding: 10px 15px;\n            text-decoration: none;\n            border-radius: 4px;\n            margin-top: 10px;\n        }\n\n        .notice {\n            font-size: 13px;\n            color: #555;\n            background: #f8f8f8;\n            padding: 10px;\n            border-radius: 6px;\n            margin-top: 20px;\n            border-left: 4px solid #004aad;\n        }\n\n        .official-email {\n            text-align: center;\n            font-size: 14px;\n            color: #004aad;\n            font-weight: 600;\n            margin-top: 5px;\n        }\n\n        .footer {\n            font-size: 12px;\n            color: #888;\n            text-align: center;\n            padding: 15px;\n            background: #f9f9f9;\n        }\n\n        /* ✅ Responsive Header for Mobile */\n        @media only screen and (max-width: 480px) {\n            .header-table td {\n                display: block !important;\n                width: 100% !important;\n                text-align: center !important;\n            }\n\n            .header-table img {\n                display: inline-block !important;\n                max-height: 60px !important;\n                margin: 5px 3px !important;\n            }\n\n            .header-table td[align=\"right\"] {\n                text-align: center !important;\n                padding-top: 10px !important;\n            }\n        }\n    </style>\n</head>\n\n<body>\n    <div class=\"email-container\">\n        <!-- HEADER -->\n        <table class=\"header-table\" cellpadding=\"0\" cellspacing=\"0\" role=\"presentation\">\n            <tr>\n                <!-- LOGOS -->\n                <td align=\"left\" valign=\"middle\" style=\"white-space:nowrap;\">\n                    <img src=\"https://gcdnb.pbrd.co/images/Pni5FEz4UOEJ.png?o=1\" alt=\"PLP Logo\">\n                    <img src=\"https://gcdnb.pbrd.co/images/EFxDeFIopVQN.png?o=1\" alt=\"SSO Logo\">\n                </td>\n\n                <!-- TEXT -->\n                <td align=\"right\" valign=\"middle\" style=\"text-align:right;\">\n                    <div style=\"background:#0c326f; color:#fff; font-weight:600; font-size:12px; padding:5px 10px; display:inline-block; border-radius:15px 0 0 15px; margin-bottom:4px;\">\n                        PAMANTASAN NG LUNGSOD NG PASIG\n                    </div><br>\n                    <div style=\"font-size:14px; font-weight:600; color:#000;\">\n                        Student Success Office\n                    </div>\n                    <div style=\"font-size:12px; color:#333;\">\n                        Alkalde Jose St. Kapasigan Pasig City, Philippines 1600\n                    </div>\n                </td>\n            </tr>\n        </table>\n\n        <!-- EMAIL CONTENT -->\n        <div class=\"content\">\n            <p>{{greetings}},</p>\n            <p>We noticed that your account with the <strong>Pamantasan ng Lungsod ng Pasig - Student Success Office (SSO)</strong> has been deactivated. To reactivate your account and regain access, please click the button below:</p>\n\n            <p style=\"text-align: center; margin: 25px 0;\">\n                <a href=\"{{activation_link}}\"\n                    style=\"background-color: #004aad; color: #ffffff; text-decoration: none; padding: 12px 20px; border-radius: 5px; display: inline-block; font-weight: bold;\">\n                    Reactivate Account\n                </a>\n            </p>\n\n            <p>This link will remain valid until <strong>{{expire_at}}</strong></p>\n\n            <div class=\"notice\">\n                If you did not request this reactivation, please ignore this email, you can safely ignore this email. For your security, please note that the <strong>only legitimate sender email address</strong> from our office is:\n                <div class=\"official-email\">plpasig.sso@gmail.com</div>\n                Any other email addresses claiming to represent the SSO should be considered unauthorized.\n            </div>\n\n            <p style=\"margin-top: 20px;\">Best regards,<br>\n                <strong>Pamantasan ng Lungsod ng Pasig<br>\n                    Student Success Office</strong>\n            </p>\n        </div>\n\n        <!-- FOOTER -->\n        <div class=\"footer\">\n            <p>Pamantasan ng Lungsod ng Pasig - Student Success Office</p>\n        </div>\n    </div>\n</body>\n\n</html>', '2025-10-15 10:42:26', 1),
 (5, 'Admission Update', 'PLP - Student Success Office [Admission Update]', '<!DOCTYPE html>\n<html>\n\n<head>\n    <meta charset=\"UTF-8\">\n    <title>{{subject}}</title>\n    <link href=\"https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap\" rel=\"stylesheet\">\n    <style>\n        body {\n            font-family: \'Poppins\', Arial, sans-serif;\n            background-color: #f4f4f4;\n            padding: 20px;\n            margin: 0;\n        }\n\n        .email-container {\n            max-width: 600px;\n            margin: 0 auto;\n            background: #ffffff;\n            border-radius: 8px;\n            overflow: hidden;\n            box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.1);\n        }\n\n        /* Header */\n        .header-table {\n            width: 100%;\n            background: #ffffff;\n            padding: 10px 15px;\n        }\n\n        .header-table img {\n            max-height: 70px;\n            vertical-align: middle;\n            margin: 0 5px;\n        }\n\n        .header-text {\n            text-align: center;\n            padding-top: 5px;\n            padding-bottom: 10px;\n        }\n\n        .header-text .school-name {\n            background: #0c326f;\n            color: white;\n            font-weight: 600;\n            font-size: 12px;\n            padding: 10px;\n            display: inline-block;\n            border-radius: 15px 0 0 15px;\n            margin-bottom: 4px;\n        }\n\n        .header-text .college-name {\n            font-size: 14px;\n            font-weight: 600;\n            color: #000;\n        }\n\n        .header-text .address {\n            font-size: 12px;\n            color: #333;\n        }\n\n        /* Content */\n        .content {\n            padding: 20px;\n            font-size: 14px;\n            line-height: 1.6;\n            color: #333;\n        }\n\n        .content p {\n            margin: 0 0 15px;\n        }\n\n        .button {\n            display: inline-block;\n            background: #004aad;\n            color: #fff !important;\n            padding: 10px 15px;\n            text-decoration: none;\n            border-radius: 4px;\n            margin-top: 10px;\n        }\n\n        .notice {\n            font-size: 13px;\n            color: #555;\n            background: #f8f8f8;\n            padding: 10px;\n            border-radius: 6px;\n            margin-top: 20px;\n            border-left: 4px solid #004aad;\n        }\n\n        .official-email {\n            text-align: center;\n            font-size: 14px;\n            color: #004aad;\n            font-weight: 600;\n            margin-top: 5px;\n        }\n\n        .footer {\n            font-size: 12px;\n            color: #888;\n            text-align: center;\n            padding: 15px;\n            background: #f9f9f9;\n        }\n\n        /* ✅ Responsive Header for Mobile */\n        @media only screen and (max-width: 480px) {\n            .header-table td {\n                display: block !important;\n                width: 100% !important;\n                text-align: center !important;\n            }\n\n            .header-table img {\n                display: inline-block !important;\n                max-height: 60px !important;\n                margin: 5px 3px !important;\n            }\n\n            .header-table td[align=\"right\"] {\n                text-align: center !important;\n                padding-top: 10px !important;\n            }\n        }\n    </style>\n</head>\n\n<body>\n    <div class=\"email-container\">\n        <!-- HEADER -->\n        <table class=\"header-table\" cellpadding=\"0\" cellspacing=\"0\" role=\"presentation\">\n            <tr>\n                <!-- LOGOS -->\n                <td align=\"left\" valign=\"middle\" style=\"white-space:nowrap;\">\n                    <img src=\"https://gcdnb.pbrd.co/images/Pni5FEz4UOEJ.png?o=1\" alt=\"PLP Logo\">\n                    <img src=\"https://gcdnb.pbrd.co/images/EFxDeFIopVQN.png?o=1\" alt=\"SSO Logo\">\n                </td>\n\n                <!-- TEXT -->\n                <td align=\"right\" valign=\"middle\" style=\"text-align:right;\">\n                    <div style=\"background:#0c326f; color:#fff; font-weight:600; font-size:12px; padding:5px 10px; display:inline-block; border-radius:15px 0 0 15px; margin-bottom:4px;\">\n                        PAMANTASAN NG LUNGSOD NG PASIG\n                    </div><br>\n                    <div style=\"font-size:14px; font-weight:600; color:#000;\">\n                        Student Success Office\n                    </div>\n                    <div style=\"font-size:12px; color:#333;\">\n                        Alkalde Jose St. Kapasigan Pasig City, Philippines 1600\n                    </div>\n                </td>\n            </tr>\n        </table>\n\n        <!-- EMAIL CONTENT -->\n        <!-- EMAIL CONTENT -->\n        <div class=\"content\">\n            <p>Good day!</p>\n\n            <p>\n                We hope you are doing well. We are writing to inform you that your admission status at\n                <strong>Pamantasan ng Lungsod ng Pasig</strong> has been updated.\n            </p>\n\n            <div style=\"text-align:center; margin: 25px 0;\">\n                <div style=\"background-color: #004aad; color: #ffffff; padding: 14px 20px; border-radius: 6px; display: inline-block; font-weight: 600; font-size: 15px; letter-spacing: 0.5px;\">\n                    APPLICATION STATUS: {{status}}\n                </div>\n            </div>\n\n            <div style=\"text-align:center; margin: 20px 0;\">\n                <div style=\"background-color: #f1f5ff; color: #004aad; border: 1px solid #004aad; padding: 12px 18px; border-radius: 6px; display: inline-block; font-weight: 500; font-size: 14px;\">\n                    REMARKS: {{remarks}}\n                </div>\n            </div>\n\n            <p>\n                To view more details or take the next steps, please visit your applicant portal.\n            </p>\n\n            <div class=\"notice\">\n                <strong>Important Reminder:</strong><br>\n                For your security, please note that the <strong>only legitimate sender email address</strong> from our office is:\n                <div class=\"official-email\">plpasig.sso@gmail.com</div>\n                Any other email addresses claiming to represent the SSO should be considered unauthorized.\n            </div>\n\n            <p style=\"margin-top: 25px;\">\n                Best regards,<br>\n                <strong>Pamantasan ng Lungsod ng Pasig<br>\n                    Student Success Office</strong>\n            </p>\n        </div>\n\n\n        <!-- FOOTER -->\n        <div class=\"footer\">\n            <p>Pamantasan ng Lungsod ng Pasig - Student Success Office</p>\n        </div>\n    </div>\n</body>\n\n</html>', '2025-10-15 10:42:26', 1),
-(6, 'Exam Schedule', 'PLP - Student Success Office [Exam Schedule]', '<!DOCTYPE html>\n<html>\n\n<head>\n    <meta charset=\"UTF-8\">\n    <title>{{subject}}</title>\n    <link href=\"https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap\" rel=\"stylesheet\">\n    <style>\n        body {\n            font-family: \'Poppins\', Arial, sans-serif;\n            background-color: #f4f4f4;\n            padding: 20px;\n            margin: 0;\n        }\n\n        .email-container {\n            max-width: 600px;\n            margin: 0 auto;\n            background: #ffffff;\n            border-radius: 8px;\n            overflow: hidden;\n            box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.1);\n        }\n\n        /* Header */\n        .header-table {\n            width: 100%;\n            background: #ffffff;\n            padding: 10px 15px;\n        }\n\n        .header-table img {\n            max-height: 70px;\n            vertical-align: middle;\n            margin: 0 5px;\n        }\n\n        .header-text {\n            text-align: center;\n            padding-top: 5px;\n            padding-bottom: 10px;\n        }\n\n        .header-text .school-name {\n            background: #0c326f;\n            color: white;\n            font-weight: 600;\n            font-size: 12px;\n            padding: 10px;\n            display: inline-block;\n            border-radius: 15px 0 0 15px;\n            margin-bottom: 4px;\n        }\n\n        .header-text .college-name {\n            font-size: 14px;\n            font-weight: 600;\n            color: #000;\n        }\n\n        .header-text .address {\n            font-size: 12px;\n            color: #333;\n        }\n\n        /* Content */\n        .content {\n            padding: 20px;\n            font-size: 14px;\n            line-height: 1.6;\n            color: #333;\n        }\n\n        .content p {\n            margin: 0 0 15px;\n        }\n\n        .button {\n            display: inline-block;\n            background: #004aad;\n            color: #fff !important;\n            padding: 10px 15px;\n            text-decoration: none;\n            border-radius: 4px;\n            margin-top: 10px;\n        }\n\n        .notice {\n            font-size: 13px;\n            color: #555;\n            background: #f8f8f8;\n            padding: 10px;\n            border-radius: 6px;\n            margin-top: 20px;\n            border-left: 4px solid #004aad;\n        }\n\n        .official-email {\n            text-align: center;\n            font-size: 14px;\n            color: #004aad;\n            font-weight: 600;\n            margin-top: 5px;\n        }\n\n        .footer {\n            font-size: 12px;\n            color: #888;\n            text-align: center;\n            padding: 15px;\n            background: #f9f9f9;\n        }\n\n        /* ✅ Responsive Header for Mobile */\n        @media only screen and (max-width: 480px) {\n            .header-table td {\n                display: block !important;\n                width: 100% !important;\n                text-align: center !important;\n            }\n\n            .header-table img {\n                display: inline-block !important;\n                max-height: 60px !important;\n                margin: 5px 3px !important;\n            }\n\n            .header-table td[align=\"right\"] {\n                text-align: center !important;\n                padding-top: 10px !important;\n            }\n        }\n    </style>\n</head>\n\n<body>\n    <div class=\"email-container\">\n        <!-- HEADER -->\n        <table class=\"header-table\" cellpadding=\"0\" cellspacing=\"0\" role=\"presentation\">\n            <tr>\n                <!-- LOGOS -->\n                <td align=\"left\" valign=\"middle\" style=\"white-space:nowrap;\">\n                    <img src=\"https://gcdnb.pbrd.co/images/Pni5FEz4UOEJ.png?o=1\" alt=\"PLP Logo\">\n                    <img src=\"https://gcdnb.pbrd.co/images/EFxDeFIopVQN.png?o=1\" alt=\"SSO Logo\">\n                </td>\n\n                <!-- TEXT -->\n                <td align=\"right\" valign=\"middle\" style=\"text-align:right;\">\n                    <div style=\"background:#0c326f; color:#fff; font-weight:600; font-size:12px; padding:5px 10px; display:inline-block; border-radius:15px 0 0 15px; margin-bottom:4px;\">\n                        PAMANTASAN NG LUNGSOD NG PASIG\n                    </div><br>\n                    <div style=\"font-size:14px; font-weight:600; color:#000;\">\n                        Student Success Office\n                    </div>\n                    <div style=\"font-size:12px; color:#333;\">\n                        Alkalde Jose St. Kapasigan Pasig City, Philippines 1600\n                    </div>\n                </td>\n            </tr>\n        </table>\n\n        <!-- EMAIL CONTENT -->\n        <div class=\"content\">\n            <p>Good day!</p>\n\n            <p>\n                We are pleased to inform you that your <strong>entrance examination schedule</strong> has been set.\n                Please review the details of your exam below carefully.\n            </p>\n\n            <div\n                style=\"background-color: #f1f5ff; border-left: 4px solid #004aad; padding: 20px; border-radius: 6px; margin: 25px 0;\">\n                <table\n                    width=\"100%\"\n                    cellpadding=\"5\"\n                    cellspacing=\"0\"\n                    style=\"font-size: 14px; color: #333;\">\n                    <tr>\n                        <td style=\"font-weight: 600; width: 35%; vertical-align: top;\">\n                            <svg\n                                xmlns=\"http://www.w3.org/2000/svg\"\n                                width=\"14\"\n                                height=\"14\"\n                                fill=\"#004aad\"\n                                viewBox=\"0 0 24 24\"\n                                style=\"vertical-align: middle; margin-right: 6px;\">\n                                <path\n                                    d=\"M19 4h-1V2h-2v2H8V2H6v2H5C3.9 4 3 4.9 3 6v14c0 \n              1.1.9 2 2 2h14c1.1 0 2-.9 \n              2-2V6c0-1.1-.9-2-2-2zm0 \n              16H5V10h14v10zm0-12H5V6h14v2z\" />\n                            </svg>\n                            Exam Date:\n                        </td>\n                        <td>{{exam_date}}</td>\n                    </tr>\n\n                    <tr>\n                        <td style=\"font-weight: 600; vertical-align: top;\">\n                            <svg\n                                xmlns=\"http://www.w3.org/2000/svg\"\n                                width=\"14\"\n                                height=\"14\"\n                                fill=\"#004aad\"\n                                viewBox=\"0 0 24 24\"\n                                style=\"vertical-align: middle; margin-right: 6px;\">\n                                <path\n                                    d=\"M12 1a11 11 0 1 0 11 11A11 11 0 0 0 12 \n              1zm0 20a9 9 0 1 1 9-9a9 9 0 0 1-9 \n              9zm.5-9.79V6h-1v6h6v-1h-5z\" />\n                            </svg>\n                            Time:\n                        </td>\n                        <td>{{exam_time}}</td>\n                    </tr>\n\n                    <tr>\n                        <td style=\"font-weight: 600; vertical-align: top;\">\n                            <svg\n                                xmlns=\"http://www.w3.org/2000/svg\"\n                                width=\"14\"\n                                height=\"14\"\n                                fill=\"#004aad\"\n                                viewBox=\"0 0 24 24\"\n                                style=\"vertical-align: middle; margin-right: 6px;\">\n                                <path\n                                    d=\"M12 2a7 7 0 0 0-7 \n              7c0 5.25 7 13 7 13s7-7.75 \n              7-13a7 7 0 0 0-7-7zm0 9.5a2.5 \n              2.5 0 1 1 2.5-2.5A2.5 2.5 0 0 1 12 \n              11.5z\" />\n                            </svg>\n                            Venue:\n                        </td>\n                        <td>{{exam_venue}}</td>\n                    </tr>\n                </table>\n            </div>\n\n            <div class=\"notice\">\n                <p style=\"margin-top: 10px;\">\n                    For your security, please note that the\n                    <strong>only legitimate sender email address</strong> from our office is:\n                </p>\n                <div class=\"official-email\">plpasig.sso@gmail.com</div>\n                Any other email addresses claiming to represent the SSO should be considered unauthorized.\n            </div>\n\n            <p style=\"margin-top: 25px;\">\n                Best regards,<br />\n                <strong>Pamantasan ng Lungsod ng Pasig<br />Student Success Office</strong>\n            </p>\n        </div>\n\n        <!-- FOOTER -->\n        <div class=\"footer\">\n            <p>Pamantasan ng Lungsod ng Pasig - Student Success Office</p>\n        </div>\n    </div>\n</body>\n\n</html>', '2025-10-15 10:42:26', 1),
-(7, 'Exam Permit', 'PLP - Student Success Office [Exam Permit]', '<!DOCTYPE html>\n<html>\n\n<head>\n    <meta charset=\"UTF-8\">\n    <title>{{subject}}</title>\n    <link href=\"https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap\" rel=\"stylesheet\">\n    <style>\n        body {\n            font-family: \'Poppins\', Arial, sans-serif;\n            background-color: #f4f4f4;\n            padding: 20px;\n            margin: 0;\n        }\n\n        .email-container {\n            max-width: 600px;\n            margin: 0 auto;\n            background: #ffffff;\n            border-radius: 8px;\n            overflow: hidden;\n            box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.1);\n        }\n\n        /* Header */\n        .header-table {\n            width: 100%;\n            background: #ffffff;\n            padding: 10px 15px;\n        }\n\n        .header-table img {\n            max-height: 70px;\n            vertical-align: middle;\n            margin: 0 5px;\n        }\n\n        .header-text {\n            text-align: center;\n            padding-top: 5px;\n            padding-bottom: 10px;\n        }\n\n        .header-text .school-name {\n            background: #0c326f;\n            color: white;\n            font-weight: 600;\n            font-size: 12px;\n            padding: 10px;\n            display: inline-block;\n            border-radius: 15px 0 0 15px;\n            margin-bottom: 4px;\n        }\n\n        .header-text .college-name {\n            font-size: 14px;\n            font-weight: 600;\n            color: #000;\n        }\n\n        .header-text .address {\n            font-size: 12px;\n            color: #333;\n        }\n\n        /* Content */\n        .content {\n            padding: 20px;\n            font-size: 14px;\n            line-height: 1.6;\n            color: #333;\n        }\n\n        .content p {\n            margin: 0 0 15px;\n        }\n\n        .button {\n            display: inline-block;\n            background: #004aad;\n            color: #fff !important;\n            padding: 10px 15px;\n            text-decoration: none;\n            border-radius: 4px;\n            margin-top: 10px;\n        }\n\n        .notice {\n            font-size: 13px;\n            color: #555;\n            background: #f8f8f8;\n            padding: 10px;\n            border-radius: 6px;\n            margin-top: 20px;\n            border-left: 4px solid #004aad;\n        }\n\n        .official-email {\n            text-align: center;\n            font-size: 14px;\n            color: #004aad;\n            font-weight: 600;\n            margin-top: 5px;\n        }\n\n        .footer {\n            font-size: 12px;\n            color: #888;\n            text-align: center;\n            padding: 15px;\n            background: #f9f9f9;\n        }\n\n        /* ✅ Responsive Header for Mobile */\n        @media only screen and (max-width: 480px) {\n            .header-table td {\n                display: block !important;\n                width: 100% !important;\n                text-align: center !important;\n            }\n\n            .header-table img {\n                display: inline-block !important;\n                max-height: 60px !important;\n                margin: 5px 3px !important;\n            }\n\n            .header-table td[align=\"right\"] {\n                text-align: center !important;\n                padding-top: 10px !important;\n            }\n        }\n    </style>\n</head>\n\n<body>\n    <div class=\"email-container\">\n        <!-- HEADER -->\n        <table class=\"header-table\" cellpadding=\"0\" cellspacing=\"0\" role=\"presentation\">\n            <tr>\n                <!-- LOGOS -->\n                <td align=\"left\" valign=\"middle\" style=\"white-space:nowrap;\">\n                    <img src=\"https://gcdnb.pbrd.co/images/Pni5FEz4UOEJ.png?o=1\" alt=\"PLP Logo\">\n                    <img src=\"https://gcdnb.pbrd.co/images/EFxDeFIopVQN.png?o=1\" alt=\"SSO Logo\">\n                </td>\n\n                <!-- TEXT -->\n                <td align=\"right\" valign=\"middle\" style=\"text-align:right;\">\n                    <div style=\"background:#0c326f; color:#fff; font-weight:600; font-size:12px; padding:5px 10px; display:inline-block; border-radius:15px 0 0 15px; margin-bottom:4px;\">\n                        PAMANTASAN NG LUNGSOD NG PASIG\n                    </div><br>\n                    <div style=\"font-size:14px; font-weight:600; color:#000;\">\n                        Student Success Office\n                    </div>\n                    <div style=\"font-size:12px; color:#333;\">\n                        Alkalde Jose St. Kapasigan Pasig City, Philippines 1600\n                    </div>\n                </td>\n            </tr>\n        </table>\n\n        <!-- EMAIL CONTENT -->\n        <div class=\"content\">\n            <p>Good day!</p>\n\n            <p>\n                This is to inform you that your <strong>Entrance Examination Permit</strong> has been issued.\n                Please review your exam details and ensure you bring a printed or digital copy of your permit\n                on the day of your examination.\n            </p>\n\n            <p style=\"text-align: center; margin: 25px 0;\">\n                <a href=\"{{exam_permit_download_link}}\"\n                    style=\"background-color: #004aad; color: #ffffff; text-decoration: none; padding: 12px 20px; border-radius: 5px; display: inline-block; font-weight: bold;\">\n                    Download Exam Permit\n                </a>\n            </p>\n\n            <div class=\"notice\">\n                <p style=\"margin-top: 10px;\">\n                    For your security, please note that the\n                    <strong>only legitimate sender email address</strong> from our office is:\n                </p>\n                <div class=\"official-email\">plpasig.sso@gmail.com</div>\n                Any other email addresses claiming to represent the SSO should be considered unauthorized.\n            </div>\n\n            <p style=\"margin-top: 25px;\">\n                Best regards,<br />\n                <strong>Pamantasan ng Lungsod ng Pasig<br />Student Success Office</strong>\n            </p>\n        </div>\n\n        <!-- FOOTER -->\n        <div class=\"footer\">\n            <p>Pamantasan ng Lungsod ng Pasig - Student Success Office</p>\n        </div>\n    </div>\n</body>\n\n</html>', '2025-10-15 10:42:26', 1);
+(6, 'Exam Schedule', 'PLP - Student Success Office [Exam Schedule]', '<!DOCTYPE html>\n<html>\n\n<head>\n    <meta charset=\"UTF-8\">\n    <title>{{subject}}</title>\n    <link href=\"https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap\" rel=\"stylesheet\">\n    <style>\n        body {\n            font-family: \'Poppins\', Arial, sans-serif;\n            background-color: #f4f4f4;\n            padding: 20px;\n            margin: 0;\n        }\n\n        .email-container {\n            max-width: 600px;\n            margin: 0 auto;\n            background: #ffffff;\n            border-radius: 8px;\n            overflow: hidden;\n            box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.1);\n        }\n\n        /* Header */\n        .header-table {\n            width: 100%;\n            background: #ffffff;\n            padding: 10px 15px;\n        }\n\n        .header-table img {\n            max-height: 70px;\n            vertical-align: middle;\n            margin: 0 5px;\n        }\n\n        .header-text {\n            text-align: center;\n            padding-top: 5px;\n            padding-bottom: 10px;\n        }\n\n        .header-text .school-name {\n            background: #0c326f;\n            color: white;\n            font-weight: 600;\n            font-size: 12px;\n            padding: 10px;\n            display: inline-block;\n            border-radius: 15px 0 0 15px;\n            margin-bottom: 4px;\n        }\n\n        .header-text .college-name {\n            font-size: 14px;\n            font-weight: 600;\n            color: #000;\n        }\n\n        .header-text .address {\n            font-size: 12px;\n            color: #333;\n        }\n\n        /* Content */\n        .content {\n            padding: 20px;\n            font-size: 14px;\n            line-height: 1.6;\n            color: #333;\n        }\n\n        .content p {\n            margin: 0 0 15px;\n        }\n\n        .button {\n            display: inline-block;\n            background: #004aad;\n            color: #fff !important;\n            padding: 10px 15px;\n            text-decoration: none;\n            border-radius: 4px;\n            margin-top: 10px;\n        }\n\n        .notice {\n            font-size: 13px;\n            color: #555;\n            background: #f8f8f8;\n            padding: 10px;\n            border-radius: 6px;\n            margin-top: 20px;\n            border-left: 4px solid #004aad;\n        }\n\n        .official-email {\n            text-align: center;\n            font-size: 14px;\n            color: #004aad;\n            font-weight: 600;\n            margin-top: 5px;\n        }\n\n        .footer {\n            font-size: 12px;\n            color: #888;\n            text-align: center;\n            padding: 15px;\n            background: #f9f9f9;\n        }\n\n        /* ✅ Responsive Header for Mobile */\n        @media only screen and (max-width: 480px) {\n            .header-table td {\n                display: block !important;\n                width: 100% !important;\n                text-align: center !important;\n            }\n\n            .header-table img {\n                display: inline-block !important;\n                max-height: 60px !important;\n                margin: 5px 3px !important;\n            }\n\n            .header-table td[align=\"right\"] {\n                text-align: center !important;\n                padding-top: 10px !important;\n            }\n        }\n    </style>\n</head>\n\n<body>\n    <div class=\"email-container\">\n        <!-- HEADER -->\n        <table class=\"header-table\" cellpadding=\"0\" cellspacing=\"0\" role=\"presentation\">\n            <tr>\n                <!-- LOGOS -->\n                <td align=\"left\" valign=\"middle\" style=\"white-space:nowrap;\">\n                    <img src=\"https://gcdnb.pbrd.co/images/Pni5FEz4UOEJ.png?o=1\" alt=\"PLP Logo\">\n                    <img src=\"https://gcdnb.pbrd.co/images/EFxDeFIopVQN.png?o=1\" alt=\"SSO Logo\">\n                </td>\n\n                <!-- TEXT -->\n                <td align=\"right\" valign=\"middle\" style=\"text-align:right;\">\n                    <div style=\"background:#0c326f; color:#fff; font-weight:600; font-size:12px; padding:5px 10px; display:inline-block; border-radius:15px 0 0 15px; margin-bottom:4px;\">\n                        PAMANTASAN NG LUNGSOD NG PASIG\n                    </div><br>\n                    <div style=\"font-size:14px; font-weight:600; color:#000;\">\n                        Student Success Office\n                    </div>\n                    <div style=\"font-size:12px; color:#333;\">\n                        Alkalde Jose St. Kapasigan Pasig City, Philippines 1600\n                    </div>\n                </td>\n            </tr>\n        </table>\n\n        <!-- EMAIL CONTENT -->\n        <div class=\"content\">\n            <p>Good day!</p>\n\n            <p>\n                We are pleased to inform you that your <strong>entrance examination schedule</strong> has been set.\n                Please review the details of your exam below carefully.\n            </p>\n\n            <div\n                style=\"background-color: #f1f5ff; border-left: 4px solid #004aad; padding: 20px; border-radius: 6px; margin: 25px 0;\">\n                <table\n                    width=\"100%\"\n                    cellpadding=\"5\"\n                    cellspacing=\"0\"\n                    style=\"font-size: 14px; color: #333;\">\n                    <tr>\n                        <td style=\"font-weight: 600; width: 35%; vertical-align: top;\">\n                            <svg\n                                xmlns=\"http://www.w3.org/2000/svg\"\n                                width=\"14\"\n                                height=\"14\"\n                                fill=\"#004aad\"\n                                viewBox=\"0 0 24 24\"\n                                style=\"vertical-align: middle; margin-right: 6px;\">\n                                <path\n                                    d=\"M19 4h-1V2h-2v2H8V2H6v2H5C3.9 4 3 4.9 3 6v14c0 \n              1.1.9 2 2 2h14c1.1 0 2-.9 \n              2-2V6c0-1.1-.9-2-2-2zm0 \n              16H5V10h14v10zm0-12H5V6h14v2z\" />\n                            </svg>\n                            Exam Date:\n                        </td>\n                        <td>{{exam_date}}</td>\n                    </tr>\n\n                    <tr>\n                        <td style=\"font-weight: 600; vertical-align: top;\">\n                            <svg\n                                xmlns=\"http://www.w3.org/2000/svg\"\n                                width=\"14\"\n                                height=\"14\"\n                                fill=\"#004aad\"\n                                viewBox=\"0 0 24 24\"\n                                style=\"vertical-align: middle; margin-right: 6px;\">\n                                <path\n                                    d=\"M12 1a11 11 0 1 0 11 11A11 11 0 0 0 12 \n              1zm0 20a9 9 0 1 1 9-9a9 9 0 0 1-9 \n              9zm.5-9.79V6h-1v6h6v-1h-5z\" />\n                            </svg>\n                            Time:\n                        </td>\n                        <td>{{exam_time}}</td>\n                    </tr>\n\n                    <tr>\n                        <td style=\"font-weight: 600; vertical-align: top;\">\n                            <svg\n                                xmlns=\"http://www.w3.org/2000/svg\"\n                                width=\"14\"\n                                height=\"14\"\n                                fill=\"#004aad\"\n                                viewBox=\"0 0 24 24\"\n                                style=\"vertical-align: middle; margin-right: 6px;\">\n                                <path\n                                    d=\"M12 2a7 7 0 0 0-7 \n              7c0 5.25 7 13 7 13s7-7.75 \n              7-13a7 7 0 0 0-7-7zm0 9.5a2.5 \n              2.5 0 1 1 2.5-2.5A2.5 2.5 0 0 1 12 \n              11.5z\" />\n                            </svg>\n                            Venue:\n                        </td>\n                        <td>{{exam_venue}}</td>\n                    </tr>\n                </table>\n            </div>\n\n            <div class=\"notice\">\n                <p style=\"margin-top: 10px;\">\n                    For your security, please note that the\n                    <strong>only legitimate sender email address</strong> from our office is:\n                </p>\n                <div class=\"official-email\">plpasig.sso@gmail.com</div>\n                Any other email addresses claiming to represent the SSO should be considered unauthorized.\n            </div>\n\n            <p style=\"margin-top: 25px;\">\n                Best regards,<br />\n                <strong>Pamantasan ng Lungsod ng Pasig<br />Student Success Office</strong>\n            </p>\n        </div>\n\n        <!-- FOOTER -->\n        <div class=\"footer\">\n            <p>Pamantasan ng Lungsod ng Pasig - Student Success Office</p>\n        </div>\n    </div>\n</body>\n\n</html>', '2025-10-15 10:42:26', 1);
 INSERT INTO `email_template` (`id`, `title`, `subject`, `html_code`, `date_added`, `is_active`) VALUES
+(7, 'Exam Permit', 'PLP - Student Success Office [Exam Permit]', '<!DOCTYPE html>\n<html>\n\n<head>\n    <meta charset=\"UTF-8\">\n    <title>{{subject}}</title>\n    <link href=\"https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap\" rel=\"stylesheet\">\n    <style>\n        body {\n            font-family: \'Poppins\', Arial, sans-serif;\n            background-color: #f4f4f4;\n            padding: 20px;\n            margin: 0;\n        }\n\n        .email-container {\n            max-width: 600px;\n            margin: 0 auto;\n            background: #ffffff;\n            border-radius: 8px;\n            overflow: hidden;\n            box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.1);\n        }\n\n        /* Header */\n        .header-table {\n            width: 100%;\n            background: #ffffff;\n            padding: 10px 15px;\n        }\n\n        .header-table img {\n            max-height: 70px;\n            vertical-align: middle;\n            margin: 0 5px;\n        }\n\n        .header-text {\n            text-align: center;\n            padding-top: 5px;\n            padding-bottom: 10px;\n        }\n\n        .header-text .school-name {\n            background: #0c326f;\n            color: white;\n            font-weight: 600;\n            font-size: 12px;\n            padding: 10px;\n            display: inline-block;\n            border-radius: 15px 0 0 15px;\n            margin-bottom: 4px;\n        }\n\n        .header-text .college-name {\n            font-size: 14px;\n            font-weight: 600;\n            color: #000;\n        }\n\n        .header-text .address {\n            font-size: 12px;\n            color: #333;\n        }\n\n        /* Content */\n        .content {\n            padding: 20px;\n            font-size: 14px;\n            line-height: 1.6;\n            color: #333;\n        }\n\n        .content p {\n            margin: 0 0 15px;\n        }\n\n        .button {\n            display: inline-block;\n            background: #004aad;\n            color: #fff !important;\n            padding: 10px 15px;\n            text-decoration: none;\n            border-radius: 4px;\n            margin-top: 10px;\n        }\n\n        .notice {\n            font-size: 13px;\n            color: #555;\n            background: #f8f8f8;\n            padding: 10px;\n            border-radius: 6px;\n            margin-top: 20px;\n            border-left: 4px solid #004aad;\n        }\n\n        .official-email {\n            text-align: center;\n            font-size: 14px;\n            color: #004aad;\n            font-weight: 600;\n            margin-top: 5px;\n        }\n\n        .footer {\n            font-size: 12px;\n            color: #888;\n            text-align: center;\n            padding: 15px;\n            background: #f9f9f9;\n        }\n\n        /* ✅ Responsive Header for Mobile */\n        @media only screen and (max-width: 480px) {\n            .header-table td {\n                display: block !important;\n                width: 100% !important;\n                text-align: center !important;\n            }\n\n            .header-table img {\n                display: inline-block !important;\n                max-height: 60px !important;\n                margin: 5px 3px !important;\n            }\n\n            .header-table td[align=\"right\"] {\n                text-align: center !important;\n                padding-top: 10px !important;\n            }\n        }\n    </style>\n</head>\n\n<body>\n    <div class=\"email-container\">\n        <!-- HEADER -->\n        <table class=\"header-table\" cellpadding=\"0\" cellspacing=\"0\" role=\"presentation\">\n            <tr>\n                <!-- LOGOS -->\n                <td align=\"left\" valign=\"middle\" style=\"white-space:nowrap;\">\n                    <img src=\"https://gcdnb.pbrd.co/images/Pni5FEz4UOEJ.png?o=1\" alt=\"PLP Logo\">\n                    <img src=\"https://gcdnb.pbrd.co/images/EFxDeFIopVQN.png?o=1\" alt=\"SSO Logo\">\n                </td>\n\n                <!-- TEXT -->\n                <td align=\"right\" valign=\"middle\" style=\"text-align:right;\">\n                    <div style=\"background:#0c326f; color:#fff; font-weight:600; font-size:12px; padding:5px 10px; display:inline-block; border-radius:15px 0 0 15px; margin-bottom:4px;\">\n                        PAMANTASAN NG LUNGSOD NG PASIG\n                    </div><br>\n                    <div style=\"font-size:14px; font-weight:600; color:#000;\">\n                        Student Success Office\n                    </div>\n                    <div style=\"font-size:12px; color:#333;\">\n                        Alkalde Jose St. Kapasigan Pasig City, Philippines 1600\n                    </div>\n                </td>\n            </tr>\n        </table>\n\n        <!-- EMAIL CONTENT -->\n        <div class=\"content\">\n            <p>Hello <strong>{{registered_fullname}}</strong>!</p>\n\n            <p>\n                This is to inform you that your admission for\n                <strong>{{academic_year}}</strong>-<strong>{{applicant_type}}</strong> has been updated by the\n                <strong>Pamantasan ng Lungsod ng Pasig – Student Success Office (SSO)</strong>.\n            </p>\n\n            <table style=\"width: 100%; border-collapse: collapse; margin: 20px 0;\">\n                <tr>\n                    <td style=\"padding: 8px; border: 1px solid #ddd; font-weight: bold;\">Applicant #</td>\n                    <td style=\"padding: 8px; border: 1px solid #ddd;\">{{applicant_number}}</td>\n                </tr>\n                <tr>\n                    <td style=\"padding: 8px; border: 1px solid #ddd; font-weight: bold;\">Venue</td>\n                    <td style=\"padding: 8px; border: 1px solid #ddd;\">{{room_number}} - {{floor}}</td>\n                </tr>\n                <tr>\n                    <td style=\"padding: 8px; border: 1px solid #ddd; font-weight: bold;\">Start-End Date Time</td>\n                    <td style=\"padding: 8px; border: 1px solid #ddd; color: #004aad; font-weight: bold;\">{{start_date}}-{{start_time}}</td>\n                </tr>\n            </table>\n\n            <p style=\"text-align: center; margin: 25px 0;\">\n                <a href=\"{{exam_permit_download_link}}\"\n                    style=\"background-color: #004aad; color: #ffffff; text-decoration: none; padding: 12px 20px; border-radius: 5px; display: inline-block; font-weight: bold; margin-right:10px;\">\n                    Download Exam Permit\n                </a>\n                <a href=\"{{qr_download_link}}\"\n                    style=\"background-color: #004aad; color: #ffffff; text-decoration: none; padding: 12px 20px; border-radius: 5px; display: inline-block; font-weight: bold;\">\n                    Download QR Code\n                </a>\n            </p>\n\n            <div class=\"notice\">\n                This is an automated notification from the\n                <strong>Student Success Office (SSO)</strong>.\n                For security and authenticity, please note that the <strong>only official sender email address</strong> from our office is:\n                <div class=\"official-email\">plpasig.sso@gmail.com</div>\n                Any other email claiming to represent the SSO should be considered unauthorized.\n            </div>\n\n            <p style=\"margin-top: 20px;\">\n                Best regards,<br>\n                <strong>Pamantasan ng Lungsod ng Pasig<br>\n                    Student Success Office</strong>\n            </p>\n        </div>\n\n\n        <!-- FOOTER -->\n        <div class=\"footer\">\n            <p>Pamantasan ng Lungsod ng Pasig - Student Success Office</p>\n        </div>\n    </div>\n</body>\n\n</html>', '2025-10-15 10:42:26', 1),
 (8, 'Student Support Services - Reset Password', 'PLP - Student Support Services - Reset Password', '<!DOCTYPE html>\r\n<html>\r\n\r\n<head>\r\n    <meta charset=\"UTF-8\">\r\n    <title>{{subject}}</title>\r\n    <link href=\"https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap\" rel=\"stylesheet\">\r\n    <style>\r\n        body {\r\n            font-family: \'Poppins\', Arial, sans-serif;\r\n            background-color: #f4f4f4;\r\n            padding: 20px;\r\n            margin: 0;\r\n        }\r\n\r\n        .email-container {\r\n            max-width: 600px;\r\n            margin: 0 auto;\r\n            background: #ffffff;\r\n            border-radius: 8px;\r\n            overflow: hidden;\r\n            box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.1);\r\n        }\r\n\r\n        /* Header */\r\n        .header-table {\r\n            width: 100%;\r\n            background: #ffffff;\r\n            padding: 10px 15px;\r\n        }\r\n\r\n        .header-table img {\r\n            max-height: 70px;\r\n            vertical-align: middle;\r\n            margin: 0 5px;\r\n        }\r\n\r\n        .header-text {\r\n            text-align: center;\r\n            padding-top: 5px;\r\n            padding-bottom: 10px;\r\n        }\r\n\r\n        .header-text .school-name {\r\n            background: #0c326f;\r\n            color: white;\r\n            font-weight: 600;\r\n            font-size: 12px;\r\n            padding: 10px;\r\n            display: inline-block;\r\n            border-radius: 15px 0 0 15px;\r\n            margin-bottom: 4px;\r\n        }\r\n\r\n        .header-text .college-name {\r\n            font-size: 14px;\r\n            font-weight: 600;\r\n            color: #000;\r\n        }\r\n\r\n        .header-text .address {\r\n            font-size: 12px;\r\n            color: #333;\r\n        }\r\n\r\n        /* Content */\r\n        .content {\r\n            padding: 20px;\r\n            font-size: 14px;\r\n            line-height: 1.6;\r\n            color: #333;\r\n        }\r\n\r\n        .content p {\r\n            margin: 0 0 15px;\r\n        }\r\n\r\n        .button {\r\n            display: inline-block;\r\n            background: #004aad;\r\n            color: #fff !important;\r\n            padding: 10px 15px;\r\n            text-decoration: none;\r\n            border-radius: 4px;\r\n            margin-top: 10px;\r\n        }\r\n\r\n        .notice {\r\n            font-size: 13px;\r\n            color: #555;\r\n            background: #f8f8f8;\r\n            padding: 10px;\r\n            border-radius: 6px;\r\n            margin-top: 20px;\r\n            border-left: 4px solid #004aad;\r\n        }\r\n\r\n        .official-email {\r\n            text-align: center;\r\n            font-size: 14px;\r\n            color: #004aad;\r\n            font-weight: 600;\r\n            margin-top: 5px;\r\n        }\r\n\r\n        .footer {\r\n            font-size: 12px;\r\n            color: #888;\r\n            text-align: center;\r\n            padding: 15px;\r\n            background: #f9f9f9;\r\n        }\r\n\r\n        /* ✅ Responsive Header for Mobile */\r\n        @media only screen and (max-width: 480px) {\r\n            .header-table td {\r\n                display: block !important;\r\n                width: 100% !important;\r\n                text-align: center !important;\r\n            }\r\n\r\n            .header-table img {\r\n                display: inline-block !important;\r\n                max-height: 60px !important;\r\n                margin: 5px 3px !important;\r\n            }\r\n\r\n            .header-table td[align=\"right\"] {\r\n                text-align: center !important;\r\n                padding-top: 10px !important;\r\n            }\r\n        }\r\n    </style>\r\n</head>\r\n\r\n<body>\r\n    <div class=\"email-container\">\r\n        <!-- HEADER -->\r\n        <table class=\"header-table\" cellpadding=\"0\" cellspacing=\"0\" role=\"presentation\">\r\n            <tr>\r\n                <!-- LOGOS -->\r\n                <td align=\"left\" valign=\"middle\" style=\"white-space:nowrap;\">\r\n                    <img src=\"https://gcdnb.pbrd.co/images/Pni5FEz4UOEJ.png?o=1\" alt=\"PLP Logo\">\r\n                    <img src=\"https://gcdnb.pbrd.co/images/EFxDeFIopVQN.png?o=1\" alt=\"SSO Logo\">\r\n                </td>\r\n\r\n                <!-- TEXT -->\r\n                <td align=\"right\" valign=\"middle\" style=\"text-align:right;\">\r\n                    <div style=\"background:#0c326f; color:#fff; font-weight:600; font-size:12px; padding:5px 10px; display:inline-block; border-radius:15px 0 0 15px; margin-bottom:4px;\">\r\n                        PAMANTASAN NG LUNGSOD NG PASIG\r\n                    </div><br>\r\n                    <div style=\"font-size:14px; font-weight:600; color:#000;\">\r\n                        Student Success Office\r\n                    </div>\r\n                    <div style=\"font-size:12px; color:#333;\">\r\n                        Alkalde Jose St. Kapasigan Pasig City, Philippines 1600\r\n                    </div>\r\n                </td>\r\n            </tr>\r\n        </table>\r\n\r\n        <!-- EMAIL CONTENT -->\r\n        <div class=\"content\">\r\n            <p>Hello!</p>\r\n\r\n            <p>\r\n                We received a request to reset your password for the\r\n                <strong>Pamantasan ng Lungsod ng Pasig – Student Success Office (SSO)</strong> account.\r\n                To continue, please use the verification code provided below:\r\n            </p>\r\n\r\n            <p style=\"text-align: center; margin: 25px 0;\">\r\n                <a\r\n                    style=\"background-color: #004aad; color: #ffffff; text-decoration: none; padding: 12px 20px; border-radius: 5px; display: inline-block; font-weight: bold;\">\r\n                    {{otp_code}}\r\n                </a>\r\n            </p>\r\n\r\n            <p>\r\n                This verification code will remain valid until <strong>{{expire_at}}</strong>.\r\n                If it expires, please request a new password reset through our system.\r\n            </p>\r\n\r\n            <div class=\"notice\">\r\n                If you did not request this password reset, you may safely ignore this email.\r\n                For your security, please note that the <strong>only official sender email address</strong> from our office is:\r\n                <div class=\"official-email\">plpasig.sso@gmail.com</div>\r\n                Any other email claiming to represent the SSO should be considered unauthorized.\r\n            </div>\r\n\r\n            <p style=\"margin-top: 20px;\">\r\n                Best regards,<br>\r\n                <strong>Pamantasan ng Lungsod ng Pasig<br>\r\n                    Student Success Office</strong>\r\n            </p>\r\n        </div>\r\n\r\n        <!-- FOOTER -->\r\n        <div class=\"footer\">\r\n            <p>Pamantasan ng Lungsod ng Pasig - Student Success Office</p>\r\n        </div>\r\n    </div>\r\n</body>\r\n\r\n</html>', '2025-10-06 19:52:52', 1),
 (9, 'Student Support Services - Register Account', 'PLP - Student Support Services - Register Account', '<!DOCTYPE html>\r\n<html>\r\n\r\n<head>\r\n    <meta charset=\"UTF-8\">\r\n    <title>{{subject}}</title>\r\n    <link href=\"https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap\" rel=\"stylesheet\">\r\n    <style>\r\n        body {\r\n            font-family: \'Poppins\', Arial, sans-serif;\r\n            background-color: #f4f4f4;\r\n            padding: 20px;\r\n            margin: 0;\r\n        }\r\n\r\n        .email-container {\r\n            max-width: 600px;\r\n            margin: 0 auto;\r\n            background: #ffffff;\r\n            border-radius: 8px;\r\n            overflow: hidden;\r\n            box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.1);\r\n        }\r\n\r\n        /* Header */\r\n        .header-table {\r\n            width: 100%;\r\n            background: #ffffff;\r\n            padding: 10px 15px;\r\n        }\r\n\r\n        .header-table img {\r\n            max-height: 70px;\r\n            vertical-align: middle;\r\n            margin: 0 5px;\r\n        }\r\n\r\n        .header-text {\r\n            text-align: center;\r\n            padding-top: 5px;\r\n            padding-bottom: 10px;\r\n        }\r\n\r\n        .header-text .school-name {\r\n            background: #0c326f;\r\n            color: white;\r\n            font-weight: 600;\r\n            font-size: 12px;\r\n            padding: 10px;\r\n            display: inline-block;\r\n            border-radius: 15px 0 0 15px;\r\n            margin-bottom: 4px;\r\n        }\r\n\r\n        .header-text .college-name {\r\n            font-size: 14px;\r\n            font-weight: 600;\r\n            color: #000;\r\n        }\r\n\r\n        .header-text .address {\r\n            font-size: 12px;\r\n            color: #333;\r\n        }\r\n\r\n        /* Content */\r\n        .content {\r\n            padding: 20px;\r\n            font-size: 14px;\r\n            line-height: 1.6;\r\n            color: #333;\r\n        }\r\n\r\n        .content p {\r\n            margin: 0 0 15px;\r\n        }\r\n\r\n        .button {\r\n            display: inline-block;\r\n            background: #004aad;\r\n            color: #fff !important;\r\n            padding: 10px 15px;\r\n            text-decoration: none;\r\n            border-radius: 4px;\r\n            margin-top: 10px;\r\n        }\r\n\r\n        .notice {\r\n            font-size: 13px;\r\n            color: #555;\r\n            background: #f8f8f8;\r\n            padding: 10px;\r\n            border-radius: 6px;\r\n            margin-top: 20px;\r\n            border-left: 4px solid #004aad;\r\n        }\r\n\r\n        .official-email {\r\n            text-align: center;\r\n            font-size: 14px;\r\n            color: #004aad;\r\n            font-weight: 600;\r\n            margin-top: 5px;\r\n        }\r\n\r\n        .footer {\r\n            font-size: 12px;\r\n            color: #888;\r\n            text-align: center;\r\n            padding: 15px;\r\n            background: #f9f9f9;\r\n        }\r\n\r\n        /* ✅ Responsive Header for Mobile */\r\n        @media only screen and (max-width: 480px) {\r\n            .header-table td {\r\n                display: block !important;\r\n                width: 100% !important;\r\n                text-align: center !important;\r\n            }\r\n\r\n            .header-table img {\r\n                display: inline-block !important;\r\n                max-height: 60px !important;\r\n                margin: 5px 3px !important;\r\n            }\r\n\r\n            .header-table td[align=\"right\"] {\r\n                text-align: center !important;\r\n                padding-top: 10px !important;\r\n            }\r\n        }\r\n    </style>\r\n</head>\r\n\r\n<body>\r\n    <div class=\"email-container\">\r\n        <!-- HEADER -->\r\n        <table class=\"header-table\" cellpadding=\"0\" cellspacing=\"0\" role=\"presentation\">\r\n            <tr>\r\n                <!-- LOGOS -->\r\n                <td align=\"left\" valign=\"middle\" style=\"white-space:nowrap;\">\r\n                    <img src=\"https://gcdnb.pbrd.co/images/Pni5FEz4UOEJ.png?o=1\" alt=\"PLP Logo\">\r\n                    <img src=\"https://gcdnb.pbrd.co/images/EFxDeFIopVQN.png?o=1\" alt=\"SSO Logo\">\r\n                </td>\r\n\r\n                <!-- TEXT -->\r\n                <td align=\"right\" valign=\"middle\" style=\"text-align:right;\">\r\n                    <div style=\"background:#0c326f; color:#fff; font-weight:600; font-size:12px; padding:5px 10px; display:inline-block; border-radius:15px 0 0 15px; margin-bottom:4px;\">\r\n                        PAMANTASAN NG LUNGSOD NG PASIG\r\n                    </div><br>\r\n                    <div style=\"font-size:14px; font-weight:600; color:#000;\">\r\n                        Student Success Office\r\n                    </div>\r\n                    <div style=\"font-size:12px; color:#333;\">\r\n                        Alkalde Jose St. Kapasigan Pasig City, Philippines 1600\r\n                    </div>\r\n                </td>\r\n            </tr>\r\n        </table>\r\n\r\n        <!-- EMAIL CONTENT -->\r\n        <div class=\"content\">\r\n            <p>Hello!</p>\r\n\r\n            <p>\r\n                Welcome to the <strong>Pamantasan ng Lungsod ng Pasig – Student Success Office (SSO)</strong> portal!\r\n                To complete your registration and verify your account, please use the verification code provided below:\r\n            </p>\r\n\r\n            <p style=\"text-align: center; margin: 25px 0;\">\r\n                <a\r\n                    style=\"background-color: #004aad; color: #ffffff; text-decoration: none; padding: 12px 20px; border-radius: 5px; display: inline-block; font-weight: bold;\">\r\n                    {{otp_code}}\r\n                </a>\r\n            </p>\r\n\r\n            <p>\r\n                This verification code will remain valid until <strong>{{expire_at}}</strong>.\r\n                If it expires, please request a new password reset through our system.\r\n            </p>\r\n\r\n            <div class=\"notice\">\r\n                If you did not request this password reset, you may safely ignore this email.\r\n                For your security, please note that the <strong>only official sender email address</strong> from our office is:\r\n                <div class=\"official-email\">plpasig.sso@gmail.com</div>\r\n                Any other email claiming to represent the SSO should be considered unauthorized.\r\n            </div>\r\n\r\n            <p style=\"margin-top: 20px;\">\r\n                Best regards,<br>\r\n                <strong>Pamantasan ng Lungsod ng Pasig<br>\r\n                    Student Success Office</strong>\r\n            </p>\r\n        </div>\r\n\r\n        <!-- FOOTER -->\r\n        <div class=\"footer\">\r\n            <p>Pamantasan ng Lungsod ng Pasig - Student Success Office</p>\r\n        </div>\r\n    </div>\r\n</body>\r\n\r\n</html>', '2025-10-06 19:52:52', 1),
 (10, 'Student Support Services - Service Request', 'PLP - Student Support Services - Service Request', '<!DOCTYPE html>\n<html>\n\n<head>\n    <meta charset=\"UTF-8\">\n    <title>{{subject}}</title>\n    <link href=\"https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap\" rel=\"stylesheet\">\n    <style>\n        body {\n            font-family: \'Poppins\', Arial, sans-serif;\n            background-color: #f4f4f4;\n            padding: 20px;\n            margin: 0;\n        }\n\n        .email-container {\n            max-width: 600px;\n            margin: 0 auto;\n            background: #ffffff;\n            border-radius: 8px;\n            overflow: hidden;\n            box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.1);\n        }\n\n        /* Header */\n        .header-table {\n            width: 100%;\n            background: #ffffff;\n            padding: 10px 15px;\n        }\n\n        .header-table img {\n            max-height: 70px;\n            vertical-align: middle;\n            margin: 0 5px;\n        }\n\n        .header-text {\n            text-align: center;\n            padding-top: 5px;\n            padding-bottom: 10px;\n        }\n\n        .header-text .school-name {\n            background: #0c326f;\n            color: white;\n            font-weight: 600;\n            font-size: 12px;\n            padding: 10px;\n            display: inline-block;\n            border-radius: 15px 0 0 15px;\n            margin-bottom: 4px;\n        }\n\n        .header-text .college-name {\n            font-size: 14px;\n            font-weight: 600;\n            color: #000;\n        }\n\n        .header-text .address {\n            font-size: 12px;\n            color: #333;\n        }\n\n        /* Content */\n        .content {\n            padding: 20px;\n            font-size: 14px;\n            line-height: 1.6;\n            color: #333;\n        }\n\n        .content p {\n            margin: 0 0 15px;\n        }\n\n        .button {\n            display: inline-block;\n            background: #004aad;\n            color: #fff !important;\n            padding: 10px 15px;\n            text-decoration: none;\n            border-radius: 4px;\n            margin-top: 10px;\n        }\n\n        .notice {\n            font-size: 13px;\n            color: #555;\n            background: #f8f8f8;\n            padding: 10px;\n            border-radius: 6px;\n            margin-top: 20px;\n            border-left: 4px solid #004aad;\n        }\n\n        .official-email {\n            text-align: center;\n            font-size: 14px;\n            color: #004aad;\n            font-weight: 600;\n            margin-top: 5px;\n        }\n\n        .footer {\n            font-size: 12px;\n            color: #888;\n            text-align: center;\n            padding: 15px;\n            background: #f9f9f9;\n        }\n\n        /* ✅ Responsive Header for Mobile */\n        @media only screen and (max-width: 480px) {\n            .header-table td {\n                display: block !important;\n                width: 100% !important;\n                text-align: center !important;\n            }\n\n            .header-table img {\n                display: inline-block !important;\n                max-height: 60px !important;\n                margin: 5px 3px !important;\n            }\n\n            .header-table td[align=\"right\"] {\n                text-align: center !important;\n                padding-top: 10px !important;\n            }\n        }\n    </style>\n</head>\n\n<body>\n    <div class=\"email-container\">\n        <!-- HEADER -->\n        <table class=\"header-table\" cellpadding=\"0\" cellspacing=\"0\" role=\"presentation\">\n            <tr>\n                <!-- LOGOS -->\n                <td align=\"left\" valign=\"middle\" style=\"white-space:nowrap;\">\n                    <img src=\"https://gcdnb.pbrd.co/images/Pni5FEz4UOEJ.png?o=1\" alt=\"PLP Logo\">\n                    <img src=\"https://gcdnb.pbrd.co/images/EFxDeFIopVQN.png?o=1\" alt=\"SSO Logo\">\n                </td>\n\n                <!-- TEXT -->\n                <td align=\"right\" valign=\"middle\" style=\"text-align:right;\">\n                    <div style=\"background:#0c326f; color:#fff; font-weight:600; font-size:12px; padding:5px 10px; display:inline-block; border-radius:15px 0 0 15px; margin-bottom:4px;\">\n                        PAMANTASAN NG LUNGSOD NG PASIG\n                    </div><br>\n                    <div style=\"font-size:14px; font-weight:600; color:#000;\">\n                        Student Success Office\n                    </div>\n                    <div style=\"font-size:12px; color:#333;\">\n                        Alkalde Jose St. Kapasigan Pasig City, Philippines 1600\n                    </div>\n                </td>\n            </tr>\n        </table>\n\n        <!-- EMAIL CONTENT -->\n        <div class=\"content\">\n            <p>Hello <strong>{{registered_fullname}}</strong>!</p>\n\n            <p>\n                This is to inform you that your service request for\n                <strong>{{service_name}}</strong> has been updated by the\n                <strong>Pamantasan ng Lungsod ng Pasig – Student Success Office (SSO)</strong>.\n            </p>\n\n            <table style=\"width: 100%; border-collapse: collapse; margin: 20px 0;\">\n                <tr>\n                    <td style=\"padding: 8px; border: 1px solid #ddd; font-weight: bold;\">Request ID</td>\n                    <td style=\"padding: 8px; border: 1px solid #ddd;\">{{request_id}}</td>\n                </tr>\n                <tr>\n                    <td style=\"padding: 8px; border: 1px solid #ddd; font-weight: bold;\">Service</td>\n                    <td style=\"padding: 8px; border: 1px solid #ddd;\">{{service_name}}</td>\n                </tr>\n                <tr>\n                    <td style=\"padding: 8px; border: 1px solid #ddd; font-weight: bold;\">Status</td>\n                    <td style=\"padding: 8px; border: 1px solid #ddd; color: #004aad; font-weight: bold;\">{{status}}</td>\n                </tr>\n                <tr>\n                    <td style=\"padding: 8px; border: 1px solid #ddd; font-weight: bold;\">Remarks</td>\n                    <td style=\"padding: 8px; border: 1px solid #ddd;\">{{remarks}}</td>\n                </tr>\n            </table>\n\n            <p>\n                You may log in to your SSO account to view more details or take further action if required.\n            </p>\n\n            <div class=\"notice\">\n                This is an automated notification from the\n                <strong>Student Success Office (SSO)</strong>.\n                For security and authenticity, please note that the <strong>only official sender email address</strong> from our office is:\n                <div class=\"official-email\">plpasig.sso@gmail.com</div>\n                Any other email claiming to represent the SSO should be considered unauthorized.\n            </div>\n\n            <p style=\"margin-top: 20px;\">\n                Best regards,<br>\n                <strong>Pamantasan ng Lungsod ng Pasig<br>\n                    Student Success Office</strong>\n            </p>\n        </div>\n\n\n        <!-- FOOTER -->\n        <div class=\"footer\">\n            <p>Pamantasan ng Lungsod ng Pasig - Student Success Office</p>\n        </div>\n    </div>\n</body>\n\n</html>', '2025-10-06 19:52:52', 1);
@@ -238,6 +326,13 @@ CREATE TABLE `ExamRegistrations` (
   `schedule_id` int(11) DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
+--
+-- Dumping data for table `ExamRegistrations`
+--
+
+INSERT INTO `ExamRegistrations` (`registration_id`, `user_id`, `schedule_id`) VALUES
+(1, 5, 1);
+
 -- --------------------------------------------------------
 
 --
@@ -252,6 +347,13 @@ CREATE TABLE `ExamSchedules` (
   `start_date_and_time` timestamp NOT NULL,
   `status` enum('Open','Full') NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+--
+-- Dumping data for table `ExamSchedules`
+--
+
+INSERT INTO `ExamSchedules` (`schedule_id`, `floor`, `room`, `capacity`, `start_date_and_time`, `status`) VALUES
+(1, '3rd Floor', 'Room 301', 30, '2025-11-17 16:28:00', 'Open');
 
 -- --------------------------------------------------------
 
@@ -298,8 +400,8 @@ CREATE TABLE `faqs` (
 
 INSERT INTO `faqs` (`id`, `question`, `answer`, `read_count`, `status`, `created_at`, `updated_at`) VALUES
 (1, 'What are the eligibility criteria for undergraduate admission?', 'Applicants must have completed high school or equivalent with a minimum required percentage as specified by the college.', 3, 'active', '2025-11-02 16:02:23', '2025-11-02 16:44:47'),
-(2, 'How can I apply for admission?', 'You can apply online through our official admission portal by filling out the application form and submitting the required documents.', 8, 'active', '2025-11-02 16:02:23', '2025-11-03 00:46:41'),
-(3, 'What documents are required during the admission process?', 'You will need your high school transcripts, passport-size photographs, ID proof, transfer certificate, and entrance exam scorecard (if applicable).', 5, 'active', '2025-11-02 16:02:23', '2025-11-05 09:07:31'),
+(2, 'How can I apply for admission?', 'You can apply online through our official admission portal by filling out the application form and submitting the required documents.', 9, 'active', '2025-11-02 16:02:23', '2025-11-12 03:20:09'),
+(3, 'What documents are required during the admission process?', 'You will need your high school transcripts, passport-size photographs, ID proof, transfer certificate, and entrance exam scorecard (if applicable).', 6, 'active', '2025-11-02 16:02:23', '2025-11-12 03:20:13'),
 (4, 'Is there an entrance exam for admission?', 'Yes, certain courses require applicants to appear for an entrance exam. Please check the course details for more information.', 5, 'active', '2025-11-02 16:02:23', '2025-11-02 22:11:42'),
 (5, 'What is the application fee?', 'The application fee is specified on the admission portal and varies based on the course. Payments can be made online via credit/debit card or net banking.', 1, 'active', '2025-11-02 16:02:23', '2025-11-02 16:43:33'),
 (6, 'Can I apply for multiple courses?', 'Yes, you can apply for multiple courses, but separate application forms and fees are required for each course.', 1, 'active', '2025-11-02 16:02:23', '2025-11-02 16:43:33'),
@@ -422,18 +524,18 @@ INSERT INTO `form_fields` (`id`, `step_id`, `name`, `label`, `input_type`, `plac
 (84, 15, 'alternative_email_address', 'Alternative Email Address', 'email', 'Alternative Email Address', 0, 1, 8, NULL, NULL, NULL, NULL, NULL),
 (85, 15, 'are_you_a_member_of_the_lgbtqia', 'Are you a member of the LGBTQIA+', 'radio', '', 0, 1, 9, NULL, NULL, NULL, NULL, NULL),
 (86, 15, 'are_you_a_person_with_disability', 'Are you a person with disability?', 'radio', '', 0, 1, 10, NULL, NULL, NULL, NULL, NULL),
-(87, 15, 'kindly_specify_your_disability', 'kindly specify your disability', 'text', 'specify your disability', 0, 1, 11, NULL, NULL, NULL, NULL, NULL),
+(87, 15, 'kindly_specify_your_disability', 'kindly specify your disability', 'text', 'specify your disability', 0, 1, 11, '', NULL, NULL, 86, 'Yes'),
 (88, 15, 'do_you_have_any_relative_s_working_in_the_city_government_of_pasig_in_pamantasan_ng_lungsod_ng_pasig_and_or_affiliated_companies_subsidiaries_within_the_second_degree_of_consanguinity_or_affinity_e_g_spouse_parents_son_daughter_brother_sister_grandparents_grandchild_in_laws_etc', 'Do you have any relative/s working in the City Government of Pasig, in Pamantasan ng Lungsod ng Pasig, and/or affiliated companies/subsidiaries within the second degree of consanguinity or affinity?(e.g, spouse, parents, son, daughter, brother, sister, grandparents, grandchild, in-laws, etc.)', 'radio', '', 0, 1, 12, NULL, NULL, NULL, NULL, NULL),
-(89, 15, 'full_name_of_the_relative', 'Full name of the relative', 'text', 'eg. Juan B. Dela Cruz', 0, 1, 13, NULL, NULL, NULL, NULL, NULL),
-(90, 15, 'designation_position', 'Designation/Position', 'text', 'Designation/Position', 0, 1, 14, NULL, NULL, NULL, NULL, NULL),
-(91, 15, 'relationship_to_the_applicant', 'Relationship to the applicant', 'text', '', 0, 1, 15, NULL, NULL, NULL, NULL, NULL),
-(92, 15, 'marginalized_applicant', 'Marginalized Applicant', 'checkbox', '', 0, 0, 16, NULL, NULL, NULL, NULL, NULL),
+(89, 15, 'full_name_of_the_relative', 'Full name of the relative', 'text', 'eg. Juan B. Dela Cruz', 0, 1, 13, '', NULL, NULL, 88, 'Yes'),
+(90, 15, 'designation_position', 'Designation/Position', 'text', 'Designation/Position', 0, 1, 14, '', NULL, NULL, 88, 'Yes'),
+(91, 15, 'relationship_to_the_applicant', 'Relationship to the applicant', 'text', '', 0, 1, 15, '', NULL, NULL, 88, 'Yes'),
+(92, 15, 'marginalized_applicant', 'Marginalized Applicant', 'checkbox', '', 0, 0, 16, '', NULL, NULL, 88, 'Yes'),
 (93, 16, 'residency_status', 'Residency Status', 'radio', '', 0, 1, 1, NULL, NULL, NULL, NULL, NULL),
-(94, 16, 'district', 'District', 'radio', '', 0, 1, 2, NULL, NULL, NULL, NULL, NULL),
-(95, 16, 'barangay', 'Barangay', 'select', '', 0, 1, 3, NULL, NULL, NULL, NULL, NULL),
-(96, 16, 'barangay', 'Barangay', 'select', '', 0, 1, 4, NULL, NULL, NULL, NULL, NULL),
-(97, 16, 'address_house_number_unit_building_street_subdivision_village', 'Address (House Number/Unit/Building, Street, Subdivision/Village)', 'text', '', 0, 1, 5, NULL, NULL, NULL, NULL, NULL),
-(98, 16, 'address_house_number_unit_building_street_subdivision_village_barangay_city', 'Address (House Number/Unit/Building, Street, Subdivision/Village, Barangay, City)', 'text', '', 0, 1, 6, NULL, NULL, NULL, NULL, NULL),
+(94, 16, 'district', 'District', 'radio', '', 0, 1, 2, '', NULL, NULL, 93, 'Pasig Resident'),
+(95, 16, 'barangay_district_1', 'Barangay (District #1)', 'select', '', 0, 1, 3, '', NULL, NULL, 94, 'District 1'),
+(96, 16, 'barangay_district_2', 'Barangay (District #2)', 'select', '', 0, 1, 4, '', NULL, NULL, 94, 'District 2'),
+(97, 16, 'address_house_number_unit_building_street_subdivision_village', 'Address (House Number/Unit/Building, Street, Subdivision/Village)', 'text', '', 0, 1, 5, '', NULL, NULL, 93, 'Pasig Resident'),
+(98, 16, 'address_house_number_unit_building_street_subdivision_village_barangay_city', 'Address (House Number/Unit/Building, Street, Subdivision/Village, Barangay, City)', 'text', '', 0, 1, 6, '', NULL, NULL, 93, 'Non-Pasig Resident'),
 (99, 17, 'type_of_school', 'Type of School', 'select', '', 0, 1, 1, NULL, NULL, NULL, NULL, NULL),
 (100, 17, 'last_school_attended', 'Last School Attended', 'text', 'Last School Attended', 0, 1, 2, NULL, NULL, NULL, NULL, NULL),
 (101, 18, 'general_average_in_filipino', 'General Average in Filipino', 'number', 'General Average in Filipino', 0, 1, 1, NULL, NULL, NULL, NULL, NULL),
@@ -448,7 +550,9 @@ INSERT INTO `form_fields` (`id`, `step_id`, `name`, `label`, `input_type`, `plac
 (110, 19, 'barangay_residence_certificate', 'Barangay Residence Certificate', 'file', '', 0, 1, 5, NULL, NULL, NULL, NULL, NULL),
 (111, 19, 'two_2_passport_size_picture_white_background_with_digital_nameplate', 'TWO (2) PASSPORT SIZE picture, WHITE BACKGROUND with DIGITAL NAMEPLATE.', 'file', '', 0, 1, 6, NULL, NULL, NULL, NULL, NULL),
 (112, 19, 'notarized_affidavit_of_guardianship_for_applicants_with_guardian', 'Notarized Affidavit of guardianship.(for applicants with guardian)', 'file', '', 0, 0, 7, NULL, NULL, NULL, NULL, NULL),
-(113, 20, 'check_whether_you_have_the_following_requirements', 'Check whether you have the following requirements', 'select', '', 0, 1, 1, NULL, NULL, NULL, NULL, NULL);
+(113, 20, 'check_whether_you_have_the_following_requirements', 'Check whether you have the following requirements', 'checkbox', '', 0, 1, 1, '', NULL, NULL, NULL, NULL),
+(115, 22, 'testing_file', 'Testing File', 'file', '', 0, 1, 1, '', '.pdf,.jpg,.png', 10, NULL, NULL),
+(116, 22, 'testing_input', 'Testing Input', 'text', '', 0, 1, 2, '', NULL, NULL, NULL, NULL);
 
 -- --------------------------------------------------------
 
@@ -641,7 +745,9 @@ INSERT INTO `form_field_options` (`id`, `field_id`, `option_label`, `option_valu
 (175, 113, 'PSA Birth Certificate', 'PSA Birth Certificate', 3),
 (176, 113, 'Two Passport size picture, white background with nameplate', 'Two Passport size picture, white background with nameplate', 4),
 (177, 113, 'Notarized Affidavit of guardianship (for applicants with guardian)', 'Notarized Affidavit of guardianship (for applicants with guardian)', 5),
-(178, 113, 'Barangay Residence Certificate', 'Barangay Residence Certificate', 6);
+(178, 113, 'Barangay Residence Certificate', 'Barangay Residence Certificate', 6),
+(179, 4, 'Female', 'Female', 2),
+(180, 78, 'Female', 'Female', 2);
 
 -- --------------------------------------------------------
 
@@ -682,7 +788,8 @@ INSERT INTO `form_steps` (`id`, `applicant_type_id`, `title`, `description`, `is
 (17, 3, 'Step 3: Previous Education Information', '', 0, 4),
 (18, 3, 'Step 4: General Average', '', 0, 5),
 (19, 3, 'Step 5: Documentary Requirements', 'When uploading the REQUIRED DOCUMENTS, please ensure that the scanned copies or screenshots are CLEAR, LEGIBLE, and FREE FROM ANY ALTERATIONS or DIGITAL MANIPULATION.\r\n\r\nApplicants are reminded that ONLY THOSE with COMPLETE REQUIREMENTS will be entertained and scheduled for VALIDATION.\r\n\r\nQualifying applicants shall take the admission exam. The schedule of examination will be posted on the PLP Official Facebook Page.', 0, 6),
-(20, 3, 'Step 6: Document Checklist', '', 0, 7);
+(20, 3, 'Step 6: Document Checklist', '', 0, 7),
+(22, 5, 'Step 1: Testing', '', 0, 1);
 
 -- --------------------------------------------------------
 
@@ -858,10 +965,10 @@ CREATE TABLE `services_answers` (
 --
 
 INSERT INTO `services_answers` (`answer_id`, `request_id`, `field_id`, `answer_value`) VALUES
-(1, 1, 11, 'Datus'),
-(2, 1, 12, 'Mark Andrie'),
-(3, 1, 13, 'Dalisay'),
-(4, 1, 14, 'Employment Application'),
+(1, 1, 11, 'Datusass'),
+(2, 1, 12, 'Mark Andrieass'),
+(3, 1, 13, 'Dalisayaaaass'),
+(4, 1, 14, 'School Admission'),
 (5, 2, 11, 'Renheart'),
 (6, 2, 12, 'Dela Vega'),
 (7, 2, 13, 'Lopez'),
@@ -874,7 +981,75 @@ INSERT INTO `services_answers` (`answer_id`, `request_id`, `field_id`, `answer_v
 (14, 4, 6, 'Romeo John'),
 (15, 4, 7, 'Gonzales'),
 (16, 4, 8, 'Ador'),
-(17, 4, 9, 'Yes');
+(17, 4, 9, 'Yes'),
+(18, 1, 15, 'aaaa'),
+(19, 5, 11, 'jerseyrrr'),
+(20, 5, 12, 'garciarrr'),
+(21, 5, 13, 'tekikorrr'),
+(22, 5, 14, 'Other'),
+(23, 5, 15, '444'),
+(24, 6, 11, 'Tricia Nicole'),
+(25, 6, 12, 'Delgado'),
+(26, 6, 13, 'De Asis'),
+(27, 6, 14, 'Scholarship Application'),
+(28, 7, 11, 'Amerel'),
+(29, 7, 12, 'Mangontra'),
+(30, 7, 13, 'Disomnong'),
+(31, 7, 14, 'Scholarship Application'),
+(32, 8, 10, 'https://beige-jellyfish-618097.hostingersite.com/uploads/service_requests/69131c84add47-IMG_20251023_214145_365.jpg'),
+(33, 8, 6, 'Tricia Nicole'),
+(34, 8, 7, 'Delgado'),
+(35, 8, 8, 'De Asis'),
+(36, 8, 9, 'Yes'),
+(37, 9, 10, 'https://beige-jellyfish-618097.hostingersite.com/uploads/service_requests/69131ca5bbc94-17628601851157468256710879873320.jpg'),
+(38, 9, 6, 'Amerel'),
+(39, 9, 7, 'Mangontra'),
+(40, 9, 8, 'Disomnong'),
+(41, 9, 9, 'Yes'),
+(42, 10, 10, 'https://beige-jellyfish-618097.hostingersite.com/uploads/service_requests/691364509f072-DFDUpdated.png'),
+(43, 10, 6, 'Gerrald'),
+(44, 10, 7, 'Aquino'),
+(45, 10, 8, 'Abo'),
+(46, 10, 9, 'No'),
+(47, 11, 11, 'testng'),
+(48, 11, 12, 'testing'),
+(49, 11, 13, 'testing'),
+(50, 11, 14, 'School Admission'),
+(51, 12, 11, 'testing'),
+(52, 12, 16, '20-00215'),
+(53, 12, 12, 'hhqhq'),
+(54, 12, 13, 'qhhq'),
+(55, 12, 14, 'Other'),
+(56, 12, 15, 'hemployment'),
+(57, 12, 17, 'Graduated'),
+(58, 13, 11, 'datus'),
+(59, 13, 16, 'mark'),
+(60, 13, 12, 'andrie'),
+(61, 13, 13, '013011'),
+(62, 13, 14, '2nd Year'),
+(63, 13, 17, 'Graduated'),
+(64, 13, 21, 'Scholarship Application'),
+(65, 14, 11, 'Abo'),
+(66, 14, 16, 'Gerrald'),
+(67, 14, 12, 'Aquino'),
+(68, 14, 13, '23-00270'),
+(69, 14, 14, '2nd Year'),
+(70, 14, 17, '1st Year'),
+(71, 14, 21, 'On-The-Job Training (OJT)'),
+(72, 15, 10, 'https://plpasig-student-services.icu/uploads/service_requests/6915fa2b4ad48-archi-framework.png'),
+(73, 15, 6, 'Gerrald'),
+(74, 15, 7, 'Aquino'),
+(75, 15, 8, 'Abo'),
+(76, 15, 9, 'No'),
+(77, 16, 10, 'https://plpasig-student-services.icu/uploads/service_requests/6915fabc9f3d1-newArchi.png'),
+(78, 16, 6, 'Gerrald'),
+(79, 16, 7, 'Aquino'),
+(80, 16, 8, 'Abo'),
+(81, 16, 9, 'No'),
+(82, 17, 23, 'Bote'),
+(83, 17, 24, 'Bote sIya'),
+(84, 17, 25, 'Gerrald Abo'),
+(85, 17, 26, '2003-08-24');
 
 -- --------------------------------------------------------
 
@@ -909,7 +1084,34 @@ INSERT INTO `services_email_otp_codes` (`id`, `user_id`, `six_digit`, `purpose`,
 (24, 21, '873231', 'register', 'adorromeojohn05@gmail.com', '2025-11-09 17:51:57', '2025-11-08 09:52:25', 0, 5, '2025-11-08 09:48:18'),
 (25, 22, '955858', 'register', 'renheartimpulsement@gmail.com', '2025-11-09 19:13:11', '2025-11-08 11:13:39', 0, 5, '2025-11-08 11:13:11'),
 (26, 23, '302043', 'register', 'datus_markandrie@plpasig.edu.ph', '2025-11-09 20:36:39', '2025-11-08 12:37:57', 1, 5, '2025-11-08 12:36:40'),
-(27, 24, '941628', 'register', 'ador_romeojohn@plpasig.edu.ph', '2025-11-11 06:36:28', '2025-11-09 22:36:56', 0, 5, '2025-11-09 22:36:28');
+(27, 24, '941628', 'register', 'ador_romeojohn@plpasig.edu.ph', '2025-11-11 06:36:28', '2025-11-09 22:36:56', 0, 5, '2025-11-09 22:36:28'),
+(28, 25, '924852', 'register', 'santosclyde867@gmail.com', '2025-11-12 18:29:34', '2025-11-11 10:30:15', 0, 5, '2025-11-11 10:29:34'),
+(29, 26, '918422', 'register', 'datusmarkandrei@gmail.com', '2025-11-12 18:37:38', '2025-11-11 10:38:36', 0, 5, '2025-11-11 10:37:41'),
+(30, 27, '845731', 'register', 'triciadeasis7@gmail.com', '2025-11-12 19:19:52', '2025-11-11 11:20:25', 0, 5, '2025-11-11 11:19:52'),
+(31, 28, '772410', 'register', 'amerel82@gmail.com', '2025-11-12 19:20:21', '2025-11-11 11:20:57', 0, 5, '2025-11-11 11:20:21'),
+(32, 29, '792798', 'register', 'jomar.aguirre.566@gmail.com', '2025-11-12 19:32:04', '2025-11-11 14:20:09', 0, 5, '2025-11-11 11:30:19'),
+(33, 30, '124727', 'register', 'Bangcore_angel@plpasig.edu.ph', '2025-11-12 21:51:51', '2025-11-11 13:52:38', 0, 5, '2025-11-11 13:51:51'),
+(34, 31, '383867', 'register', 'kthscenery30@gmail.com', '2025-11-12 21:58:55', '2025-11-11 14:00:43', 0, 5, '2025-11-11 13:58:55'),
+(35, 32, '677906', 'register', 'francispeter.bundalian@my.jru.edu', '2025-11-12 22:31:06', '2025-11-11 14:31:38', 0, 5, '2025-11-11 14:31:06'),
+(36, 33, '397718', 'register', 'codera_isabela@plpasig.edu.ph', '2025-11-12 22:35:24', '2025-11-11 14:37:17', 0, 5, '2025-11-11 14:35:24'),
+(37, 34, '839447', 'register', 'andreyaa932@gmail.com', '2025-11-12 23:12:23', NULL, 0, 5, '2025-11-11 15:11:28'),
+(38, 35, '355705', 'register', 'ahgomez6949ant@student.fatima.edu.ph', '2025-11-12 23:29:42', '2025-11-11 15:30:05', 0, 5, '2025-11-11 15:29:42'),
+(39, 36, '966099', 'register', 'abogerrald2403@gmail.com', '2025-11-12 23:47:25', '2025-11-11 15:48:45', 0, 5, '2025-11-11 15:47:25'),
+(40, 37, '921850', 'register', 'doumamatsuno@gmail.com', '2025-11-12 23:50:06', NULL, 0, 5, '2025-11-11 15:50:07'),
+(41, 38, '863579', 'register', 'gerraldabo24@gmail.com', '2025-11-12 23:51:05', NULL, 0, 5, '2025-11-11 15:51:05'),
+(42, 39, '661448', 'register', 'heraldogray@gmail.com', '2025-11-12 23:51:37', NULL, 0, 5, '2025-11-11 15:51:37'),
+(43, 40, '340808', 'register', 'nosib74615@fermiro.com', '2025-11-12 23:54:02', NULL, 0, 5, '2025-11-11 15:54:02'),
+(44, 41, '117132', 'register', 'cicel17015@gyknife.com', '2025-11-13 00:08:16', '2025-11-11 16:11:42', 0, 5, '2025-11-11 16:08:16'),
+(45, 41, '115750', 'reset_password', 'cicel17015@gyknife.com', '2025-11-13 00:15:26', '2025-11-11 16:18:20', 0, 5, '2025-11-11 16:15:26'),
+(46, 24, '511831', 'reset_password', 'ador_romeojohn@plpasig.edu.ph', '2025-11-13 17:24:34', NULL, 0, 5, '2025-11-12 09:24:34'),
+(47, 42, '881160', 'register', 'pjgvaldez1008@gmail.com', '2025-11-13 20:44:14', '2025-11-12 12:44:47', 0, 5, '2025-11-12 12:44:14'),
+(48, 43, '312101', 'register', 'gipanep625@canvect.com', '2025-11-14 08:26:35', NULL, 0, 5, '2025-11-13 00:23:44'),
+(49, 44, '559855', 'register', 'doyaw45859@chaineor.com', '2025-11-14 08:28:11', NULL, 0, 5, '2025-11-13 00:28:12'),
+(50, 45, '980206', 'register', 'gamboa.khinandrei@gmail.com', '2025-11-14 10:53:49', '2025-11-13 02:54:16', 0, 5, '2025-11-13 02:53:49'),
+(51, 26, '713906', 'reset_password', 'datusmarkandrei@gmail.com', '2025-11-14 23:01:18', '2025-11-13 15:02:09', 0, 5, '2025-11-13 14:59:49'),
+(52, 46, '538637', 'register', 'nasogeh333@fermiro.com', '2025-11-14 22:59:58', '2025-11-13 15:00:18', 0, 5, '2025-11-13 14:59:51'),
+(53, 47, '211343', 'register', 'keveh19414@canvect.com', '2025-11-14 23:02:31', '2025-11-13 15:02:48', 0, 5, '2025-11-13 15:02:25'),
+(54, 47, '536569', 'reset_password', 'keveh19414@canvect.com', '2025-11-15 00:05:07', '2025-11-13 16:18:06', 0, 5, '2025-11-13 16:05:00');
 
 -- --------------------------------------------------------
 
@@ -935,21 +1137,31 @@ CREATE TABLE `services_fields` (
 --
 
 INSERT INTO `services_fields` (`field_id`, `service_id`, `label`, `field_type`, `is_required`, `display_order`, `allowed_file_types`, `visible_when_value`, `visible_when_option_id`, `max_file_size_mb`) VALUES
-(1, 3, 'First Name', 'text', 1, 1, NULL, NULL, NULL, NULL),
-(2, 3, 'Middle Name', 'text', 1, 2, NULL, NULL, NULL, NULL),
-(3, 3, 'Program', 'select', 1, 4, NULL, NULL, NULL, NULL),
-(4, 3, 'Last Name', 'text', 1, 3, NULL, NULL, NULL, NULL),
-(5, 3, 'Alternative Email', 'email', 1, 5, NULL, NULL, NULL, NULL),
 (6, 2, 'Given Name', 'text', 1, 1, NULL, NULL, NULL, NULL),
 (7, 2, 'Middle Name', 'text', 1, 1, NULL, NULL, NULL, NULL),
 (8, 2, 'Surname', 'text', 1, 3, NULL, NULL, NULL, NULL),
 (9, 2, 'Loss ID?', 'radio', 1, 4, NULL, NULL, NULL, NULL),
 (10, 2, 'Notarized Affidavit of Loss', 'file', 1, 6, NULL, NULL, NULL, 5),
-(11, 1, 'Given Name', 'text', 1, 1, NULL, NULL, NULL, NULL),
-(12, 1, 'Middle Name', 'text', 1, 2, NULL, NULL, NULL, NULL),
-(13, 1, 'Surname', 'text', 1, 3, NULL, NULL, NULL, NULL),
-(14, 1, 'Purpose', 'select', 1, 4, NULL, NULL, NULL, NULL),
-(15, 1, 'Please Specify Purpose', 'text', 1, 5, NULL, NULL, 16, NULL);
+(11, 1, 'Surname', 'text', 1, 1, NULL, NULL, NULL, NULL),
+(12, 1, 'Middle Name', 'text', 0, 3, NULL, NULL, NULL, NULL),
+(13, 1, 'Student #', 'text', 1, 4, NULL, NULL, NULL, NULL),
+(14, 1, 'Year', 'select', 1, 5, NULL, NULL, NULL, NULL),
+(15, 1, 'Course (1st Year)', 'select', 1, 5, NULL, NULL, 26, NULL),
+(16, 1, 'Given Name', 'text', 1, 2, NULL, NULL, NULL, NULL),
+(17, 1, 'Course (2nd Year)', 'select', 1, 6, NULL, NULL, 27, NULL),
+(18, 1, 'Course (3rd Year)', 'select', 1, 7, NULL, NULL, 28, NULL),
+(19, 1, 'Course (4th Year)', 'select', 1, 8, NULL, NULL, 29, NULL),
+(20, 1, 'Year Graduated', 'number', 1, 9, NULL, NULL, 30, NULL),
+(21, 1, 'Purpose', 'select', 1, 10, NULL, NULL, NULL, NULL),
+(22, 1, 'Please Specify Purpose', 'text', 1, 11, NULL, NULL, 34, NULL),
+(23, 4, 'Item Name', 'text', 1, 1, NULL, NULL, NULL, NULL),
+(24, 4, 'Description', 'textarea', 1, 2, NULL, NULL, NULL, NULL),
+(25, 4, 'Name of Claimnant', 'text', 1, 3, NULL, NULL, NULL, NULL),
+(26, 4, 'Date Loss', 'date', 1, 4, NULL, NULL, NULL, NULL),
+(27, 5, 'Item Name', 'text', 1, 1, NULL, NULL, NULL, NULL),
+(28, 5, 'Description', 'textarea', 1, 2, NULL, NULL, NULL, NULL),
+(29, 5, 'Surrender By', 'text', 1, 3, NULL, NULL, NULL, NULL),
+(30, 5, 'Date Found', 'date', 1, 4, NULL, NULL, NULL, NULL);
 
 -- --------------------------------------------------------
 
@@ -970,9 +1182,6 @@ CREATE TABLE `services_field_options` (
 --
 
 INSERT INTO `services_field_options` (`option_id`, `field_id`, `option_label`, `option_value`, `display_order`) VALUES
-(1, 3, 'BSIT', 'BSIT', 1),
-(2, 3, 'BSCS', 'BSCS', 2),
-(3, 3, 'BSEd', 'BSEd', 3),
 (4, 6, 'School Admission', 'School Admission', 1),
 (5, 6, 'Employment Application', 'Employment Application', 2),
 (6, 6, 'Scholarship Application', 'Scholarship Application', 3),
@@ -982,10 +1191,22 @@ INSERT INTO `services_field_options` (`option_id`, `field_id`, `option_label`, `
 (10, 6, 'Other', 'Other', 7),
 (11, 9, 'Yes', 'Yes', 1),
 (12, 9, 'No', 'No', 2),
-(13, 14, 'School Admission', 'School Admission', 1),
-(14, 14, 'Employment Application', 'Employment Application', 2),
-(15, 14, 'Scholarship Application', 'Scholarship Application', 3),
-(16, 14, 'Other', 'Other', 4);
+(19, 17, '1st Year', '1st Year', 1),
+(20, 17, '2nd Year', '2nd Year', 2),
+(21, 17, '3rd Year', '3rd Year', 3),
+(22, 17, '4th Year', '4th Year', 4),
+(23, 17, 'Graduated', 'Graduated', 5),
+(24, 18, 'BSIT', 'BSIT', 1),
+(25, 18, 'BSCS', 'BSCS', 2),
+(26, 14, '1st Year', '1st Year', 1),
+(27, 14, '2nd Year', '2nd Year', 2),
+(28, 14, '3rd Year', '3rd Year', 3),
+(29, 14, '4th Year', '4th Year', 4),
+(30, 14, 'Graduated', 'Graduated', 5),
+(31, 21, 'Scholarship Application', 'Scholarship Application', 1),
+(32, 21, 'On-The-Job Training (OJT)', 'On-The-Job Training (OJT)', 2),
+(33, 21, 'Transfer to Another School', 'Transfer to Another School', 3),
+(34, 21, 'Other', 'Other', 4);
 
 -- --------------------------------------------------------
 
@@ -1009,7 +1230,8 @@ CREATE TABLE `services_list` (
 INSERT INTO `services_list` (`service_id`, `name`, `description`, `icon`, `button_text`, `is_active`) VALUES
 (1, 'Good Moral Request', 'A formal request to obtain a certification confirming an individual\'s good moral character and ethical conduct.', '<svg xmlns=\"http://www.w3.org/2000/svg\" width=\"24\" height=\"24\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\" class=\"lucide lucide-file-text-icon lucide-file-text\"><path d=\"M6 22a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h8a2.4 2.4 0 0 1 1.704.706l3.588 3.588A2.4 2.4 0 0 1 20 8v12a2 2 0 0 1-2 2z\"/><path d=\"M14 2v5a1 1 0 0 0 1 1h5\"/><path d=\"M10 9H8\"/><path d=\"M16 13H8\"/><path d=\"M16 17H8\"/></svg>', 'Request', 1),
 (2, 'ID Replacement', 'ID Replacement is the process of issuing a new identification card to replace one that has been lost, stolen, damaged, or contains outdated information.', '<svg xmlns=\"http://www.w3.org/2000/svg\" width=\"24\" height=\"24\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\" class=\"lucide lucide-id-card-lanyard-icon lucide-id-card-lanyard\"><path d=\"M13.5 8h-3\"/><path d=\"m15 2-1 2h3a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h3\"/><path d=\"M16.899 22A5 5 0 0 0 7.1 22\"/><path d=\"m9 2 3 6\"/><circle cx=\"12\" cy=\"15\" r=\"3\"/></svg>', 'Request', 1),
-(3, 'Library Card Replacement', 'If your library card is lost, stolen, or damaged, you can request a replacement at the library’s front desk. A small replacement fee may apply, and valid identification is required to issue a new card.', '<svg xmlns=\"http://www.w3.org/2000/svg\" width=\"24\" height=\"24\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\" class=\"lucide lucide-id-card-icon lucide-id-card\"><path d=\"M16 10h2\"/><path d=\"M16 14h2\"/><path d=\"M6.17 15a3 3 0 0 1 5.66 0\"/><circle cx=\"9\" cy=\"11\" r=\"2\"/><rect x=\"2\" y=\"5\" width=\"20\" height=\"14\" rx=\"2\"/></svg>', 'Request', 0);
+(4, 'Lost Item', 'If you’ve lost something, use this service to provide details. This information allows our team to help locate your item.', '<svg xmlns=\"http://www.w3.org/2000/svg\" width=\"24\" height=\"24\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\" class=\"lucide lucide-message-square-warning-icon lucide-message-square-warning\"><path d=\"M22 17a2 2 0 0 1-2 2H6.828a2 2 0 0 0-1.414.586l-2.202 2.202A.71.71 0 0 1 2 21.286V5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2z\"/><path d=\"M12 15h.01\"/><path d=\"M12 7v4\"/></svg>', 'Report Lost Item', 1),
+(5, 'Report Found Item', 'If you’ve found an item, use this service to provide details including a description, where and when it was found. This helps reunite lost items with their rightful owners quickly.', '<svg xmlns=\"http://www.w3.org/2000/svg\" width=\"24\" height=\"24\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\" class=\"lucide lucide-search-check-icon lucide-search-check\"><path d=\"m8 11 2 2 4-4\"/><circle cx=\"11\" cy=\"11\" r=\"8\"/><path d=\"m21 21-4.3-4.3\"/></svg>', 'Report Found Item', 1);
 
 -- --------------------------------------------------------
 
@@ -1032,10 +1254,23 @@ CREATE TABLE `services_requests` (
 --
 
 INSERT INTO `services_requests` (`request_id`, `service_id`, `user_id`, `status_id`, `admin_remarks`, `can_update`, `requested_at`) VALUES
-(1, 1, 23, 1, 'Just a quick note to let you know your request is currently under admin review. We’ll get back to you as soon as it’s approved — thanks for your patience!', 1, '2025-11-08 14:51:17'),
+(1, 1, 23, 1, 'Just a quick note to let you know your request is currently under admin review. We’ll get back to you as soon as it’s approved — thanks for your patience!', 0, '2025-11-08 14:51:17'),
 (2, 1, 22, 4, 'Your request was rejected.', 1, '2025-11-09 01:01:28'),
 (3, 1, 24, 1, 'Just a quick note to let you know your request is currently under admin review. We’ll get back to you as soon as it’s approved — thanks for your patience!', 0, '2025-11-09 22:38:27'),
-(4, 2, 24, 1, 'Just a quick note to let you know your request is currently under admin review. We’ll get back to you as soon as it’s approved — thanks for your patience!', 0, '2025-11-10 07:14:16');
+(4, 2, 24, 1, 'Just a quick note to let you know your request is currently under admin review. We’ll get back to you as soon as it’s approved — thanks for your patience!', 0, '2025-11-10 07:14:16'),
+(5, 1, 26, 1, 'Just a quick note to let you know your request is currently under admin review. We’ll get back to you as soon as it’s approved — thanks for your patience!', 0, '2025-11-11 10:40:21'),
+(6, 1, 27, 1, 'Just a quick note to let you know your request is currently under admin review. We’ll get back to you as soon as it’s approved — thanks for your patience!', 0, '2025-11-11 11:21:24'),
+(7, 1, 28, 1, 'Just a quick note to let you know your request is currently under admin review. We’ll get back to you as soon as it’s approved — thanks for your patience!', 0, '2025-11-11 11:22:38'),
+(8, 2, 27, 1, 'Just a quick note to let you know your request is currently under admin review. We’ll get back to you as soon as it’s approved — thanks for your patience!', 0, '2025-11-11 11:22:44'),
+(9, 2, 28, 1, 'Just a quick note to let you know your request is currently under admin review. We’ll get back to you as soon as it’s approved — thanks for your patience!', 0, '2025-11-11 11:23:17'),
+(10, 2, 41, 1, 'Just a quick note to let you know your request is currently under admin review. We’ll get back to you as soon as it’s approved — thanks for your patience!', 0, '2025-11-11 16:29:04'),
+(11, 1, 26, 3, 'kunin mo na ito', 0, '2025-11-12 08:08:55'),
+(12, 1, 26, 3, 'Your request is complete.', 0, '2025-11-12 09:17:01'),
+(13, 1, 26, 1, 'Just a quick note to let you know your request is currently under admin review. We’ll get back to you as soon as it’s approved — thanks for your patience!', 0, '2025-11-13 15:03:49'),
+(14, 1, 47, 1, 'Just a quick note to let you know your request is currently under admin review. We’ll get back to you as soon as it’s approved — thanks for your patience!', 0, '2025-11-13 15:27:02'),
+(15, 2, 47, 1, 'Just a quick note to let you know your request is currently under admin review. We’ll get back to you as soon as it’s approved — thanks for your patience!', 0, '2025-11-13 15:32:51'),
+(16, 2, 47, 1, 'Just a quick note to let you know your request is currently under admin review. We’ll get back to you as soon as it’s approved — thanks for your patience!', 0, '2025-11-13 15:35:16'),
+(17, 4, 47, 1, 'Just a quick note to let you know your request is currently under admin review. We’ll get back to you as soon as it’s approved — thanks for your patience!', 0, '2025-11-13 15:36:29');
 
 -- --------------------------------------------------------
 
@@ -1089,15 +1324,38 @@ CREATE TABLE `services_users` (
 --
 
 INSERT INTO `services_users` (`id`, `email`, `first_name`, `middle_name`, `last_name`, `suffix`, `password_hash`, `email_verified`, `email_verified_at`, `is_active`, `last_login_at`, `created_at`, `updated_at`) VALUES
-(14, 'adorromeojohn0105@gmail.com', 'Romeo', 'Gonzales', 'Ador', '', '$2y$10$8ziiRf41Pv32inQ71q9zmOCMeMtx9HWJ46YsXkfsUrWQrENufeuJ.', 1, '2025-11-03 20:39:54', 1, '2025-11-08 11:48:12', '2025-11-03 20:18:11', '2025-11-08 11:48:12'),
+(14, 'adorromeojohn0105@gmail.com', 'Romeo', 'Gonzales', 'Adore', '', '$2y$10$8ziiRf41Pv32inQ71q9zmOCMeMtx9HWJ46YsXkfsUrWQrENufeuJ.', 1, '2025-11-03 20:39:54', 1, '2025-11-13 15:31:12', '2025-11-03 20:18:11', '2025-11-13 15:31:12'),
 (15, 'batfish31723@aminating.com', NULL, NULL, NULL, NULL, '$2y$10$n6Wr0g6Vn4l0zob8VSLMw.O5s6UJ8DwuXTCuitNly3fEkb9NE7bRW', 0, NULL, 1, NULL, '2025-11-08 09:30:29', '2025-11-08 09:30:29'),
 (16, 'anaconda28553@mailshan.com', NULL, NULL, NULL, NULL, '$2y$10$LLZxFlrqS4oVZllJGt2a.ebYl3jkZy.hEdLwrd/UPwYixkZbddNS.', 0, NULL, 1, NULL, '2025-11-08 09:33:26', '2025-11-08 09:33:26'),
 (17, 'hyena07539@aminating.com', NULL, NULL, NULL, NULL, '$2y$10$plK/s6MpbIku28Up4pFH.OM85MLtrl4Eesh/wL1J.Ae6tAf/JCV4O', 0, NULL, 1, NULL, '2025-11-08 09:35:04', '2025-11-08 09:35:04'),
 (18, 'wombat15934@aminating.com', NULL, NULL, NULL, NULL, '$2y$10$a5Iq2eLKzqxjNkfoNrkhoOxbTtEsVO4CsgFe4NFpSWgIEO9ULvxS6', 0, NULL, 1, NULL, '2025-11-08 09:45:03', '2025-11-08 09:45:03'),
 (21, 'adorromeojohn05@gmail.com', 'Mark Andrie', '', 'Datus', '', '$2y$10$phJwAq7kzUfzChHbA0kroeer9U0PS/3tY.f6fiQJurwcEVNpUgpDC', 1, '2025-11-08 09:52:26', 1, '2025-11-08 10:04:21', '2025-11-08 09:48:17', '2025-11-08 10:04:21'),
-(22, 'renheartimpulsement@gmail.com', 'Renheart', '', 'Lopez', '', '$2y$10$UjqFkQC0PqbNiZblWL8pFO8CvVf4p29hUXa/POcZ3CMjshTkWRQ42', 1, '2025-11-08 11:13:39', 1, '2025-11-08 11:13:54', '2025-11-08 11:13:11', '2025-11-08 11:16:47'),
-(23, 'datus_markandrie@plpasig.edu.ph', 'Mark', 'Dalisay', 'Datus', '', '$2y$10$OmdgNO3nbo1lt7OHBoKqgOKNicfg9uKFaJa5DPJsUBw5wcChGL0c2', 1, '2025-11-08 12:37:57', 1, '2025-11-10 13:16:03', '2025-11-08 12:36:39', '2025-11-10 13:16:03'),
-(24, 'ador_romeojohn@plpasig.edu.ph', 'Romeo John', '', 'Ador', '', '$2y$10$z.lNOILGHBqpRlghwAs/LekIulh.oF6LNruoYFLh20AGE6mVpjVJW', 1, '2025-11-09 22:36:56', 1, '2025-11-10 07:13:02', '2025-11-09 22:36:28', '2025-11-10 07:13:02');
+(22, 'renheartimpulsement@gmail.com', 'Renheart', '', 'Lopez', '', '$2y$10$UjqFkQC0PqbNiZblWL8pFO8CvVf4p29hUXa/POcZ3CMjshTkWRQ42', 1, '2025-11-08 11:13:39', 1, '2025-11-12 11:06:23', '2025-11-08 11:13:11', '2025-11-12 11:06:23'),
+(23, 'datus_markandrie@plpasig.edu.ph', 'Mark', 'Dalisay', 'Datus', '', '$2y$10$OmdgNO3nbo1lt7OHBoKqgOKNicfg9uKFaJa5DPJsUBw5wcChGL0c2', 1, '2025-11-08 12:37:57', 1, '2025-11-13 14:42:42', '2025-11-08 12:36:39', '2025-11-13 14:42:42'),
+(24, 'ador_romeojohn@plpasig.edu.ph', 'Romeo John', '', 'Ador', '', '$2y$10$z.lNOILGHBqpRlghwAs/LekIulh.oF6LNruoYFLh20AGE6mVpjVJW', 1, '2025-11-09 22:36:56', 1, '2025-11-10 07:13:02', '2025-11-09 22:36:28', '2025-11-10 07:13:02'),
+(25, 'santosclyde867@gmail.com', 'Isshika', 'kishiel', 'Clamohoy', 'Yutuc', '$2y$10$jyixoQCUDNepRkWqKex0t.8fGHmHNVyyGhcmeG.Yd30xkkVbo4/YG', 1, '2025-11-11 10:30:15', 1, '2025-11-11 10:33:18', '2025-11-11 10:29:34', '2025-11-11 10:34:14'),
+(26, 'datusmarkandrei@gmail.com', 'Student', 'one', 'datus', 'junior', '$2y$10$c3b3w/O0MaajAMXQvA/UY.y1gbv.AhiqDwASWXfcnbGq1PrhHmI0K', 1, '2025-11-11 10:38:36', 1, '2025-11-13 15:02:43', '2025-11-11 10:37:40', '2025-11-13 15:07:27'),
+(27, 'triciadeasis7@gmail.com', 'Tricia', 'Delgado', 'De Asis', '', '$2y$10$X8oa7Pjo/d03TEG55vdxiu8HRheu/N1OAXsjBylp4g.DfxueAuIqC', 1, '2025-11-11 11:20:25', 1, '2025-11-11 11:20:46', '2025-11-11 11:19:52', '2025-11-11 11:21:03'),
+(28, 'amerel82@gmail.com', 'Amerel', '', 'Disomnong', '', '$2y$10$HjOtP1pqPxOx/xEiUkbIReZLEiDc5zslel745lUTVCilqNvsDadTq', 1, '2025-11-11 11:20:57', 1, '2025-11-11 11:21:10', '2025-11-11 11:20:21', '2025-11-11 11:21:31'),
+(29, 'jomar.aguirre.566@gmail.com', 'Jomar', 'Anibo', 'Aguirre', '', '$2y$10$gbKrwPRbl4mcSNa2OeI9GO3gvTH/AkrA8KJA4CpcwyoFLmKnCuFQK', 1, '2025-11-11 14:20:09', 1, '2025-11-11 14:20:27', '2025-11-11 11:30:19', '2025-11-11 14:20:49'),
+(30, 'Bangcore_angel@plpasig.edu.ph', 'Angel', 'Rubio', 'Bangcore', '', '$2y$10$IwyDCe7a6PsDEHIO8.BJQe58CosHgj43qO9cqpuY1fPMcF4fAxQg.', 1, '2025-11-11 13:52:38', 1, '2025-11-11 13:54:10', '2025-11-11 13:51:51', '2025-11-11 13:54:27'),
+(31, 'kthscenery30@gmail.com', 'Hiraeth', '', 'Hiraeth', '', '$2y$10$.sJVnL51TP7J4p9ypAFfv.6GCfwpegFB0w/qqV2WJf48IqOV5K6YG', 1, '2025-11-11 14:00:43', 1, '2025-11-11 14:01:06', '2025-11-11 13:58:55', '2025-11-11 14:01:20'),
+(32, 'francispeter.bundalian@my.jru.edu', 'Francis', '', 'Bundalian', '', '$2y$10$0EKPLBXz3/GOtqy6cvxHSu4tgYwTAKoEeIeRWQJDMcslbE9oWWore', 1, '2025-11-11 14:31:38', 1, '2025-11-11 14:31:55', '2025-11-11 14:31:06', '2025-11-11 14:32:08'),
+(33, 'codera_isabela@plpasig.edu.ph', 'Isabela', '', 'Codera', '', '$2y$10$5Pm7GewM0etGq2E1aZ3WLeiEEi2froMhZgoe5a62c3/enmmT3pwzC', 1, '2025-11-11 14:37:17', 1, '2025-11-11 14:37:39', '2025-11-11 14:35:24', '2025-11-11 14:38:04'),
+(34, 'andreyaa932@gmail.com', NULL, NULL, NULL, NULL, '$2y$10$v32prR6vzM9d5ubNRss/NOlYYeQ0IMzipHvdpHxudIgwKA4agRJSG', 0, NULL, 1, NULL, '2025-11-11 15:11:28', '2025-11-11 15:11:28'),
+(35, 'ahgomez6949ant@student.fatima.edu.ph', 'Andrea', 'Hiyao', 'Gomez', '', '$2y$10$yPbAxFXnY88of4XcsdiTPuCOrBJwbrc2NVOQOrvRx.jnE8nEVlp4i', 1, '2025-11-11 15:30:06', 1, '2025-11-11 15:30:17', '2025-11-11 15:29:42', '2025-11-11 15:30:32'),
+(36, 'abogerrald2403@gmail.com', NULL, NULL, NULL, NULL, '$2y$10$.A81b3ZqjEFIo8GVNbIOTeUR1pRthUvx5fulXfutj3h/hEMKB.JMC', 1, '2025-11-11 15:48:45', 1, NULL, '2025-11-11 15:47:25', '2025-11-11 15:48:45'),
+(37, 'doumamatsuno@gmail.com', NULL, NULL, NULL, NULL, '$2y$10$oT5oELLKtBxEHfp2TliET.urLF5HSdPOmbNyLqN6o.zPLmnBk995S', 0, NULL, 1, NULL, '2025-11-11 15:50:06', '2025-11-11 15:50:06'),
+(38, 'gerraldabo24@gmail.com', NULL, NULL, NULL, NULL, '$2y$10$kXXryEA0.OFMfEZtB/q2muW5EUp5WJWfNPsRn8hVKDOplGXm8t3cW', 0, NULL, 1, NULL, '2025-11-11 15:51:05', '2025-11-11 15:51:05'),
+(39, 'heraldogray@gmail.com', NULL, NULL, NULL, NULL, '$2y$10$wYN8HIYo4D2gwtXD0IWzve.xPNgyTq4Y8mW6VGr6yVmu0foaPrUM.', 0, NULL, 1, NULL, '2025-11-11 15:51:36', '2025-11-11 15:51:36'),
+(40, 'nosib74615@fermiro.com', NULL, NULL, NULL, NULL, '$2y$10$Jlzi4yaF2cmfFDmxeN0BXe/kDJ8hzT2aPys..eM4BFRkcUywuRa7G', 0, NULL, 1, NULL, '2025-11-11 15:54:01', '2025-11-11 15:54:01'),
+(41, 'cicel17015@gyknife.com', 'Gerrald', 'Aquino', 'Abo', '', '$2y$10$cGxuYgdFn9m5gh92ImtLDOvA.N3kLNVx5SUrLlPjNWftTZwskR.jC', 1, '2025-11-11 16:11:42', 1, '2025-11-13 14:48:24', '2025-11-11 16:08:16', '2025-11-13 14:48:24'),
+(42, 'pjgvaldez1008@gmail.com', 'PJ', '', 'Valdez', '', '$2y$10$w4grGc0ZTeN7ZDh.9EGsLOIjRQ0adDuwdKH1b7yVaBuRV1SoiFcja', 1, '2025-11-12 12:44:47', 1, '2025-11-12 12:45:03', '2025-11-12 12:44:14', '2025-11-12 12:45:16'),
+(43, 'gipanep625@canvect.com', NULL, NULL, NULL, NULL, '$2y$10$knBc5sv7PKYty9LnpGe5UebYQipDT9JXn0SdhNxdDu/U7Z2s6Ryse', 0, NULL, 1, NULL, '2025-11-13 00:23:44', '2025-11-13 00:23:44'),
+(44, 'doyaw45859@chaineor.com', NULL, NULL, NULL, NULL, '$2y$10$OXZwjVvJ23O6azgVkiE3z.9qKNcW9B6WUKdT1qYW06/xlRXWugjKu', 0, NULL, 1, NULL, '2025-11-13 00:28:11', '2025-11-13 00:28:11'),
+(45, 'gamboa.khinandrei@gmail.com', 'Khin Andrei', 'Roque', 'Gamboa', '', '$2y$10$u3hIX62WsSTwDJYTw/Gn0utisz4jLwunZ0Ka6fD9ujMs4M7hS9zxu', 1, '2025-11-13 02:54:16', 1, '2025-11-13 02:54:53', '2025-11-13 02:53:49', '2025-11-13 02:55:19'),
+(46, 'nasogeh333@fermiro.com', 'Gerrald', 'Aquino', 'Abo', '', '$2y$10$/gbmBLwobmNyyVpq/IPcd.sglgzpQF84P7lyd3eT1My4KhT9z7Kg2', 1, '2025-11-13 15:00:20', 1, '2025-11-13 15:01:11', '2025-11-13 14:59:50', '2025-11-13 15:01:34'),
+(47, 'keveh19414@canvect.com', 'Gerrald', 'Aquino', 'Abo', '', '$2y$10$v7hMbITzAudMuaNPBnihpupe.L0Han63bzCwYw/GwKlBQFNDj69ZO', 1, '2025-11-13 15:02:49', 1, '2025-11-13 16:18:31', '2025-11-13 15:02:21', '2025-11-13 16:18:31');
 
 -- --------------------------------------------------------
 
@@ -1170,9 +1428,11 @@ CREATE TABLE `sso_user` (
 
 INSERT INTO `sso_user` (`id`, `first_name`, `middle_name`, `last_name`, `suffix`, `email`, `password`, `status`, `created_at`) VALUES
 (1, 'ROMEO JOHN', NULL, 'ADOR', NULL, 'testuser@example.com', 'some_password_hash', 'active', '2025-10-23 19:57:01'),
-(2, 'ROMEO JOHN', NULL, 'ADOR', NULL, 'admin@sso.edu', '$2y$10$0RtgqYinB4p5bHMB7dKgVOipANdaYevQbrX.OUDqIN6IPsvtVIJe2', 'active', '2025-10-26 21:33:22'),
+(2, 'Romeo John', '', 'Ador', '', 'admin@sso.edu', '$2y$10$SfQTD0pmghZ1rjlZrTiMguI7Vp7ORdw83IyekWLTEcj8CkEWAXHLy', 'active', '2025-10-26 21:33:22'),
 (3, '', NULL, '', NULL, 'admin@sso.edu.ph', '$2y$10$gsh6vf8hlqBdU4T.Ao.Mpuv1xWcMDV/jGobuXwpSgpafqn5L8WL1u', 'active', '2025-10-27 07:43:37'),
-(4, 'John', 'Michael', 'Doe', 'Jr.', 'admin@test.com', '$2y$10$BuOzHpV3B8Ran5YlHL7O4.PA23HydDsJSiMN1HUawyX2UCt.i2EwO', 'active', '2025-10-27 13:43:56');
+(4, 'John', 'Michael', 'Doe', 'Jr.', 'admin@test.com', '$2y$10$BuOzHpV3B8Ran5YlHL7O4.PA23HydDsJSiMN1HUawyX2UCt.i2EwO', 'active', '2025-10-27 13:43:56'),
+(5, 'Mark Andrie', '', 'Dalisay', '', 'mark_andrie@sso.plpasig', '$2y$10$3Otsk94a9Dbq1HtqT5i1y.FvrmMKiZYafbXA9vbCIWc3j8mebpop2', 'active', '2025-11-13 05:04:52'),
+(6, 'Gerrald', '', 'Abo', '', 'gerrald_abo@sso.plpasig', '$2y$10$oKzzfPgB4VaXX0leuzN/MediggOvuf7OGo.S2dFm8052e5AQYfGme', 'active', '2025-11-13 05:12:15');
 
 -- --------------------------------------------------------
 
@@ -1184,6 +1444,7 @@ CREATE TABLE `statuses` (
   `id` int(11) NOT NULL,
   `name` varchar(50) NOT NULL COMMENT 'e.g., Pending, Accepted',
   `remarks` text NOT NULL,
+  `is_default` tinyint(1) NOT NULL DEFAULT 0,
   `hex_color` varchar(250) NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
@@ -1191,14 +1452,14 @@ CREATE TABLE `statuses` (
 -- Dumping data for table `statuses`
 --
 
-INSERT INTO `statuses` (`id`, `name`, `remarks`, `hex_color`) VALUES
-(1, 'Pending', 'Thank you for your interest in applying for admission at Pamantasan ng Lungsod ng Pasig. We have received your reply. Please wait for an email regarding the status of your application. For more information, please visit our FB page Pamantasan ng Lungsod ng Pasig... Daluyan ng Pag-asa https://www.facebook.com/Pamantasan-ng-Lungsod-ng. Pasig-108294641685841/  NOTE: You can only complete this online application ONCE. Attempting to fill out or sign up for the online application multiple times using different emails but the same account/application will NULLIFY your admission registration.  Regularly check your email(inbox and spam folder) for application updates, as we will send all notifications there. Kindly inform the admissions office immediately of any change to your email address to prevent difficulties  PLEASE MAKE SURE ALL YOUR ENTRIES ARE CORRECT BEFORE SUBMITTING YOUR APPLICATION', '#FACC15'),
-(2, 'Document Need to Review Face to Face', 'Please visit the campus for a quick face-to-face document review. Our staff will gladly assist you.', '#FFA500'),
-(3, 'Missing Documents', 'Some required documents are still missing (e.g., Transcript of Records, Form 137, or Birth Certificate). Kindly submit the remaining items to complete your application.', '#FF4C4C'),
-(4, 'Examination', 'Your entrance examination is scheduled. We wish you the best of luck!', '#1E90FF'),
-(5, 'Rejected', 'We appreciate your interest. Unfortunately, this application did not meet our current admission requirements.', '#808080'),
-(6, 'Dean Interview', 'Your application is progressing well. Please prepare for your interview with the Dean.', '#8A2BE2'),
-(7, 'Passed', 'Congratulations! You’ve successfully met all admission requirements. Welcome to our college community!', '#28A745');
+INSERT INTO `statuses` (`id`, `name`, `remarks`, `is_default`, `hex_color`) VALUES
+(1, 'Pending', 'Thank you for your interest in applying for admission at Pamantasan ng Lungsod ng Pasig. We have received your reply. Please wait for an email regarding the status of your application. For more information, please visit our FB page Pamantasan ng Lungsod ng Pasig... Daluyan ng Pag-asa https://www.facebook.com/Pamantasan-ng-Lungsod-ng. Pasig-108294641685841/  \n\nNOTE: You can only complete this online application ONCE. Attempting to fill out or sign up for the online application multiple times using different emails but the same account/application will NULLIFY your admission registration.  \n\nRegularly check your email(inbox and spam folder) for application updates, as we will send all notifications there. Kindly inform the admissions office immediately of any change to your email address to prevent difficulties  \n\nPLEASE MAKE SURE ALL YOUR ENTRIES ARE CORRECT BEFORE SUBMITTING YOUR APPLICATION', 1, '#FACC15'),
+(2, 'Document Need to Review Face to Face', 'Please visit the campus for a quick face-to-face document review. Our staff will gladly assist you.', 0, '#FFA500'),
+(3, 'Missing Documents', 'Some required documents are still missing (e.g., Transcript of Records, Form 137, or Birth Certificate). Kindly submit the remaining items to complete your application.', 0, '#FF4C4C'),
+(4, 'Examination', 'Your entrance examination is scheduled. We wish you the best of luck!', 0, '#1E90FF'),
+(5, 'Rejected', 'We appreciate your interest. Unfortunately, this application did not meet our current admission requirements.', 0, '#808080'),
+(6, 'Dean Interview', 'Your application is progressing well. Please prepare for your interview with the Dean.', 0, '#8A2BE2'),
+(7, 'Passed', 'Congratulations! You’ve successfully met all admission requirements. Welcome to our college community!', 0, '#28A745');
 
 -- --------------------------------------------------------
 
@@ -1216,6 +1477,16 @@ CREATE TABLE `submissions` (
   `can_update` tinyint(1) NOT NULL DEFAULT 0
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
+--
+-- Dumping data for table `submissions`
+--
+
+INSERT INTO `submissions` (`id`, `user_id`, `applicant_type_id`, `submitted_at`, `status`, `remarks`, `can_update`) VALUES
+(17, 5, 5, '2025-11-12 01:18:26', 'Pending', 'Thank you for your interest in applying for admission at Pamantasan ng Lungsod ng Pasig. We have received your reply. Please wait for an email regarding the status of your application. For more information, please visit our FB page Pamantasan ng Lungsod ng Pasig... Daluyan ng Pag-asa https://www.facebook.com/Pamantasan-ng-Lungsod-ng. Pasig-108294641685841/  \n\nNOTE: You can only complete this online application ONCE. Attempting to fill out or sign up for the online application multiple times using different emails but the same account/application will NULLIFY your admission registration.  \n\nRegularly check your email(inbox and spam folder) for application updates, as we will send all notifications there. Kindly inform the admissions office immediately of any change to your email address to prevent difficulties  \n\nPLEASE MAKE SURE ALL YOUR ENTRIES ARE CORRECT BEFORE SUBMITTING YOUR APPLICATION', 0),
+(18, 11, 3, '2025-11-12 15:41:34', 'Pending', 'Thank you for your interest in applying for admission at Pamantasan ng Lungsod ng Pasig. We have received your reply. Please wait for an email regarding the status of your application. For more information, please visit our FB page Pamantasan ng Lungsod ng Pasig... Daluyan ng Pag-asa https://www.facebook.com/Pamantasan-ng-Lungsod-ng. Pasig-108294641685841/  \n\nNOTE: You can only complete this online application ONCE. Attempting to fill out or sign up for the online application multiple times using different emails but the same account/application will NULLIFY your admission registration.  \n\nRegularly check your email(inbox and spam folder) for application updates, as we will send all notifications there. Kindly inform the admissions office immediately of any change to your email address to prevent difficulties  \n\nPLEASE MAKE SURE ALL YOUR ENTRIES ARE CORRECT BEFORE SUBMITTING YOUR APPLICATION', 0),
+(19, 1, 3, '2025-11-12 18:22:19', 'Pending', 'Thank you for your interest in applying for admission at Pamantasan ng Lungsod ng Pasig. We have received your reply. Please wait for an email regarding the status of your application. For more information, please visit our FB page Pamantasan ng Lungsod ng Pasig... Daluyan ng Pag-asa https://www.facebook.com/Pamantasan-ng-Lungsod-ng. Pasig-108294641685841/  \n\nNOTE: You can only complete this online application ONCE. Attempting to fill out or sign up for the online application multiple times using different emails but the same account/application will NULLIFY your admission registration.  \n\nRegularly check your email(inbox and spam folder) for application updates, as we will send all notifications there. Kindly inform the admissions office immediately of any change to your email address to prevent difficulties  \n\nPLEASE MAKE SURE ALL YOUR ENTRIES ARE CORRECT BEFORE SUBMITTING YOUR APPLICATION', 0),
+(21, 19, 1, '2025-11-13 14:55:04', 'Pending', 'Thank you for your interest in applying for admission at Pamantasan ng Lungsod ng Pasig. We have received your reply. Please wait for an email regarding the status of your application. For more information, please visit our FB page Pamantasan ng Lungsod ng Pasig... Daluyan ng Pag-asa https://www.facebook.com/Pamantasan-ng-Lungsod-ng. Pasig-108294641685841/  \n\nNOTE: You can only complete this online application ONCE. Attempting to fill out or sign up for the online application multiple times using different emails but the same account/application will NULLIFY your admission registration.  \n\nRegularly check your email(inbox and spam folder) for application updates, as we will send all notifications there. Kindly inform the admissions office immediately of any change to your email address to prevent difficulties  \n\nPLEASE MAKE SURE ALL YOUR ENTRIES ARE CORRECT BEFORE SUBMITTING YOUR APPLICATION', 0);
+
 -- --------------------------------------------------------
 
 --
@@ -1228,6 +1499,90 @@ CREATE TABLE `submission_data` (
   `field_name` varchar(255) NOT NULL,
   `field_value` text DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+--
+-- Dumping data for table `submission_data`
+--
+
+INSERT INTO `submission_data` (`id`, `submission_id`, `field_name`, `field_value`) VALUES
+(1, 17, 'testing_input', 'Testing input Updated'),
+(2, 18, 'email_address', 'adorromeojohn0105@gmail.com'),
+(3, 18, 'i_hereby_certify_that_all_the_information_and_documents_attached_herein_are_true_and_correct_to_the_best_of_my_knowledge_and_belief_i_am_fully_aware_that_submitting_fake_or_tampered_documents_or_any_form_of_dishonesty_are_grounds_for_disqualification_for_', 'Agree'),
+(4, 18, 'lrn_number', ''),
+(5, 18, 'sex_kasarian', 'Male'),
+(6, 18, 'date_of_birth', '2004-01-05'),
+(7, 18, 'surname_apelyido', 'Ador'),
+(8, 18, 'middle_name_gitnang_pangalan', ''),
+(9, 18, 'given_name_pangalan', 'Romeo John'),
+(10, 18, 'contact_number', '09516154757'),
+(11, 18, 'alternative_email_address', 'adorromeojohn05@gmail.com'),
+(12, 18, 'are_you_a_member_of_the_lgbtqia', 'No'),
+(13, 18, 'are_you_a_person_with_disability', 'No'),
+(14, 18, 'do_you_have_any_relative_s_working_in_the_city_government_of_pasig_in_pamantasan_ng_lungsod_ng_pasig_and_or_affiliated_companies_subsidiaries_within_the_second_degree_of_consanguinity_or_affinity_e_g_spouse_parents_son_daughter_brother_sister_grandparents', 'No'),
+(15, 18, 'residency_status', 'Non-Pasig Resident'),
+(16, 18, 'address_house_number_unit_building_street_subdivision_village_barangay_city', 'House 123 D makita st. nakatago city'),
+(17, 18, 'type_of_school', 'Public'),
+(18, 18, 'last_school_attended', 'Last Senior High School '),
+(19, 18, 'general_average_in_filipino', '99'),
+(20, 18, 'general_average_in_english', '99'),
+(21, 18, 'general_average_in_mathematics', '99'),
+(22, 18, 'general_average_in_science', '99'),
+(23, 18, 'overall_general_average_gwa', '99'),
+(24, 18, 'check_whether_you_have_the_following_requirements', 'Certified True Copy (CTC) of Form 137 with remarks \"For Evaluation Purposes only\", Any Two (2) Government Issued ID / School D of applicant thattasbirthidate and address, PSA Birth Certificate, Two Passport size picture, white background with nameplate, Notarized Affidavit of guardianship (for applicants with guardian), Barangay Residence Certificate'),
+(26, 19, 'i_hereby_certify_that_all_the_information_and_documents_attached_herein_are_true_and_correct_to_the_best_of_my_knowledge_and_belief_i_am_fully_aware_that_submitting_fake_or_tampered_documents_or_any_form_of_dishonesty_are_grounds_for_disqualification_for_', 'Agree'),
+(38, 19, 'do_you_have_any_relative_s_working_in_the_city_government_of_pasig_in_pamantasan_ng_lungsod_ng_pasig_and_or_affiliated_companies_subsidiaries_within_the_second_degree_of_consanguinity_or_affinity_e_g_spouse_parents_son_daughter_brother_sister_grandparents', 'No'),
+(51, 19, 'email_address', 'datusmarkandrei@gmail.com'),
+(52, 19, 'i_hereby_certify_that_all_the_information_and_documents_attached_herein_are_true_and_correct_to_the_best_of_my_knowledge_and_belief_i_am_fully_aware_that_submitting_fake_or_tampered_documents_or_any_form_of_dishonesty_are_grounds_for_disqualification_for_', 'Agree'),
+(53, 19, 'lrn_number', ''),
+(54, 19, 'sex_kasarian', 'Female'),
+(55, 19, 'date_of_birth', '2004-06-12'),
+(56, 19, 'surname_apelyido', 'alvarez'),
+(57, 19, 'middle_name_gitnang_pangalan', 'datus'),
+(58, 19, 'given_name_pangalan', 'juliana'),
+(59, 19, 'contact_number', '09354826798'),
+(60, 19, 'alternative_email_address', 'julianaalvarez@gmail.com'),
+(61, 19, 'are_you_a_member_of_the_lgbtqia', 'No'),
+(62, 19, 'are_you_a_person_with_disability', 'Yes'),
+(63, 19, 'kindly_specify_your_disability', 'heartbroken'),
+(64, 19, 'do_you_have_any_relative_s_working_in_the_city_government_of_pasig_in_pamantasan_ng_lungsod_ng_pasig_and_or_affiliated_companies_subsidiaries_within_the_second_degree_of_consanguinity_or_affinity_e_g_spouse_parents_son_daughter_brother_sister_grandparents', 'No'),
+(65, 19, 'residency_status', 'Pasig Resident'),
+(66, 19, 'district', 'District 2'),
+(67, 19, 'barangay_district_2', 'Rosario'),
+(68, 19, 'address_house_number_unit_building_street_subdivision_village', '14-A mamerto district rosario pasig city'),
+(69, 19, 'type_of_school', 'Public'),
+(70, 19, 'last_school_attended', 'rhs'),
+(71, 19, 'general_average_in_filipino', '55'),
+(72, 19, 'general_average_in_english', '55'),
+(73, 19, 'general_average_in_mathematics', '55'),
+(74, 19, 'general_average_in_science', '55'),
+(75, 19, 'overall_general_average_gwa', '55'),
+(76, 19, 'check_whether_you_have_the_following_requirements', 'Certified True Copy (CTC) of Form 137 with remarks \"For Evaluation Purposes only\", Any Two (2) Government Issued ID / School D of applicant thattasbirthidate and address, PSA Birth Certificate, Two Passport size picture, white background with nameplate, Notarized Affidavit of guardianship (for applicants with guardian), Barangay Residence Certificate'),
+(77, 21, 'email_address', 'datusmarkandrei@gmail.com'),
+(78, 21, 'i_hereby_certify_that_all_the_information_and_documents_attached_herein_are_true_and_correct_to_the_best_of_my_knowledge_and_belief_i_am_fully_aware_that_submitting_fake_or_tampered_documents_or_any_form_of_dishonesty_are_grounds_for_disqualification_for_', 'Agree'),
+(79, 21, 'lrn_number', '225501902932'),
+(80, 21, 'sex_kasarian', 'Male'),
+(81, 21, 'date_of_birth', '2004-09-08'),
+(82, 21, 'surname_apelyido', 'Datus'),
+(83, 21, 'middle_name_gitnang_pangalan', 'Cruz'),
+(84, 21, 'given_name_pangalan', 'Mark Andrie'),
+(85, 21, 'contact_number', '097777788833'),
+(86, 21, 'alternative_email_address', 'Datusmarkandrie@gmail.com'),
+(87, 21, 'are_you_a_member_of_the_lgbtqia', 'No'),
+(88, 21, 'are_you_a_person_with_disability', 'No'),
+(89, 21, 'do_you_have_any_relative_s_working_in_the_city_government_of_pasig_in_pamantasan_ng_lungsod_ng_pasig_and_or_affiliated_companies_subsidiaries_within_the_second_degree_of_consanguinity_or_affinity_e_g_spouse_parents_son_daughter_brother_sister_grandparents', 'No'),
+(90, 21, 'marginalized_applicant', 'A beneficiary of DSWD Listahanan or Pantawid Pamilyang Pilipino Program (4Ps), A children of migrant workers (OFWs) with OWWA Certification'),
+(91, 21, 'residency_status', 'Pasig Resident'),
+(92, 21, 'district', 'District 2'),
+(93, 21, 'barangay', 'Rosario'),
+(94, 21, 'address_house_number_unit_building_street_subdivision_village', '14-A mamerto district rosario pasig city'),
+(95, 21, 'type_of_school', 'Public'),
+(96, 21, 'last_school_attended', 'rhs'),
+(97, 21, 'general_average_in_filipino', '99'),
+(98, 21, 'general_average_in_english', '99'),
+(99, 21, 'general_average_in_mathematics', '99'),
+(100, 21, 'general_average_in_science', '99'),
+(101, 21, 'overall_general_average_gwa', '99'),
+(102, 21, 'check_whether_you_have_the_following_requirements', 'PSA Birth Certificate');
 
 -- --------------------------------------------------------
 
@@ -1242,6 +1597,19 @@ CREATE TABLE `submission_files` (
   `original_filename` varchar(255) NOT NULL,
   `file_path` varchar(512) NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+--
+-- Dumping data for table `submission_files`
+--
+
+INSERT INTO `submission_files` (`id`, `submission_id`, `field_name`, `original_filename`, `file_path`) VALUES
+(7, 17, 'testing_file', 'SSO-Dashboard-Report-services-month.pdf', 'http://localhost/pages/src/media/private/b4e5f657e58dcb1f_SSO-Dashboard-Report-services-month.pdf'),
+(8, 18, 'psa_birth_certificate', 'System Evaluation Tool.docx.pdf', 'http://localhost/pages/src/media/private/b6db78e50842462e_System_Evaluation_Tool.docx.pdf'),
+(9, 18, 'psa_marriage_certificate_if_married', 'System Evaluation Tool.docx.pdf', 'http://localhost/pages/src/media/private/214e634b44d5dd2c_System_Evaluation_Tool.docx.pdf'),
+(10, 18, 'certified_true_copy_verified_copy_of_form_138', 'SSO-Dashboard-Report-services-month.pdf', 'http://localhost/pages/src/media/private/f2b801d6b8b2795b_SSO-Dashboard-Report-services-month.pdf'),
+(11, 18, 'any_two_2_government_issued_id_school_id_of_applicant_that_has_birthdate_and_address', 'SSO-Dashboard-Report-month.pdf', 'http://localhost/pages/src/media/private/02c09f0e76c39d61_SSO-Dashboard-Report-month.pdf'),
+(12, 18, 'barangay_residence_certificate', 'SSO-Dashboard-Report-services-month.pdf', 'http://localhost/pages/src/media/private/fbf0fe727f1013cf_SSO-Dashboard-Report-services-month.pdf'),
+(13, 18, 'two_2_passport_size_picture_white_background_with_digital_nameplate', 'SSO-Dashboard-Report-services-month.pdf', 'http://localhost/pages/src/media/private/43372833af04fc3d_SSO-Dashboard-Report-services-month.pdf');
 
 -- --------------------------------------------------------
 
@@ -1266,9 +1634,16 @@ CREATE TABLE `tokenization` (
 INSERT INTO `tokenization` (`id`, `user_id`, `name`, `value`, `is_used`, `expires_at`, `created_at`) VALUES
 (1, 1, 'VERIFY_ACCOUNT', 'c995ffe3064f9defbaebceb941aafe4239318fc1ef26e90b866b1cfcfeac3803', 1, '2025-10-18 16:11:24', '2025-10-17 16:10:01'),
 (2, 1, 'RESET_PASSWORD', '2070763c96b1b1a7ac478c0e47df97724163f3690f8785a41408b633d264b8f1', 0, '2025-11-17 18:48:00', '2025-10-17 18:40:04'),
-(3, 1, 'SESSION', 'dfd9f3aa0b1a26d9ed53b8617c6c37de5410b9c175bbb819f62dc4837ffe740c', 0, '2025-11-14 07:31:52', '2025-10-17 20:26:02'),
+(3, 1, 'SESSION', '9c489f2b917e7c9f02ef2047787726cf2dfc346ee0c9a1b3b6aeba31fddda062', 0, '2025-11-20 14:02:46', '2025-10-17 20:26:02'),
 (4, 2, 'VERIFY_ACCOUNT', 'ad31fffc6cff947fc9b46aebdf9e5fe137fa1832bcb11f56e81e827f9e316fd5', 0, '2025-11-04 07:08:19', '2025-11-03 04:31:29'),
-(5, 3, 'VERIFY_ACCOUNT', 'de90fc3d8ae607da87b973e833ff05dd04ea99d134733f8458afbd443ade9cc3', 0, '2025-11-08 20:35:27', '2025-11-07 20:34:12');
+(5, 3, 'VERIFY_ACCOUNT', '2032feed40430a491a13d49a617daccca67fbc9ae56479fedb58e5c3c8a8b4cb', 0, '2025-11-12 02:48:56', '2025-11-07 20:34:12'),
+(6, 4, 'VERIFY_ACCOUNT', '740cebb3471fa7ad26afd176fa967de7c6100d933bcea29f1a50a1a82a4d549d', 0, '2025-11-12 02:55:41', '2025-11-11 02:49:56'),
+(7, 5, 'VERIFY_ACCOUNT', '1c225fc8f1bf09f1adcfd1fc555105a3f24f69eb43cb4fb8dbfda8dfdd153bda', 1, '2025-11-12 02:54:05', '2025-11-11 02:54:05'),
+(8, 5, 'SESSION', 'ee25f9e98cc9169825715ffe13e3b4b14a21dd065c978a84f103bd9dec4091eb', 0, '2025-11-19 06:03:16', '2025-11-11 02:54:53'),
+(14, 11, 'VERIFY_ACCOUNT', 'e5d90e7779b0009008b7ea6cce841279980dd0d74adc8ca72905210926873855', 1, '2025-11-13 06:18:00', '2025-11-12 06:18:00'),
+(16, 11, 'SESSION', 'b08d847887548f687241c178ece8764270257f41bff44dab0be19b0254d76d57', 0, '2025-11-19 10:20:05', '2025-11-12 06:21:28'),
+(23, 19, 'VERIFY_ACCOUNT', '79e584b3e3593dd72bcbf680fdeeae4d2978850be90ea1e87bb76c0d672b3e8e', 1, '2025-11-14 14:48:38', '2025-11-13 14:48:38'),
+(24, 19, 'SESSION', 'a7b0538ab9e2858eabc68d64f0db37572c349583cbe728dc6d67c7cb9154a921', 0, '2025-11-20 14:50:12', '2025-11-13 14:50:12');
 
 -- --------------------------------------------------------
 
@@ -1292,9 +1667,13 @@ CREATE TABLE `users` (
 --
 
 INSERT INTO `users` (`id`, `email`, `password_hash`, `role`, `acc_type`, `acc_status`, `created_at`, `updated_at`) VALUES
-(1, 'Mc+Mcxig2rdxnixLZkgbFUZib24yTStwUThXRHNGcklrd0w1MklLUFJCL2IrVENzc0h6a2hodVVyM2M9', '$2y$10$qqkbJr8jYNemgO.L1poJAudVVatRG1J7AU7lFmGN/49VenmXC6EPm', 'applicant', 'admission', 'active', '2025-10-17 16:10:01', '2025-10-17 16:11:37'),
+(1, 'Mc+Mcxig2rdxnixLZkgbFUZib24yTStwUThXRHNGcklrd0w1MklLUFJCL2IrVENzc0h6a2hodVVyM2M9', '$2y$10$qqkbJr8jYNemgO.L1poJAudVVatRG1J7AU7lFmGN/49VenmXC6EPm', 'applicant', 'admission', 'active', '2025-10-17 16:10:01', '2025-11-13 05:39:11'),
 (2, 'zmsCoQ2CE3SGf2BbhhvtW3k4ZUczbTg0WHI1bXA1TUdmSzZGbDB1L1ptZExPaEF6TFo4cFF0OWs1S0E9', '$2y$10$vs7pye8l7AWgAXQjBBLegOTJBrFFaXjS9nMoBSu8XtigsektxtSKy', 'applicant', 'admission', 'not_verified', '2025-11-03 04:31:27', '2025-11-03 04:31:27'),
-(3, 'BwkLzX0Of7DS7MNTUKo06nhkOHprcy9aTm5RQzV6UzNGV1lzdEY5U2FweFE3NW9BaXZaNEtzb3FwdmM9', '$2y$10$SPl5OAHoBxu916gu/alTbeHQn8GuOgGWrvYSKd/EyqrQlu4JXTo2m', 'applicant', 'admission', 'not_verified', '2025-11-07 20:34:11', '2025-11-07 20:34:11');
+(3, 'BwkLzX0Of7DS7MNTUKo06nhkOHprcy9aTm5RQzV6UzNGV1lzdEY5U2FweFE3NW9BaXZaNEtzb3FwdmM9', '$2y$10$SPl5OAHoBxu916gu/alTbeHQn8GuOgGWrvYSKd/EyqrQlu4JXTo2m', 'applicant', 'admission', 'not_verified', '2025-11-07 20:34:11', '2025-11-07 20:34:11'),
+(4, 'mXxQwIrdtyg7UWuc3In6WXVQNjNiUlh3TjI1STBGT3pNTm10T2dhUFRocVNmSWZWbDNsYTRzcjVMS0E9', '$2y$10$QxVtiRXkjS1WQCeNVd0w7.zCoxNGP1PEr1br17P.Ug6MKwYwfgF4m', 'applicant', 'admission', 'not_verified', '2025-11-11 02:49:55', '2025-11-11 02:49:55'),
+(5, 'kTXjbu2P9Sgh/QVZooZcvkliZ0JFcERJUllNeVBrdjE5TTVoODQzeThBYjltOFA1L2xzdkI5N1Nxc1k9', '$2y$10$WDiSJ/TljpvYzRFAmUtx9O9aRxVEsOtJBgNsYK/ylDjqjKAwKpXtW', 'applicant', 'admission', 'active', '2025-11-11 02:54:02', '2025-11-11 02:54:37'),
+(11, 'dMgRrbuGcszL2kVYi3KKhjNsb1VqbWpoS2tidGlhU0NjT2ZpOGZjTzRJLzRVMlFqUndnRTZzZncvdFE9', '$2y$10$RJ6vfhDoWvSgO6/wcgMyTeylgKqrRLnbUyYg7E4xJPgUELRpCobfC', 'applicant', 'admission', 'active', '2025-11-12 06:17:59', '2025-11-12 12:48:01'),
+(19, '2uVmFcbW/HQSa2Pr4xIUtENOeXI5dVlSUHZuNWg5V2psTDhWL3ZRUVRJbUJNdXIrTGtlanBiRmZsMFE9', '$2y$10$n6Qx.9PAenD8bF0lFpBITuuXR/MmMR/8G2yepabrkCjn9F.m3IkAG', 'applicant', 'admission', 'active', '2025-11-13 14:48:36', '2025-11-13 14:49:48');
 
 -- --------------------------------------------------------
 
@@ -1317,7 +1696,10 @@ CREATE TABLE `user_fullname` (
 --
 
 INSERT INTO `user_fullname` (`id`, `user_id`, `first_name`, `middle_name`, `last_name`, `suffix`, `last_updated`) VALUES
-(1, 1, 'Romeo John', '', 'Ador', '', '2025-10-19 21:58:51');
+(1, 1, 'Romeo John', '', 'Ador', '', '2025-10-19 21:58:51'),
+(2, 5, 'Mark Andrie', '', 'Datus', '', '2025-11-11 03:16:53'),
+(3, 11, 'E', '', 'Fernandez', '', '2025-11-12 06:21:50'),
+(4, 19, 'Mark Andrie', 'Cruz', 'Datus', '', '2025-11-13 14:50:43');
 
 --
 -- Indexes for dumped tables
@@ -1331,11 +1713,31 @@ ALTER TABLE `acc_locking`
   ADD KEY `user_id` (`user_id`);
 
 --
+-- Indexes for table `admission_controller`
+--
+ALTER TABLE `admission_controller`
+  ADD PRIMARY KEY (`id`),
+  ADD KEY `admission_controller_fk_user` (`user_id`);
+
+--
 -- Indexes for table `admission_cycles`
 --
 ALTER TABLE `admission_cycles`
   ADD PRIMARY KEY (`id`),
   ADD KEY `idx_archived` (`is_archived`);
+
+--
+-- Indexes for table `announcement`
+--
+ALTER TABLE `announcement`
+  ADD PRIMARY KEY (`id`);
+
+--
+-- Indexes for table `announcement_tag`
+--
+ALTER TABLE `announcement_tag`
+  ADD PRIMARY KEY (`id`),
+  ADD UNIQUE KEY `name` (`name`);
 
 --
 -- Indexes for table `api_list`
@@ -1368,6 +1770,15 @@ ALTER TABLE `application_permit`
 --
 ALTER TABLE `contact_support`
   ADD PRIMARY KEY (`id`);
+
+--
+-- Indexes for table `downloadable_forms`
+--
+ALTER TABLE `downloadable_forms`
+  ADD PRIMARY KEY (`id`),
+  ADD UNIQUE KEY `uq_slug` (`slug`),
+  ADD KEY `idx_active` (`is_active`),
+  ADD KEY `idx_category` (`category`);
 
 --
 -- Indexes for table `email_template`
@@ -1588,19 +1999,37 @@ ALTER TABLE `user_fullname`
 -- AUTO_INCREMENT for table `acc_locking`
 --
 ALTER TABLE `acc_locking`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=4;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=20;
+
+--
+-- AUTO_INCREMENT for table `admission_controller`
+--
+ALTER TABLE `admission_controller`
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=6;
 
 --
 -- AUTO_INCREMENT for table `admission_cycles`
 --
 ALTER TABLE `admission_cycles`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=2;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=3;
+
+--
+-- AUTO_INCREMENT for table `announcement`
+--
+ALTER TABLE `announcement`
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
+
+--
+-- AUTO_INCREMENT for table `announcement_tag`
+--
+ALTER TABLE `announcement_tag`
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
 
 --
 -- AUTO_INCREMENT for table `api_list`
 --
 ALTER TABLE `api_list`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=9;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=10;
 
 --
 -- AUTO_INCREMENT for table `applicant_number_prefix`
@@ -1612,19 +2041,25 @@ ALTER TABLE `applicant_number_prefix`
 -- AUTO_INCREMENT for table `applicant_types`
 --
 ALTER TABLE `applicant_types`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=4;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=6;
 
 --
 -- AUTO_INCREMENT for table `application_permit`
 --
 ALTER TABLE `application_permit`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=11;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=20;
 
 --
 -- AUTO_INCREMENT for table `contact_support`
 --
 ALTER TABLE `contact_support`
   MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=5;
+
+--
+-- AUTO_INCREMENT for table `downloadable_forms`
+--
+ALTER TABLE `downloadable_forms`
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
 
 --
 -- AUTO_INCREMENT for table `email_template`
@@ -1648,19 +2083,19 @@ ALTER TABLE `faqs`
 -- AUTO_INCREMENT for table `form_fields`
 --
 ALTER TABLE `form_fields`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=114;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=117;
 
 --
 -- AUTO_INCREMENT for table `form_field_options`
 --
 ALTER TABLE `form_field_options`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=179;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=181;
 
 --
 -- AUTO_INCREMENT for table `form_steps`
 --
 ALTER TABLE `form_steps`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=21;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=23;
 
 --
 -- AUTO_INCREMENT for table `general_uploads`
@@ -1690,13 +2125,13 @@ ALTER TABLE `remark_templates`
 -- AUTO_INCREMENT for table `services_answers`
 --
 ALTER TABLE `services_answers`
-  MODIFY `answer_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=18;
+  MODIFY `answer_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=86;
 
 --
 -- AUTO_INCREMENT for table `services_email_otp_codes`
 --
 ALTER TABLE `services_email_otp_codes`
-  MODIFY `id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=28;
+  MODIFY `id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=55;
 
 --
 -- AUTO_INCREMENT for table `services_fields`
@@ -1708,31 +2143,31 @@ ALTER TABLE `services_fields`
 -- AUTO_INCREMENT for table `services_field_options`
 --
 ALTER TABLE `services_field_options`
-  MODIFY `option_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=17;
+  MODIFY `option_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=35;
 
 --
 -- AUTO_INCREMENT for table `services_list`
 --
 ALTER TABLE `services_list`
-  MODIFY `service_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=4;
+  MODIFY `service_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=6;
 
 --
 -- AUTO_INCREMENT for table `services_requests`
 --
 ALTER TABLE `services_requests`
-  MODIFY `request_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=5;
+  MODIFY `request_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=18;
 
 --
 -- AUTO_INCREMENT for table `services_request_statuses`
 --
 ALTER TABLE `services_request_statuses`
-  MODIFY `status_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=7;
+  MODIFY `status_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=10;
 
 --
 -- AUTO_INCREMENT for table `services_users`
 --
 ALTER TABLE `services_users`
-  MODIFY `id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=25;
+  MODIFY `id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=48;
 
 --
 -- AUTO_INCREMENT for table `smtp_config`
@@ -1750,7 +2185,7 @@ ALTER TABLE `sso_officers`
 -- AUTO_INCREMENT for table `sso_user`
 --
 ALTER TABLE `sso_user`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=5;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=7;
 
 --
 -- AUTO_INCREMENT for table `statuses`
@@ -1762,37 +2197,37 @@ ALTER TABLE `statuses`
 -- AUTO_INCREMENT for table `submissions`
 --
 ALTER TABLE `submissions`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=22;
 
 --
 -- AUTO_INCREMENT for table `submission_data`
 --
 ALTER TABLE `submission_data`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=103;
 
 --
 -- AUTO_INCREMENT for table `submission_files`
 --
 ALTER TABLE `submission_files`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=14;
 
 --
 -- AUTO_INCREMENT for table `tokenization`
 --
 ALTER TABLE `tokenization`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=6;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=25;
 
 --
 -- AUTO_INCREMENT for table `users`
 --
 ALTER TABLE `users`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=4;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=20;
 
 --
 -- AUTO_INCREMENT for table `user_fullname`
 --
 ALTER TABLE `user_fullname`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=2;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=5;
 
 --
 -- Constraints for dumped tables
@@ -1803,6 +2238,12 @@ ALTER TABLE `user_fullname`
 --
 ALTER TABLE `acc_locking`
   ADD CONSTRAINT `acc_locking_ibfk_1` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE CASCADE;
+
+--
+-- Constraints for table `admission_controller`
+--
+ALTER TABLE `admission_controller`
+  ADD CONSTRAINT `admission_controller_fk_user` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE CASCADE;
 
 --
 -- Constraints for table `applicant_types`
@@ -1885,7 +2326,7 @@ ALTER TABLE `services_requests`
 -- Constraints for table `submissions`
 --
 ALTER TABLE `submissions`
-  ADD CONSTRAINT `submissions_ibfk_1` FOREIGN KEY (`user_id`) REFERENCES `sso_user` (`id`),
+  ADD CONSTRAINT `submissions_fk_user` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE CASCADE,
   ADD CONSTRAINT `submissions_ibfk_2` FOREIGN KEY (`applicant_type_id`) REFERENCES `applicant_types` (`id`) ON DELETE CASCADE;
 
 --
