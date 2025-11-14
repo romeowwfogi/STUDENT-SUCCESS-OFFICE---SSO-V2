@@ -62,7 +62,7 @@ require_once 'middleware/auth.php';
                             </div>
                         </div> -->
 
-                        <div class="settings-item" onclick="window.location.href = 'faqs_management.php';">
+                        <!-- <div class="settings-item" onclick="window.location.href = 'faqs_management.php';">
                             <div class="settings-item__label">
                                 <span class="settings-item__text">Email Template Management</span>
                                 <span class="settings-item__description">Create, edit, and organize email templates for consistent communication. This feature ensures standardized messaging for admissions, notifications, and service updates.</span>
@@ -74,7 +74,7 @@ require_once 'middleware/auth.php';
                                     </svg>
                                 </button>
                             </div>
-                        </div>
+                        </div> -->
 
                         <div class="settings-item" onclick="window.location.href = 'faqs_management.php';">
                             <div class="settings-item__label">
@@ -118,7 +118,7 @@ require_once 'middleware/auth.php';
                             </div>
                         </div>
 
-                        <div class="settings-item">
+                        <!-- <div class="settings-item">
                             <div class="settings-item__label">
                                 <span class="settings-item__text">Privacy Policy</span>
                                 <span class="settings-item__description">Configure and manage platform’s privacy policy with ease. This module helps ensure clear, compliant, and up-to-date privacy information for users.</span>
@@ -144,7 +144,7 @@ require_once 'middleware/auth.php';
                                     </svg>
                                 </button>
                             </div>
-                        </div>
+                        </div> -->
 
                         <div class="settings-item" onclick="window.location.href = 'admission_status_remarks.php';">
                             <div class="settings-item__label">
