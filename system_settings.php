@@ -79,7 +79,21 @@ require_once 'middleware/auth.php';
                         <div class="settings-item" onclick="window.location.href = 'faqs_management.php';">
                             <div class="settings-item__label">
                                 <span class="settings-item__text">FAQ's Management</span>
-                                <span class="settings-item__description">Create, edit, and organize email templates for consistent communication. This feature ensures standardized messaging for admissions, notifications, and service updates.</span>
+                                <span class="settings-item__description">Manage and organize frequently asked questions with ease. This module helps keep information clear, accessible, and up to date for users.</span>
+                            </div>
+                            <div class="settings-item__control">
+                                <button class="btn btn--icon" id="openEmailModalBtn" aria-label="Change email">
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-chevron-right-icon lucide-chevron-right">
+                                        <path d="m9 18 6-6-6-6" />
+                                    </svg>
+                                </button>
+                            </div>
+                        </div>
+
+                        <div class="settings-item" onclick="window.location.href = 'demo_video_management.php';">
+                            <div class="settings-item__label">
+                                <span class="settings-item__text">Demo Video Management</span>
+                                <span class="settings-item__description">Manage demo content and configurations efficiently. This module helps organize demonstrations, track versions, and ensure accurate, up-to-date materials for presentations or testing.</span>
                             </div>
                             <div class="settings-item__control">
                                 <button class="btn btn--icon" id="openEmailModalBtn" aria-label="Change email">
@@ -93,7 +107,7 @@ require_once 'middleware/auth.php';
                         <div class="settings-item" onclick="window.location.href = 'contact_details.php';">
                             <div class="settings-item__label">
                                 <span class="settings-item__text">Contact Details</span>
-                                <span class="settings-item__description">Create, edit, and organize email templates for consistent communication. This feature ensures standardized messaging for admissions, notifications, and service updates.</span>
+                                <span class="settings-item__description">Maintain and organize contact information efficiently. This module ensures accurate, accessible records to support effective communication and streamlined operations.</span>
                             </div>
                             <div class="settings-item__control">
                                 <button class="btn btn--icon" id="openEmailModalBtn" aria-label="Change email">
@@ -107,7 +121,7 @@ require_once 'middleware/auth.php';
                         <div class="settings-item">
                             <div class="settings-item__label">
                                 <span class="settings-item__text">Privacy Policy</span>
-                                <span class="settings-item__description">Create, edit, and organize email templates for consistent communication. This feature ensures standardized messaging for admissions, notifications, and service updates.</span>
+                                <span class="settings-item__description">Configure and manage platform’s privacy policy with ease. This module helps ensure clear, compliant, and up-to-date privacy information for users.</span>
                             </div>
                             <div class="settings-item__control">
                                 <button class="btn btn--icon" id="openEmailModalBtn" aria-label="Change email">
@@ -121,7 +135,7 @@ require_once 'middleware/auth.php';
                         <div class="settings-item">
                             <div class="settings-item__label">
                                 <span class="settings-item__text">Terms and Conditions</span>
-                                <span class="settings-item__description">Create, edit, and organize email templates for consistent communication. This feature ensures standardized messaging for admissions, notifications, and service updates.</span>
+                                <span class="settings-item__description">Create and manage your platform’s terms and conditions efficiently. This module helps ensure clear, compliant, and up-to-date usage guidelines for users.</span>
                             </div>
                             <div class="settings-item__control">
                                 <button class="btn btn--icon" id="openEmailModalBtn" aria-label="Change email">
@@ -163,7 +177,7 @@ require_once 'middleware/auth.php';
                         <div class="settings-item" onclick="window.location.href = 'link_management.php';">
                             <div class="settings-item__label">
                                 <span class="settings-item__text">Link Management</span>
-                                <span class="settings-item__description">Manage and organize important links in one centralized location. This module simplifies access to frequently used resources and ensures proper linkage across systems.</span>
+                                <span class="settings-item__description">Organize and maintain important links with ease. This module helps ensure quick access, proper categorization, and accurate updates for all essential URLs.</span>
                             </div>
                             <div class="settings-item__control">
                                 <button class="btn btn--icon" id="openPasswordModalBtn" aria-label="Change password">
